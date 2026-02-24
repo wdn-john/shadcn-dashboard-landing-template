@@ -1,0 +1,1 @@
+export type WSHandler = (payload: any) => void;
