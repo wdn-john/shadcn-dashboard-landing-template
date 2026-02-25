@@ -29,12 +29,14 @@ import {
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void
+  onTypingChange?: (isTyping: boolean) => void
   disabled?: boolean
   placeholder?: string
 }
 
 export function MessageInput({
   onSendMessage,
+  onTypingChange,
   disabled = false,
   placeholder = "Type a message..."
 }: MessageInputProps) {
@@ -48,6 +50,7 @@ export function MessageInput({
       onSendMessage(trimmedMessage)
       setMessage("")
       setIsTyping(false)
+      onTypingChange?.(false)
 
       // Reset textarea height
       if (textareaRef.current) {
@@ -76,8 +79,10 @@ export function MessageInput({
     // Handle typing indicator
     if (value.trim() && !isTyping) {
       setIsTyping(true)
+      onTypingChange?.(true)
     } else if (!value.trim() && isTyping) {
       setIsTyping(false)
+      onTypingChange?.(false)
     }
   }
 

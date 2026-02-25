@@ -9,17 +9,22 @@ import { Logo } from "@/components/logo"
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export function LoginForm3({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const registered = searchParams.get("registered") === "true"
+  const passwordReset = searchParams.get("reset") === "true"
+  const next = searchParams.get("next") ?? "/dashboard"
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -33,16 +38,14 @@ export function LoginForm3({
     })
 
     const data = await res.json().catch(() => ({}))
-
     setLoading(false)
 
     if (!res.ok || !data.ok) {
-      console.log(data)
       setError(data.message ?? "Unable to sign in")
       return
     }
 
-    router.replace("/dashboard")
+    router.replace(next)
   }
 
   return (
@@ -56,22 +59,33 @@ export function LoginForm3({
                   <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
                     <Logo size={24} />
                   </div>
-                  <span className="text-xl">ShadcnStore</span>
+                  <span className="text-xl font-bold">Workedin</span>
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your ShadcnStore account
+                  Sign in to your Workedin account
                 </p>
               </div>
+
+              {registered && (
+                <p className="text-sm text-center text-green-600 bg-green-50 dark:bg-green-950/20 rounded-md px-3 py-2">
+                  Account created! Please sign in.
+                </p>
+              )}
+              {passwordReset && (
+                <p className="text-sm text-center text-green-600 bg-green-50 dark:bg-green-950/20 rounded-md px-3 py-2">
+                  Password reset successful! Sign in with your new password.
+                </p>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="test@example.com"
-                  defaultValue="test@example.com"
+                  placeholder="you@example.com"
                   required
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
@@ -81,31 +95,37 @@ export function LoginForm3({
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
+                  <Link
                     href="/auth/forgot-password-3"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  defaultValue="password"
                   required
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                   autoComplete="current-password"
                 />
               </div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
+
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/20 rounded-md px-3 py-2">
+                  {error}
+                </p>
+              )}
+
               <Button
                 type="submit"
                 className="w-full cursor-pointer"
                 disabled={loading}
               >
-                {loading ? "Loading..." : "Login"}
+                {loading ? "Signing in..." : "Sign in"}
               </Button>
+
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                   Or continue with
@@ -123,7 +143,7 @@ export function LoginForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Apple</span>
+                  <span className="sr-only">Sign in with Apple</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -136,7 +156,7 @@ export function LoginForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Google</span>
+                  <span className="sr-only">Sign in with Google</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -149,17 +169,14 @@ export function LoginForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Meta</span>
+                  <span className="sr-only">Sign in with Meta</span>
                 </Button>
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a
-                  href="/auth/sign-up-3"
-                  className="underline underline-offset-4"
-                >
+                <Link href="/sign-up" className="underline underline-offset-4">
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </form>
@@ -174,8 +191,8 @@ export function LoginForm3({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By signing in, you agree to our <a href="#">Terms of Service</a> and{" "}
+        <a href="#">Privacy Policy</a>.
       </div>
     </div>
   )

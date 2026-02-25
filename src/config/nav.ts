@@ -30,7 +30,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
       group: "Work",
     },
     { title: "Requests", href: "/requests", icon: "requests", group: "Work" },
-    { title: "Missions", href: "/missions", icon: "missions", group: "Work" },
+    { title: "Work in Progress", href: "/jobs", icon: "missions", group: "Work" },
     { title: "Messages", href: "/chat", icon: "chat", group: "Work" },
     { title: "Payments", href: "/payments", icon: "payments", group: "Work" },
     {

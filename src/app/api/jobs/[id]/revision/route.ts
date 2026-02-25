@@ -1,0 +1,31 @@
+import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
+
+// POST — request revision from expert (multipart: message + optional attachments)
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const token = (await cookies()).get("_workedin_access_token")?.value
+
+  const formData = await req.formData()
+
+  const backendRes = await fetch(`${process.env.API_BASE_URL}/jobs/${id}/revision`, {
+    method: "POST",
+    headers: { ...(token ? { Cookie: `_workedin_access_token=${token}` } : {}) },
+    body: formData,
+  })
+
+  const raw = await backendRes.text().catch(() => "")
+  let parsed: unknown = null
+  try { parsed = JSON.parse(raw) } catch { /* not JSON */ }
+
+  if (!backendRes.ok) {
+    return NextResponse.json(
+      { ok: false, message: (parsed as any)?.message ?? "Failed to request revision" },
+      { status: backendRes.status }
+    )
+  }
+  return NextResponse.json({ ok: true, data: parsed })
+}

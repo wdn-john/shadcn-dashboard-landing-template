@@ -16,5 +16,8 @@ export async function getSession(): Promise<Session> {
 
   if (!res.ok) return { isAuthenticated: false };
 
-  return (await res.json()) as Session;
+  const data = await res.json();
+
+  // Backend returns { user, profile } — we merge isAuthenticated into it
+  return { ...data, isAuthenticated: true } as Session;
 }

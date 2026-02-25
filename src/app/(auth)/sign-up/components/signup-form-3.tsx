@@ -9,69 +9,117 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import Image from "next/image"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export function SignupForm3({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [agreed, setAgreed] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+    if (!agreed) {
+      setError("You must agree to the Terms of Service")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    const res = await fetch("/api/auth/sign-up", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+
+    const data = await res.json().catch(() => ({}))
+    setLoading(false)
+
+    if (!res.ok || !data.ok) {
+      setError(data.message ?? "Registration failed. Please try again.")
+      return
+    }
+
+    router.replace("/sign-in?registered=true")
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form className="p-6 md:p-8" onSubmit={onSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex justify-center mb-2">
                 <Link href="/" className="flex items-center gap-2 font-medium">
                   <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
                     <Logo size={24} />
                   </div>
-                  <span className="text-xl">ShadcnStore</span>
+                  <span className="text-xl font-bold">Workedin</span>
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Create your account</h1>
                 <p className="text-muted-foreground text-balance">
-                  Enter your information to create a new account
+                  Join Workedin — the trusted IT services network
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-3">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    placeholder="John"
-                    required
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    placeholder="Doe"
-                    required
-                  />
-                </div>
-              </div>
+
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="you@company.com"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                 />
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" required />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="terms" required />
-                <Label htmlFor="terms" className="text-sm">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="terms"
+                  checked={agreed}
+                  onCheckedChange={(v) => setAgreed(v === true)}
+                />
+                <Label htmlFor="terms" className="text-sm leading-snug">
                   I agree to the{" "}
                   <a href="#" className="underline underline-offset-4 hover:text-primary">
                     Terms of Service
@@ -82,8 +130,15 @@ export function SignupForm3({
                   </a>
                 </Label>
               </div>
-              <Button type="submit" className="w-full cursor-pointer">
-                Create Account
+
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/20 rounded-md px-3 py-2">
+                  {error}
+                </p>
+              )}
+
+              <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+                {loading ? "Creating account..." : "Create Account"}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
@@ -121,9 +176,9 @@ export function SignupForm3({
               </div>
               <div className="text-center text-sm">
                 Already have an account?{" "}
-                <a href="/auth/sign-in-3" className="underline underline-offset-4">
+                <Link href="/auth/sign-in" className="underline underline-offset-4">
                   Sign in
-                </a>
+                </Link>
               </div>
             </div>
           </form>
@@ -138,7 +193,7 @@ export function SignupForm3({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        By signing up, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>

@@ -2,10 +2,11 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { UpgradeToProButton } from "@/components/upgrade-to-pro-button"
+import { ChatInitializer } from "@/components/chat-initializer"
 import { getSession } from "@/lib/server/getSession"
 import type { UserRole } from "@/types/auth"
 import { Session } from "@/types/Session"
+import { redirect } from "next/navigation"
 
 export default async function DashboardLayout({
   children,
@@ -13,7 +14,15 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const session = await getSession()
-  console.log("User Role", session.user)
+
+  if (!session.isAuthenticated) {
+    redirect("/auth/sign-in")
+  }
+
+  if (!session.profile?.profileSetupComplete) {
+    redirect("/profile-setup")
+  }
+
   const rawRole = (session as Session)?.user?.role.roleName;
   const role: UserRole =
     rawRole === "ROLE_CLIENT" ||
@@ -28,10 +37,16 @@ export default async function DashboardLayout({
       ? "ROLE_ADMIN"
       : "ROLE_CLIENT"
 
+  const p = session.profile
+  const u = session.user
   const sidebarUser = {
-    name: (session as any)?.user?.name ?? "Workedin User",
-    email: (session as any)?.user?.email ?? "",
-    avatar: (session as any)?.user?.avatarUrl ?? "",
+    name: p?.fullName
+      ?? (p?.firstName && p?.lastName ? `${p.firstName} ${p.lastName}` : undefined)
+      ?? p?.firstName
+      ?? u?.email
+      ?? "Workedin User",
+    email: u?.email ?? "",
+    avatar: p?.avatarUrl ?? "",
   }
 
   // Temporary sidebar UI config (server-safe). You can later replace this with a persisted user preference.
@@ -63,6 +78,7 @@ export default async function DashboardLayout({
           />
           <SidebarInset>
             <SiteHeader />
+            <ChatInitializer />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -77,6 +93,7 @@ export default async function DashboardLayout({
         <>
           <SidebarInset>
             <SiteHeader />
+            <ChatInitializer />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -96,7 +113,6 @@ export default async function DashboardLayout({
         </>
       )}
 
-      <UpgradeToProButton />
     </SidebarProvider>
   )
 }

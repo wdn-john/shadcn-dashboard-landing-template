@@ -1,32 +1,59 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-// This function can be marked `async` if using `await` inside
+const AUTH_COOKIE = "_workedin_access_token"
+
+// Routes that require authentication
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/requests",
+  "/browse-requests",
+  "/missions",
+  "/jobs",
+  "/chat",
+  "/payments",
+  "/applications",
+  "/earnings",
+  "/profile",
+  "/settings",
+  "/experts",
+  "/disputes",
+  "/profile-setup",
+]
+
+// Auth routes — authenticated users should not see these
+const AUTH_PREFIXES = ["/auth/"]
+
 export function middleware(request: NextRequest) {
-  // Add custom middleware logic here
-  // For example: authentication, redirects, etc.
-  
-  // Example: Redirect /login to /auth/sign-in
-  if (request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/auth/sign-in', request.url))
+  const { pathname } = request.nextUrl
+  const token = request.cookies.get(AUTH_COOKIE)?.value
+
+  // Legacy redirects
+  if (pathname === "/login") {
+    return NextResponse.redirect(new URL("/auth/sign-in", request.url))
   }
-  
-  // Example: Redirect /register to /auth/sign-up
-  if (request.nextUrl.pathname === '/register') {
-    return NextResponse.redirect(new URL('/auth/sign-up', request.url))
+  if (pathname === "/register") {
+    return NextResponse.redirect(new URL("/auth/sign-up", request.url))
   }
-  
+
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))
+  const isAuthPage = AUTH_PREFIXES.some((p) => pathname.startsWith(p))
+
+  // Unauthenticated user trying to access a protected route → sign-in
+  if (isProtected && !token) {
+    const signInUrl = new URL("/sign-in", request.url)
+    signInUrl.searchParams.set("next", pathname)
+    return NextResponse.redirect(signInUrl)
+  }
+
+  // Authenticated user trying to access auth pages → dashboard
+  if (isAuthPage && token) {
+    return NextResponse.redirect(new URL("/dashboard", request.url))
+  }
+
   return NextResponse.next()
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: [
-    // Match all request paths except for the ones starting with:
-    // - api (API routes)
-    // - _next/static (static files)
-    // - _next/image (image optimization files)
-    // - favicon.ico (favicon file)
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }

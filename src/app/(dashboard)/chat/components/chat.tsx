@@ -10,17 +10,22 @@ import { ChatHeader } from "./chat-header"
 import { MessageList } from "./message-list"
 import { MessageInput } from "./message-input"
 import { useChat, type Conversation, type Message, type User } from "../use-chat"
+import { useChatSocketStore } from "@/store/chatSocketStore"
 
 interface ChatProps {
   conversations: Conversation[]
   messages: Record<string, Message[]>
   users: User[]
+  onSelectConversation?: (conversationId: string) => void
+  onSendMessage?: (conversationId: string, content: string) => void
 }
 
 export function Chat({
   conversations,
   messages,
   users,
+  onSelectConversation,
+  onSendMessage,
 }: ChatProps) {
   const {
     selectedConversation,
@@ -33,6 +38,15 @@ export function Chat({
   } = useChat()
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const sendWsMessage = useChatSocketStore((s) => s.sendMessage)
+
+  const handleTypingChange = (isTyping: boolean) => {
+    if (!selectedConversation) return
+    sendWsMessage({
+      type: "typing",
+      payload: { chatroomId: Number(selectedConversation), isTyping },
+    })
+  }
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -75,6 +89,7 @@ export function Chat({
   const handleSendMessage = (content: string) => {
     if (!selectedConversation) return
 
+    // Optimistic update
     const newMessage = {
       id: `msg-${Date.now()}`,
       content,
@@ -85,8 +100,10 @@ export function Chat({
       reactions: [],
       replyTo: null,
     }
-
     addMessage(selectedConversation, newMessage)
+
+    // Real API call
+    onSendMessage?.(selectedConversation, content)
   }
 
   const handleToggleMute = () => {
@@ -132,7 +149,8 @@ export function Chat({
             selectedConversation={selectedConversation}
             onSelectConversation={(id) => {
               setSelectedConversation(id)
-              setIsSidebarOpen(false) // Close sidebar on mobile after selection
+              setIsSidebarOpen(false)
+              onSelectConversation?.(id)
             }}
           />
         </div>
@@ -172,6 +190,7 @@ export function Chat({
                 {/* Message Input */}
                 <MessageInput
                   onSendMessage={handleSendMessage}
+                  onTypingChange={handleTypingChange}
                   placeholder={`Message ${currentConversation?.name || ""}...`}
                 />
               </>

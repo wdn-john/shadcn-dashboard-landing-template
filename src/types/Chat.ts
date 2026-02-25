@@ -1,12 +1,10 @@
-import { UUIDVersion } from "validator";
-
 export type Message = {
-  id?: UUIDVersion;
+  id?: string;
   chatroomId: number;
   sender?: string;
   senderName?: string;
   profilePicture?: string;
-  receiver?: UUIDVersion;
+  receiver?: string;
   receiverName?: string;
   status: "SENT" | "DELIVERED" | "READ";
   content?: string;
@@ -14,14 +12,14 @@ export type Message = {
 };
 
 export type ChatRoom = {
-  id: UUIDVersion;
+  id: string;
   name: string;
   description: string;
   isPrivate: boolean;
   senderAvatarUrl: string;
   receiverAvatarUrl: string;
-  senderId: UUIDVersion;
-  receiverId: UUIDVersion;
+  senderId: string;
+  receiverId: string;
   senderName: string;
   receiverName: string;
   createdAt: string;
@@ -29,7 +27,7 @@ export type ChatRoom = {
 };
 
 export type ChatRoomResponse = {
-  id: UUIDVersion;
+  id: string;
   name: string;
   description: string;
   isPrivate: boolean;
