@@ -13,6 +13,9 @@ export type NavIconKey =
   | "profile"
   | "experts"
   | "disputes"
+  | "verifications"
+  | "users"
+  | "promo-codes"
 
 export type NavItem = {
   title: string
@@ -67,24 +70,13 @@ export const navByRole: Record<UserRole, NavItem[]> = {
       group: "Account",
     },
     { title: "Messages", href: "/chat", icon: "chat", group: "Work" },
-    { title: "Profile", href: "/profile", icon: "profile", group: "Account" },
+    { title: "Account", href: "/account", icon: "profile", group: "Account" },
   ],
   ROLE_ADMIN: [
-    {
-      title: "Overview",
-      href: "/dashboard",
-      icon: "dashboard",
-      group: "Admin",
-    },
-    { title: "Experts", href: "/experts", icon: "experts", group: "Admin" },
-    { title: "Requests", href: "/requests", icon: "requests", group: "Admin" },
-    { title: "Disputes", href: "/disputes", icon: "disputes", group: "Admin" },
-    { title: "Payments", href: "/payments", icon: "payments", group: "Admin" },
-    {
-      title: "Settings",
-      href: "/settings/account",
-      icon: "settings",
-      group: "Account",
-    },
+    { title: "Overview", href: "/dashboard", icon: "dashboard", group: "Admin" },
+    { title: "Verifications", href: "/admin/verifications", icon: "verifications", group: "Admin" },
+    { title: "Users", href: "/admin/users", icon: "users", group: "Admin" },
+    { title: "Promo Codes", href: "/admin/promo-codes", icon: "promo-codes", group: "Admin" },
+    { title: "Settings", href: "/settings/account", icon: "settings", group: "Account" },
   ],
 }

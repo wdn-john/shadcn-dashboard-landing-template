@@ -45,6 +45,11 @@ export function Step4Address() {
     defaultValues: identity,
   })
 
+  function formatPostalCode(value: string) {
+    const clean = value.replace(/\s/g, "").toUpperCase().slice(0, 6)
+    return clean.length > 3 ? `${clean.slice(0, 3)} ${clean.slice(3)}` : clean
+  }
+
   function onSubmit(data: FormValues) {
     setIdentity(data)
     nextStep()
@@ -66,7 +71,12 @@ export function Step4Address() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="postalCode">Postal code *</Label>
-          <Input id="postalCode" placeholder="H3Z 2Y7" {...register("postalCode")} />
+          <Input
+            id="postalCode"
+            placeholder="H3Z 2Y7"
+            {...register("postalCode")}
+            onChange={(e) => setValue("postalCode", formatPostalCode(e.target.value), { shouldValidate: true })}
+          />
           {errors.postalCode && <p className="text-xs text-destructive">{errors.postalCode.message}</p>}
         </div>
       </div>

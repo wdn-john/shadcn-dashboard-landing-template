@@ -8,7 +8,6 @@ import {
   CircleUser,
 } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 
 import { Logo } from "@/components/logo"
 import {
@@ -26,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import useAuth from "@/hooks/use-auth"
 
 export function NavUser({
   user,
@@ -37,12 +37,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
-
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" })
-    router.replace("/sign-in")
-  }
+  const { logout} = useAuth();
 
   return (
     <SidebarMenu>
@@ -108,7 +103,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-red-600 focus:text-red-600"
-              onSelect={handleLogout}
+              onSelect={logout}
             >
               <LogOut />
               Log out

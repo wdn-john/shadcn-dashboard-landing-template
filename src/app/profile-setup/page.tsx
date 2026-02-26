@@ -8,9 +8,12 @@ import { Step4Address } from "./components/step-4-address"
 import { Step5Payment } from "./components/step-5-payment"
 import { Step6Photo } from "./components/step-6-photo"
 import { Step7Review } from "./components/step-7-review"
-import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { ModeToggle } from "@/components/mode-toggle"
+import { LogOut } from "lucide-react"
+import useAuth from "@/hooks/use-auth"
+import { Logo } from "@/components/logo"
 
 const STEPS = [
   { number: 1, label: "Personal" },
@@ -23,33 +26,52 @@ const STEPS = [
 ]
 
 const STEP_TITLES: Record<number, { title: string; subtitle: string }> = {
-  1: { title: "Personal information", subtitle: "Tell us a bit about yourself to get started." },
+  1: {
+    title: "Personal information",
+    subtitle: "Tell us a bit about yourself to get started.",
+  },
   2: { title: "Account type", subtitle: "How will you be using Workedin?" },
-  3: { title: "Expertise & skills", subtitle: "Help us match you with the right opportunities." },
-  4: { title: "Your address", subtitle: "We use this to match you with local opportunities." },
+  3: {
+    title: "Expertise & skills",
+    subtitle: "Help us match you with the right opportunities.",
+  },
+  4: {
+    title: "Your address",
+    subtitle: "We use this to match you with local opportunities.",
+  },
   5: { title: "Payment setup", subtitle: "Secure payments for your missions." },
-  6: { title: "Profile photo", subtitle: "A photo helps build trust with your connections." },
-  7: { title: "Review & confirm", subtitle: "Everything look right? Complete your profile." },
+  6: {
+    title: "Profile photo",
+    subtitle: "A photo helps build trust with your connections.",
+  },
+  7: {
+    title: "Review & confirm",
+    subtitle: "Everything look right? Complete your profile.",
+  },
 }
 
 export default function ProfileSetupPage() {
   const { currentStep } = useProfileSetupStore()
   const progress = (currentStep / 7) * 100
   const { title, subtitle } = STEP_TITLES[currentStep]
+  const { logout } = useAuth()
 
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
       <header className="border-b bg-background px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-md">
-            <Logo size={20} />
-          </div>
-          <span>Workedin</span>
+        <Logo/>
         </Link>
-        <p className="text-sm text-muted-foreground">
-          Step {currentStep} of 7
-        </p>
+        <div className="flex items-center gap-4">
+          <ModeToggle />
+          <p className="text-sm text-muted-foreground">
+            Step {currentStep} of 7
+          </p>
+          <div>
+            <LogOut onClick={logout} />
+          </div>
+        </div>
       </header>
 
       {/* Progress bar */}
@@ -68,7 +90,8 @@ export default function ProfileSetupPage() {
               key={step.number}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
-                currentStep === step.number && "bg-primary/10 text-primary font-medium",
+                currentStep === step.number &&
+                  "bg-primary/10 text-primary font-medium",
                 currentStep > step.number && "text-muted-foreground",
                 currentStep < step.number && "text-muted-foreground/50"
               )}
@@ -76,9 +99,12 @@ export default function ProfileSetupPage() {
               <div
                 className={cn(
                   "flex size-6 items-center justify-center rounded-full text-xs font-semibold border-2 shrink-0",
-                  currentStep === step.number && "border-primary bg-primary text-primary-foreground",
-                  currentStep > step.number && "border-primary bg-primary text-primary-foreground",
-                  currentStep < step.number && "border-muted-foreground/30 text-muted-foreground/50"
+                  currentStep === step.number &&
+                    "border-primary bg-primary text-primary-foreground",
+                  currentStep > step.number &&
+                    "border-primary bg-primary text-primary-foreground",
+                  currentStep < step.number &&
+                    "border-muted-foreground/30 text-muted-foreground/50"
                 )}
               >
                 {currentStep > step.number ? "✓" : step.number}

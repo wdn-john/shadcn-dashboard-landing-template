@@ -1,4 +1,4 @@
-import type { Profile } from "@workedin/types";
+import type { Profile } from "@/types/Profile";
 
 // Keep the same public shape as before, but make it reusable via a factory.
 // We inject "api" (and optionally "storage") so this shared store stays platform-agnostic.

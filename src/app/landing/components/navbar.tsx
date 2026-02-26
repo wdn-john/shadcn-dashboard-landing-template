@@ -95,8 +95,7 @@ export function LandingNavbar() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Logo size={32} />
-            <span className="font-bold">ShadcnStore</span>
+            <Logo />
           </Link>
         </div>
 
@@ -159,10 +158,10 @@ export function LandingNavbar() {
             </Link>
           </Button>
           <Button variant="ghost" asChild className="cursor-pointer">
-            <Link href="/sign-in">Sign In</Link>
+            <Link href="/auth/sign-in">Sign In</Link>
           </Button>
           <Button asChild className="cursor-pointer">
-            <Link href="/sign-up">Get Started</Link>
+            <Link href="/auth/sign-up">Get Started</Link>
           </Button>
         </div>
 

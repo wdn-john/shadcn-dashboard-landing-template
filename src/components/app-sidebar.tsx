@@ -10,6 +10,8 @@ import {
   CreditCard,
   Users,
   AlertTriangle,
+  ShieldCheck,
+  Tag,
 } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
@@ -29,8 +31,15 @@ import {
 import { navByRole, type NavIconKey } from "@/config/nav"
 import type { UserRole } from "@/types/auth"
 
-export function AppSidebar({ role, user, ...props }: { role: UserRole; user?: { name?: string; email?: string; avatar?: string } } & React.ComponentProps<typeof Sidebar>) {
-  const items = navByRole[role] ?? navByRole.ROLE_CLIENT;
+export function AppSidebar({
+  role,
+  user,
+  ...props
+}: {
+  role: UserRole | undefined
+  user?: { name?: string; email?: string; avatar?: string }
+} & React.ComponentProps<typeof Sidebar>) {
+  const items = navByRole[role ?? "ROLE_CLIENT"] ?? navByRole.ROLE_CLIENT
 
   const iconMap: Record<NavIconKey, React.ElementType> = {
     dashboard: LayoutDashboard,
@@ -45,25 +54,28 @@ export function AppSidebar({ role, user, ...props }: { role: UserRole; user?: { 
     profile: Users,
     experts: Users,
     disputes: AlertTriangle,
-  };
+    verifications: ShieldCheck,
+    users: Users,
+    "promo-codes": Tag,
+  }
 
   const groups = items.reduce<Record<string, any[]>>((acc, item) => {
-    acc[item.group] = acc[item.group] ?? [];
-    const Icon = iconMap[item.icon];
-    acc[item.group].push({ title: item.title, url: item.href, icon: Icon });
-    return acc;
-  }, {});
+    acc[item.group] = acc[item.group] ?? []
+    const Icon = iconMap[item.icon]
+    acc[item.group].push({ title: item.title, url: item.href, icon: Icon })
+    return acc
+  }, {})
 
   const navGroups = Object.entries(groups).map(([label, groupItems]) => ({
     label,
     items: groupItems,
-  }));
+  }))
 
   const displayUser = {
     name: user?.name ?? "Workedin User",
     email: user?.email ?? "",
     avatar: user?.avatar ?? "",
-  };
+  }
 
   return (
     <Sidebar {...props}>
@@ -72,12 +84,22 @@ export function AppSidebar({ role, user, ...props }: { role: UserRole; user?: { 
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Logo size={24} className="text-current" />
-                </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Workedin</span>
-                  <span className="truncate text-xs">Secure IT Marketplace</span>
+                  <img
+                    src="/logo/logo-black.svg"
+                    alt="Workedin"
+                    className="hidden h-auto w-auto dark:hidden sm:inline"
+                    style={{ maxHeight: "1.5rem" }}
+                  />
+                  <img
+                    src="/logo/logo-light.svg"
+                    alt="Workedin"
+                    className="hidden h-auto w-auto sm:dark:inline"
+                    style={{ maxHeight: "1.5rem" }}
+                  />
+                  <span className="truncate text-xs">
+                    Secure IT Marketplace
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -92,9 +114,8 @@ export function AppSidebar({ role, user, ...props }: { role: UserRole; user?: { 
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarNotification />
         <NavUser user={displayUser} />
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

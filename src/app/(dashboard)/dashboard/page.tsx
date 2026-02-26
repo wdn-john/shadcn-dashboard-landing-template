@@ -69,5 +69,15 @@ export default async function DashboardPage() {
   }
 
   // ── ADMIN ─────────────────────────────────────────────────────────────────
-  return <AdminDashboard firstName={firstName} />
+  const stats = await serverGet<{
+    totalUsers: number
+    totalExperts: number
+    totalClients: number
+    pendingVerifications: number
+    activeMissions: number
+    completedMissions: number
+    totalRevenue: number
+  }>("/admin/stats")
+
+  return <AdminDashboard firstName={firstName} stats={stats} />
 }

@@ -41,7 +41,7 @@ export function middleware(request: NextRequest) {
 
   // Unauthenticated user trying to access a protected route → sign-in
   if (isProtected && !token) {
-    const signInUrl = new URL("/sign-in", request.url)
+    const signInUrl = new URL("/auth/sign-in", request.url)
     signInUrl.searchParams.set("next", pathname)
     return NextResponse.redirect(signInUrl)
   }

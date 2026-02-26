@@ -1,5 +1,3 @@
-import { UUIDVersion } from 'validator';
-
 export type ApplicationEntryDetailsType = {
   id: number;
   title: string;

@@ -36,20 +36,20 @@ const schema = z
     category: z.enum(
       ["SOFTWARE", "HARDWARE", "NETWORK", "SECURITY", "PROJECT", "OTHER"],
       {
-        required_error: "Please select a category",
+        message: "Please select a category",
       }
     ),
     description: z
       .string()
       .min(20, "Please provide more detail (min 20 characters)"),
     priority: z.enum(["LOW", "MEDIUM", "HIGH"], {
-      required_error: "Select a priority",
+      message: "Select a priority",
     }),
     workLocation: z.enum(["ON_SITE", "REMOTE", "NOT_SURE"], {
-      required_error: "Select a work location",
+      message: "Select a work location",
     }),
     budgetOption: z.enum(["NEGOTIABLE", "FIXED"], {
-      required_error: "Select a budget type",
+      message: "Select a budget type",
     }),
     budget: z.string().optional(),
     desiredCompletionDate: z

@@ -1,4 +1,5 @@
-import { WebSocketMessage, WSHandler } from "@workedin/types";
+import { WebSocketMessage } from "@/types/WebSocketMessage";
+import { WSHandler } from "@/types/WSHandler";
 import { MainSocketType } from "./MainSocketType";
 
 export type WebSocketClient = {
