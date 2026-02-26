@@ -68,9 +68,13 @@ export default function ProfileSetupPage() {
           <p className="text-sm text-muted-foreground">
             Step {currentStep} of 7
           </p>
-          <div>
-            <LogOut onClick={logout} />
-          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LogOut className="size-4" />
+            <span>Log out</span>
+          </button>
         </div>
       </header>
 

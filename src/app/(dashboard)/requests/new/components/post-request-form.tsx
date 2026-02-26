@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -27,6 +27,29 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
+
+// ── Issue suggestions (mirrors mobile backupItHelpDeskCommonIssues) ────────────
+
+const ISSUE_SUGGESTIONS = [
+  "Password reset", "Software installation", "Network connectivity issues",
+  "Printer not working", "Email issues", "Computer running slow",
+  "Virus or malware", "File recovery", "VPN issues", "Hardware failure",
+  "Account lockout", "Software update", "Data backup", "Remote access issues",
+  "Blue screen of death", "Software crash", "Peripheral device issues",
+  "Security alert", "Access permissions", "System performance",
+  "Software compatibility issues", "Email configuration", "Mobile device support",
+  "Cloud service issues", "Database issues", "User training",
+  "Software licensing", "Server maintenance", "Password policy",
+  "Two-factor authentication", "Firewall issues", "Network security",
+  "Data encryption", "Software deployment", "System monitoring",
+  "Patch management", "Incident response", "Compliance issues",
+  "User account management", "System integration", "Application support",
+  "Hardware upgrades", "Virtualization issues", "Backup and restore",
+  "Performance tuning", "Log management", "Capacity planning",
+  "Disaster recovery", "Service desk management", "IT asset management",
+  "Change management", "Other",
+]
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -114,6 +137,28 @@ export function PostRequestForm() {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Issue suggestions state
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestionQuery, setSuggestionQuery] = useState("")
+  const issueContainerRef = useRef<HTMLDivElement>(null)
+
+  const filteredSuggestions = suggestionQuery.trim()
+    ? ISSUE_SUGGESTIONS.filter((s) =>
+        s.toLowerCase().includes(suggestionQuery.toLowerCase())
+      )
+    : ISSUE_SUGGESTIONS
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (issueContainerRef.current && !issueContainerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const {
     register,
@@ -216,15 +261,45 @@ export function PostRequestForm() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <div className="grid gap-2">
+            <div className="grid gap-2" ref={issueContainerRef}>
               <Label htmlFor="issue">
                 Issue Title <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="issue"
-                placeholder="e.g. VPN not connecting after Windows update"
-                {...register("issue")}
-              />
+              <div className="relative">
+                <Input
+                  id="issue"
+                  placeholder="e.g. VPN not connecting after Windows update"
+                  autoComplete="off"
+                  {...register("issue")}
+                  onChange={(e) => {
+                    register("issue").onChange(e)
+                    setSuggestionQuery(e.target.value)
+                    setShowSuggestions(true)
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                />
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <ul className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover shadow-md">
+                    {filteredSuggestions.map((suggestion) => (
+                      <li
+                        key={suggestion}
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          setValue("issue", suggestion, { shouldValidate: true })
+                          setSuggestionQuery(suggestion)
+                          setShowSuggestions(false)
+                        }}
+                        className={cn(
+                          "cursor-pointer px-3 py-2 text-sm",
+                          "hover:bg-accent hover:text-accent-foreground",
+                        )}
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               {errors.issue && (
                 <p className="text-sm text-destructive">
                   {errors.issue.message}
