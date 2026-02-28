@@ -7,12 +7,15 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, MapPin, Calendar, DollarSign, Users, Clock } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ArrowLeft, MapPin, Calendar, DollarSign, Users, Clock, Star, Building2 } from "lucide-react"
 import { ApplyForm } from "./components/apply-form"
+import { StartChatButton } from "@/components/start-chat-button"
 
 type ServiceRequest = {
   id: number
@@ -33,6 +36,15 @@ type ServiceRequest = {
     street?: string
     postalCode?: string
     country?: string
+  } | null
+  owner: {
+    id: string
+    fullName: string | null
+    avatarUrl: string | null
+    title: string | null
+    businessName: string | null
+    averageRating?: number
+    numberOfReviews?: number
   } | null
 }
 
@@ -177,6 +189,64 @@ export default async function BrowseRequestDetailPage({
           </p>
         </CardContent>
       </Card>
+
+      {/* Requested By */}
+      {request.owner && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Requested By</CardTitle>
+            <CardDescription>Information about the client who posted this request.</CardDescription>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-4">
+              <Avatar className="size-12 shrink-0">
+                <AvatarImage src={request.owner.avatarUrl ?? undefined} alt={request.owner.fullName ?? ""} />
+                <AvatarFallback>
+                  {(request.owner.fullName ?? "?").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{request.owner.fullName ?? "Unknown"}</p>
+                {request.owner.title && (
+                  <p className="text-sm text-muted-foreground">{request.owner.title}</p>
+                )}
+                {request.owner.businessName && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Building2 className="size-3" />
+                    {request.owner.businessName}
+                  </p>
+                )}
+                {(request.owner.averageRating ?? 0) > 0 && (
+                  <p className="text-sm flex items-center gap-1 mt-1">
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    <span className="font-medium">{request.owner.averageRating!.toFixed(1)}</span>
+                    {(request.owner.numberOfReviews ?? 0) > 0 && (
+                      <span className="text-muted-foreground">
+                        ({request.owner.numberOfReviews} review{request.owner.numberOfReviews !== 1 ? "s" : ""})
+                      </span>
+                    )}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Calendar className="size-3" />
+                  Posted {request.createdAt
+                    ? new Date(request.createdAt).toLocaleDateString("en-CA", {
+                        month: "long", day: "numeric", year: "numeric",
+                      })
+                    : "—"}
+                </p>
+                <div className="mt-3">
+                  <StartChatButton
+                    recipientId={request.owner.id}
+                    recipientName={request.owner.fullName ?? undefined}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Apply CTA (bottom) */}
       {!alreadyApplied && (

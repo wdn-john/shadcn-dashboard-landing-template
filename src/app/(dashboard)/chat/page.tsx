@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Chat } from "./components/chat"
 import { type Conversation, type Message, type User } from "./use-chat"
 import { useChatStore } from "@/store/chatStore"
@@ -40,6 +41,10 @@ function mapMessage(msg: BackendMessage): Message {
 }
 
 export default function ChatPage() {
+  const searchParams = useSearchParams()
+  const roomParam = searchParams.get("room")
+  const defaultRoomId = roomParam ? String(roomParam) : undefined
+
   const rooms = useChatStore((s) => s.rooms)
   const storeMessages = useChatStore((s) => s.messages)
   const fetchRooms = useChatStore((s) => s.fetchRooms)
@@ -52,13 +57,15 @@ export default function ChatPage() {
     void fetchRooms()
   }, [fetchRooms])
 
-  // Auto-fetch messages for the first room (Chat auto-selects it)
+  // Auto-fetch messages for the target room after rooms load
   useEffect(() => {
-    if (!hasFetchedFirst.current && rooms.length > 0) {
-      hasFetchedFirst.current = true
-      void fetchMessages(rooms[0].id)
-    }
-  }, [rooms, fetchMessages])
+    if (hasFetchedFirst.current || rooms.length === 0) return
+    hasFetchedFirst.current = true
+    const targetId = defaultRoomId
+      ? rooms.find((r) => String(r.id) === defaultRoomId)?.id
+      : rooms[0].id
+    if (targetId != null) void fetchMessages(targetId)
+  }, [rooms, fetchMessages, defaultRoomId])
 
   const conversations: Conversation[] = useMemo(() => rooms.map(mapRoom), [rooms])
 
@@ -113,6 +120,7 @@ export default function ChatPage() {
         users={users}
         onSelectConversation={handleSelectConversation}
         onSendMessage={handleSendMessage}
+        defaultConversationId={defaultRoomId}
       />
     </div>
   )

@@ -58,14 +58,32 @@ type Props = {
 }
 
 const STATUS_CONFIG = {
-  COMPLETED:   { label: "Completed",   variant: "default" as const,     icon: CheckCircle2 },
-  IN_PROGRESS: { label: "In Progress", variant: "secondary" as const,   icon: Clock },
-  PENDING:     { label: "Pending",     variant: "outline" as const,     icon: Clock },
-  BLOCKED:     { label: "Blocked",     variant: "destructive" as const, icon: AlertTriangle },
-  SKIPPED:     { label: "Skipped",     variant: "outline" as const,     icon: SkipForward },
+  COMPLETED: {
+    label: "Completed",
+    variant: "default" as const,
+    icon: CheckCircle2,
+  },
+  IN_PROGRESS: {
+    label: "In Progress",
+    variant: "secondary" as const,
+    icon: Clock,
+  },
+  PENDING: { label: "Pending", variant: "outline" as const, icon: Clock },
+  BLOCKED: {
+    label: "Blocked",
+    variant: "destructive" as const,
+    icon: AlertTriangle,
+  },
+  SKIPPED: { label: "Skipped", variant: "outline" as const, icon: SkipForward },
 }
 
-export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isCompleted, expertName }: Props) {
+export function JobProgressView({
+  jobId,
+  initialProgress,
+  isWaitingApproval,
+  isCompleted,
+  expertName,
+}: Props) {
   const router = useRouter()
   const [progress, setProgress] = useState(initialProgress)
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set())
@@ -100,14 +118,21 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-base">Work Progress</CardTitle>
-            <span className="text-sm font-semibold">{progress.completionPercentage}%</span>
+            <span className="text-sm font-semibold">
+              {progress.completionPercentage}%
+            </span>
           </div>
-          <Progress value={progress.completionPercentage} className="h-2 mt-2" />
+          <Progress
+            value={progress.completionPercentage}
+            className="h-2 mt-2"
+          />
         </CardHeader>
 
         <CardContent className="flex flex-col gap-2">
           {error && (
-            <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2 mb-2">{error}</p>
+            <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2 mb-2">
+              {error}
+            </p>
           )}
 
           {progress.steps
@@ -122,19 +147,26 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
                   key={step.id}
                   className={cn(
                     "rounded-lg border transition-colors",
-                    step.status === "COMPLETED" && "border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20",
-                    step.status === "IN_PROGRESS" && "border-primary/30 bg-primary/5",
-                    step.status === "BLOCKED" && "border-destructive/30 bg-destructive/5",
+                    step.status === "COMPLETED" &&
+                      "border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20",
+                    step.status === "IN_PROGRESS" &&
+                      "border-primary/30 bg-primary/5",
+                    step.status === "BLOCKED" &&
+                      "border-destructive/30 bg-destructive/5"
                   )}
                 >
                   <button
                     type="button"
                     className="w-full flex items-center gap-3 px-4 py-3 text-left"
-                    onClick={() => setExpandedSteps((prev) => {
-                      const next = new Set(prev)
-                      next.has(step.id) ? next.delete(step.id) : next.add(step.id)
-                      return next
-                    })}
+                    onClick={() =>
+                      setExpandedSteps((prev) => {
+                        const next = new Set(prev)
+                        next.has(step.id)
+                          ? next.delete(step.id)
+                          : next.add(step.id)
+                        return next
+                      })
+                    }
                   >
                     <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
                       {idx + 1}
@@ -142,23 +174,32 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
                     <span className="flex-1 font-medium text-sm">
                       {step.title?.en ?? `Step ${idx + 1}`}
                     </span>
-                    <Badge variant={cfg.variant} className="text-xs shrink-0 gap-1">
+                    <Badge
+                      variant={cfg.variant}
+                      className="text-xs shrink-0 gap-1"
+                    >
                       <Icon className="size-3" />
                       {cfg.label}
                     </Badge>
-                    {isExpanded
-                      ? <ChevronDown className="size-4 text-muted-foreground shrink-0" />
-                      : <ChevronRight className="size-4 text-muted-foreground shrink-0" />}
+                    {isExpanded ? (
+                      <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+                    ) : (
+                      <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+                    )}
                   </button>
 
                   {isExpanded && (
                     <div className="px-4 pb-4 border-t pt-3 flex flex-col gap-2">
                       {step.summary?.en && (
-                        <p className="text-sm text-muted-foreground">{step.summary.en}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {step.summary.en}
+                        </p>
                       )}
                       {step.note?.text && (
                         <div className="rounded-md bg-muted px-3 py-2 text-sm">
-                          <p className="text-xs text-muted-foreground mb-1">Expert&apos;s note</p>
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Expert&apos;s note
+                          </p>
                           <p>{step.note.text}</p>
                         </div>
                       )}
@@ -177,9 +218,16 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
                 disabled={approving}
                 className="gap-2 flex-1"
               >
-                {approving
-                  ? <><Loader2 className="size-4 animate-spin" /> Approving...</>
-                  : <><ThumbsUp className="size-4" /> Approve &amp; Release Payment</>}
+                {approving ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" /> Approving...
+                  </>
+                ) : (
+                  <>
+                    <ThumbsUp className="size-4" /> Approve &amp; Release
+                    Payment
+                  </>
+                )}
               </Button>
               <Button
                 variant="outline"
@@ -206,12 +254,19 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
       )}
 
       {/* Revision dialog */}
-      <Dialog open={revisionOpen} onOpenChange={(o) => { setRevisionOpen(o); if (!o) setRevisionMessage("") }}>
+      <Dialog
+        open={revisionOpen}
+        onOpenChange={(o) => {
+          setRevisionOpen(o)
+          if (!o) setRevisionMessage("")
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Request Revision</DialogTitle>
             <DialogDescription>
-              Explain what needs to be corrected. The expert will be notified and asked to revise their work.
+              Explain what needs to be corrected. The expert will be notified
+              and asked to revise their work.
             </DialogDescription>
           </DialogHeader>
           <Textarea
@@ -222,15 +277,23 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRevisionOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setRevisionOpen(false)}>
+              Cancel
+            </Button>
             <Button
               onClick={handleRevision}
               disabled={submittingRevision || !revisionMessage.trim()}
               className="gap-2"
             >
-              {submittingRevision
-                ? <><Loader2 className="size-4 animate-spin" /> Sending...</>
-                : <><RefreshCw className="size-4" /> Send Revision Request</>}
+              {submittingRevision ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Sending...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="size-4" /> Send Revision Request
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -241,10 +304,13 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
   async function handleApprove() {
     setApproving(true)
     setError(null)
-    const res = await fetch(`/api/jobs/${jobId}/approve`)
+    const res = await fetch(`/api/jobs/${initialProgress?.id}/approve`)
     const data = await res.json().catch(() => ({}))
     setApproving(false)
-    if (!res.ok || !data.ok) { setError(data.message ?? "Failed to approve job"); return }
+    if (!res.ok || !data.ok) {
+      setError(data.message ?? "Failed to approve job")
+      return
+    }
     setProgress(data.data)
     router.refresh()
   }
@@ -254,10 +320,16 @@ export function JobProgressView({ jobId, initialProgress, isWaitingApproval, isC
     setError(null)
     const formData = new FormData()
     formData.append("message", revisionMessage.trim())
-    const res = await fetch(`/api/jobs/${jobId}/revision`, { method: "POST", body: formData })
+    const res = await fetch(`/api/jobs/${initialProgress?.id}/revision`, {
+      method: "POST",
+      body: formData,
+    })
     const data = await res.json().catch(() => ({}))
     setSubmittingRevision(false)
-    if (!res.ok || !data.ok) { setError(data.message ?? "Failed to send revision request"); return }
+    if (!res.ok || !data.ok) {
+      setError(data.message ?? "Failed to send revision request")
+      return
+    }
     setRevisionOpen(false)
     setRevisionMessage("")
     setProgress(data.data)

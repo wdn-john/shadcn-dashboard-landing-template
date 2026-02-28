@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowRight, MapPin, Calendar, Search } from "lucide-react"
 import { RequestFilters } from "./components/request-filters"
 
@@ -25,6 +26,10 @@ type ServiceRequest = {
   createdAt: string
   desiredCompletionDate: string | null
   applications: unknown[]
+  owner: {
+    fullName: string | null
+    avatarUrl: string | null
+  } | null
 }
 
 type PaginatedResponse = {
@@ -142,14 +147,30 @@ export default async function BrowseRequestsPage({
                     </div>
                   </CardContent>
                   <CardFooter className="flex items-center justify-between pt-3 border-t">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="size-3" />
-                      {req.createdAt
-                        ? new Date(req.createdAt).toLocaleDateString("en-CA", {
-                            month: "short", day: "numeric",
-                          })
-                        : ""}
-                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {req.owner ? (
+                        <>
+                          <Avatar className="size-5 shrink-0">
+                            <AvatarImage src={req.owner.avatarUrl ?? undefined} />
+                            <AvatarFallback className="text-[10px]">
+                              {(req.owner.fullName ?? "?").slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                            {req.owner.fullName ?? "Unknown"}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="size-3" />
+                          {req.createdAt
+                            ? new Date(req.createdAt).toLocaleDateString("en-CA", {
+                                month: "short", day: "numeric",
+                              })
+                            : ""}
+                        </span>
+                      )}
+                    </div>
                     <Button size="sm" asChild>
                       <Link href={`/browse-requests/${req.id}`} className="flex items-center gap-1">
                         View <ArrowRight className="size-3" />

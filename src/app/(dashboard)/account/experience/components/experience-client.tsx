@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -148,17 +148,23 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
         </Button>
       </div>
 
-      {items.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-            <Briefcase className="size-8 text-muted-foreground" />
-            <p className="font-medium">No experience yet</p>
-            <p className="text-sm text-muted-foreground">Add your work history to strengthen your profile.</p>
-            <Button size="sm" onClick={openAdd} className="mt-1">Add Experience</Button>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Work Experience</CardTitle>
+          <CardDescription>
+            {items.length === 0
+              ? "Add your work history to strengthen your profile."
+              : `${items.length} ${items.length === 1 ? "entry" : "entries"}`}
+          </CardDescription>
+        </CardHeader>
+        <Separator />
+        {items.length === 0 ? (
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+            <Briefcase className="size-7 text-muted-foreground" />
+            <p className="font-medium text-sm">No experience yet</p>
+            <Button size="sm" variant="outline" onClick={openAdd}>Add Experience</Button>
           </CardContent>
-        </Card>
-      ) : (
-        <Card>
+        ) : (
           <CardContent className="p-0">
             {items.map((item, i) => (
               <div key={item.id}>
@@ -193,8 +199,8 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
               </div>
             ))}
           </CardContent>
-        </Card>
-      )}
+        )}
+      </Card>
 
       {/* Add / Edit */}
       <Dialog open={dialog === "add" || dialog === "edit"} onOpenChange={open => !open && setDialog(null)}>

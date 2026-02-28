@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Menu, X } from "lucide-react"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -18,6 +18,7 @@ interface ChatProps {
   users: User[]
   onSelectConversation?: (conversationId: string) => void
   onSendMessage?: (conversationId: string, content: string) => void
+  defaultConversationId?: string
 }
 
 export function Chat({
@@ -26,6 +27,7 @@ export function Chat({
   users,
   onSelectConversation,
   onSendMessage,
+  defaultConversationId,
 }: ChatProps) {
   const {
     selectedConversation,
@@ -77,11 +79,14 @@ export function Chat({
       setMessages(conversationId, conversationMessages)
     })
 
-    // Auto-select first conversation if none selected
-    if (!selectedConversation && conversations.length > 0) {
-      setSelectedConversation(conversations[0].id)
+    // Auto-select: prefer defaultConversationId, then first conversation
+    if (!selectedConversation) {
+      const target = defaultConversationId
+        ? conversations.find((c) => c.id === defaultConversationId)
+        : conversations[0]
+      if (target) setSelectedConversation(target.id)
     }
-  }, [conversations, messages, users, selectedConversation, setConversations, setMessages, setUsers, setSelectedConversation])
+  }, [conversations, messages, users, selectedConversation, defaultConversationId, setConversations, setMessages, setUsers, setSelectedConversation])
 
   const currentConversation = conversations.find(conv => conv.id === selectedConversation)
   const currentMessages = selectedConversation ? messages[selectedConversation] || [] : []

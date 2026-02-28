@@ -11,6 +11,7 @@ import {
   Users,
   AlertTriangle,
   ShieldCheck,
+  Briefcase,
   Tag,
 } from "lucide-react"
 import Link from "next/link"
@@ -19,6 +20,7 @@ import { SidebarNotification } from "@/components/sidebar-notification"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
+import { SidebarSetupCard } from "@/components/sidebar-setup-card"
 import {
   Sidebar,
   SidebarContent,
@@ -34,21 +36,23 @@ import type { UserRole } from "@/types/auth"
 export function AppSidebar({
   role,
   user,
+  accountStatus,
   ...props
 }: {
   role: UserRole | undefined
   user?: { name?: string; email?: string; avatar?: string }
+  accountStatus?: string | null
 } & React.ComponentProps<typeof Sidebar>) {
   const items = navByRole[role ?? "ROLE_CLIENT"] ?? navByRole.ROLE_CLIENT
 
   const iconMap: Record<NavIconKey, React.ElementType> = {
     dashboard: LayoutDashboard,
-    requests: LayoutPanelLeft,
+    requests: Briefcase,
     missions: CheckSquare,
     chat: MessageCircle,
     payments: CreditCard,
     settings: Settings,
-    browse: LayoutPanelLeft,
+    browse: Briefcase,
     applications: CheckSquare,
     earnings: CreditCard,
     profile: Users,
@@ -113,6 +117,7 @@ export function AppSidebar({
         ))}
       </SidebarContent>
 
+      <SidebarSetupCard accountStatus={accountStatus ?? null} role={role} />
       <SidebarFooter>
         <NavUser user={displayUser} />
       </SidebarFooter>

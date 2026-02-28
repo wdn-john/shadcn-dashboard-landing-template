@@ -21,7 +21,7 @@ export type NavItem = {
   title: string
   href: string
   icon: NavIconKey
-  group: "Work" | "Account" | "Admin"
+  group: "Work" | "Account" | "Admin" | "Expert Space" | "Client Space"
 }
 
 export const navByRole: Record<UserRole, NavItem[]> = {
@@ -30,12 +30,33 @@ export const navByRole: Record<UserRole, NavItem[]> = {
       title: "Dashboard",
       href: "/dashboard",
       icon: "dashboard",
-      group: "Work",
+      group: "Client Space",
     },
-    { title: "Requests", href: "/requests", icon: "requests", group: "Work" },
-    { title: "Work in Progress", href: "/jobs", icon: "missions", group: "Work" },
-    { title: "Messages", href: "/chat", icon: "chat", group: "Work" },
-    { title: "Payments", href: "/payments", icon: "payments", group: "Work" },
+    {
+      title: "Requests",
+      href: "/requests",
+      icon: "requests",
+      group: "Client Space",
+    },
+    {
+      title: "Applications",
+      href: "/applications",
+      icon: "applications",
+      group: "Client Space",
+    },
+    {
+      title: "Work in Progress",
+      href: "/jobs",
+      icon: "missions",
+      group: "Client Space",
+    },
+    { title: "Messages", href: "/chat", icon: "chat", group: "Client Space" },
+    {
+      title: "Payments",
+      href: "/payments",
+      icon: "payments",
+      group: "Client Space",
+    },
     {
       title: "Settings",
       href: "/settings/account",
@@ -48,48 +69,108 @@ export const navByRole: Record<UserRole, NavItem[]> = {
       title: "Dashboard",
       href: "/dashboard",
       icon: "dashboard",
-      group: "Work",
+      group: "Expert Space",
     },
     {
       title: "Browse Requests",
       href: "/browse-requests",
       icon: "browse",
-      group: "Work",
+      group: "Expert Space",
     },
     {
       title: "My Applications",
       href: "/applications",
       icon: "applications",
-      group: "Work",
+      group: "Expert Space",
     },
-    { title: "Missions", href: "/missions", icon: "missions", group: "Work" },
+    {
+      title: "Missions",
+      href: "/missions",
+      icon: "missions",
+      group: "Expert Space",
+    },
     {
       title: "Earnings",
       href: "/earnings",
       icon: "earnings",
       group: "Account",
     },
-    { title: "Messages", href: "/chat", icon: "chat", group: "Work" },
+    { title: "Messages", href: "/chat", icon: "chat", group: "Expert Space" },
     { title: "Account", href: "/account", icon: "profile", group: "Account" },
   ],
   ROLE_ADMIN: [
     // Admin-specific
-    { title: "Overview", href: "/dashboard", icon: "dashboard", group: "Admin" },
-    { title: "Verifications", href: "/admin/verifications", icon: "verifications", group: "Admin" },
+    {
+      title: "Overview",
+      href: "/dashboard",
+      icon: "dashboard",
+      group: "Admin",
+    },
+    {
+      title: "Verifications",
+      href: "/admin/verifications",
+      icon: "verifications",
+      group: "Admin",
+    },
     { title: "Users", href: "/admin/users", icon: "users", group: "Admin" },
-    { title: "Promo Codes", href: "/admin/promo-codes", icon: "promo-codes", group: "Admin" },
+    {
+      title: "Promo Codes",
+      href: "/admin/promo-codes",
+      icon: "promo-codes",
+      group: "Admin",
+    },
     // Client view
-    { title: "Requests", href: "/requests", icon: "requests", group: "Work" },
-    { title: "Work in Progress", href: "/jobs", icon: "missions", group: "Work" },
+    {
+      title: "Requests",
+      href: "/requests",
+      icon: "requests",
+      group: "Client Space",
+    },
+    {
+      title: "Work in Progress",
+      href: "/jobs",
+      icon: "missions",
+      group: "Client Space",
+    },
     // Expert view
-    { title: "Browse Requests", href: "/browse-requests", icon: "browse", group: "Work" },
-    { title: "My Applications", href: "/applications", icon: "applications", group: "Work" },
-    { title: "Missions", href: "/missions", icon: "missions", group: "Work" },
+    {
+      title: "Browse Requests",
+      href: "/browse-requests",
+      icon: "browse",
+      group: "Expert Space",
+    },
+    {
+      title: "My Applications",
+      href: "/applications",
+      icon: "applications",
+      group: "Expert Space",
+    },
+    {
+      title: "Missions",
+      href: "/missions",
+      icon: "missions",
+      group: "Expert Space",
+    },
     // Shared
     { title: "Messages", href: "/chat", icon: "chat", group: "Work" },
-    { title: "Payments", href: "/payments", icon: "payments", group: "Account" },
-    { title: "Earnings", href: "/earnings", icon: "earnings", group: "Account" },
+    {
+      title: "Payments",
+      href: "/payments",
+      icon: "payments",
+      group: "Account",
+    },
+    {
+      title: "Earnings",
+      href: "/earnings",
+      icon: "earnings",
+      group: "Account",
+    },
     { title: "Account", href: "/account", icon: "profile", group: "Account" },
-    { title: "Settings", href: "/settings/account", icon: "settings", group: "Account" },
+    {
+      title: "Settings",
+      href: "/settings/account",
+      icon: "settings",
+      group: "Account",
+    },
   ],
 }

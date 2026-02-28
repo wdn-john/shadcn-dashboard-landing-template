@@ -18,7 +18,7 @@ import {
   ShieldCheck,
   Briefcase,
 } from "lucide-react"
-import { ApplicantActions } from "./components/applicant-actions"
+import { ApplicantActions } from "@/app/(dashboard)/requests/[id]/applicants/[entryId]/components/applicant-actions"
 
 type Experience = {
   id?: number
@@ -101,7 +101,7 @@ function displayName(entry: EntryDetail) {
     ?? "Unknown Expert"
 }
 
-export default async function ApplicantDetailPage({
+export default async function ClientApplicantDetailPage({
   params,
 }: {
   params: Promise<{ id: string; entryId: string }>
@@ -124,7 +124,10 @@ export default async function ApplicantDetailPage({
       {/* Back */}
       <div>
         <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2">
-          <Link href={`/requests/${id}`} className="flex items-center gap-1 text-muted-foreground">
+          <Link
+            href={`/applications/${id}/applicants`}
+            className="flex items-center gap-1 text-muted-foreground"
+          >
             <ArrowLeft className="size-3" /> Back to Applicants
           </Link>
         </Button>
@@ -161,7 +164,9 @@ export default async function ApplicantDetailPage({
                   <span className="flex items-center gap-1 text-sm">
                     <Star className="size-4 fill-amber-400 text-amber-400" />
                     <span className="font-medium">{entry.averageRating.toFixed(1)}</span>
-                    <span className="text-muted-foreground">({entry.numberOfReviews} review{entry.numberOfReviews !== 1 ? "s" : ""})</span>
+                    <span className="text-muted-foreground">
+                      ({entry.numberOfReviews} review{entry.numberOfReviews !== 1 ? "s" : ""})
+                    </span>
                   </span>
                 )}
               </div>
@@ -349,7 +354,7 @@ export default async function ApplicantDetailPage({
       {/* Actions */}
       <ApplicantActions
         entryId={entry.id}
-        requestId={Number(id)}
+        requestId={entry.serviceRequest.id}
         serviceRequestId={entry.serviceRequest.id}
         expertBid={entry.bid}
         originalBudget={entry.serviceRequest.budget}

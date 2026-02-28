@@ -2,20 +2,20 @@
 
 import { create } from "zustand"
 import { fetchWsToken } from "@/lib/ws-token"
-import type { ChatSocketType } from "@/types/ChatSocketType"
+import type { MainSocketType } from "@/types/MainSocketType"
 
-export type ChatWebSocketMessage<T = unknown> = {
-  type: ChatSocketType
+type MainWebSocketMessage<T = unknown> = {
+  type: MainSocketType
   payload: T
 }
 
-interface ChatSocketStore {
+interface MainSocketStore {
   connected: boolean
   connecting: boolean
   connect: () => Promise<void>
   disconnect: () => void
   subscribeTopic: (topic: string) => void
-  sendMessage: <T>(message: ChatWebSocketMessage<T>) => void
+  sendMessage: <T>(message: MainWebSocketMessage<T>) => void
   registerHandler: (type: string, handler: (payload: unknown) => void) => void
   unregisterHandler: (type: string) => void
 }
@@ -28,10 +28,10 @@ let pendingMessages: string[] = []
 const eventHandlers: Record<string, (payload: unknown) => void> = {}
 const pendingSubscriptions: Set<string> = new Set()
 
-const CHAT_WS_URL =
-  process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080/ws/chat"
+const MAIN_WS_URL =
+  process.env.NEXT_PUBLIC_MAIN_WS_URL ?? "ws://localhost:8080/ws"
 
-export const useChatSocketStore = create<ChatSocketStore>((set, get) => ({
+export const useMainSocketStore = create<MainSocketStore>((set, get) => ({
   connected: false,
   connecting: false,
 
@@ -52,7 +52,7 @@ export const useChatSocketStore = create<ChatSocketStore>((set, get) => ({
     }
 
     const ws = new WebSocket(
-      `${CHAT_WS_URL}?token=${encodeURIComponent(token)}`
+      `${MAIN_WS_URL}?token=${encodeURIComponent(token)}`
     )
     socket = ws
 
@@ -71,7 +71,7 @@ export const useChatSocketStore = create<ChatSocketStore>((set, get) => ({
 
       heartbeatTimer = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: "chat-heartbeat", payload: {} }))
+          ws.send(JSON.stringify({ type: "heartbeat", payload: {} }))
         }
       }, 10_000)
     }
@@ -125,7 +125,7 @@ export const useChatSocketStore = create<ChatSocketStore>((set, get) => ({
     }
   },
 
-  sendMessage: <T>(message: ChatWebSocketMessage<T>) => {
+  sendMessage: <T>(message: MainWebSocketMessage<T>) => {
     const serialized = JSON.stringify(message)
     if (socket?.readyState === WebSocket.OPEN) {
       socket.send(serialized)

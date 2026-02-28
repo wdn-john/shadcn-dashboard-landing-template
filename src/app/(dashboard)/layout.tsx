@@ -2,7 +2,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { ChatInitializer } from "@/components/chat-initializer"
+import { SocketInitializer } from "@/components/socket-initializer"
 import { getSession } from "@/lib/server/getSession"
 import type { UserRole } from "@/types/auth"
 import { Session } from "@/types/Session"
@@ -72,13 +72,14 @@ export default async function DashboardLayout({
           <AppSidebar
             user={sidebarUser}
             role={role}
+            accountStatus={p?.accountStatus ?? null}
             variant={config.variant}
             collapsible={config.collapsible}
             side={config.side}
           />
           <SidebarInset>
-            <SiteHeader />
-            <ChatInitializer />
+            <SiteHeader role={role} />
+            <SocketInitializer role={role} />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -92,8 +93,8 @@ export default async function DashboardLayout({
       ) : (
         <>
           <SidebarInset>
-            <SiteHeader />
-            <ChatInitializer />
+            <SiteHeader role={role} />
+            <SocketInitializer role={role} />
             <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -106,6 +107,7 @@ export default async function DashboardLayout({
           <AppSidebar
             user={sidebarUser}
             role={role}
+            accountStatus={p?.accountStatus ?? null}
             variant={config.variant}
             collapsible={config.collapsible}
             side={config.side}

@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowLeft, Tag, X, Info, Loader2, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, Tag, X, Info, Loader2 } from "lucide-react"
 import { StripePaymentForm } from "./stripe-payment-form"
 
 const stripePromise = loadStripe(
@@ -34,7 +34,6 @@ export function CheckoutView({ requestId }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [intentLoading, setIntentLoading] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
 
   if (!details) {
     return (
@@ -121,23 +120,10 @@ export function CheckoutView({ requestId }: Props) {
     setClientSecret(data.data?.intent ?? data.data?.clientSecret ?? null)
   }
 
-  function handlePaymentSuccess() {
-    setSuccess(true)
+  function handlePaymentSuccess(missionId?: number) {
     reset()
-    setTimeout(() => router.push(`/requests/${requestId}`), 2000)
-  }
-
-  if (success) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-20 px-4 text-center max-w-sm mx-auto">
-        <CheckCircle2 className="size-16 text-green-500" />
-        <h2 className="text-xl font-bold">Payment authorized!</h2>
-        <p className="text-sm text-muted-foreground">
-          The expert has been assigned to your mission. You&apos;ll be charged
-          only after approving the completed work.
-        </p>
-      </div>
-    )
+    // Redirect directly to the newly created mission (job) page
+    router.push(missionId ? `/jobs/${missionId}` : "/jobs")
   }
 
   return (

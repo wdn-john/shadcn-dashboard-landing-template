@@ -8,7 +8,7 @@ import { Loader2, Lock, CreditCard } from "lucide-react"
 type Props = {
   applicationEntryId: number
   total: number
-  onSuccess: () => void
+  onSuccess: (missionId?: number) => void
   onError: (msg: string) => void
 }
 
@@ -34,7 +34,7 @@ export function StripePaymentForm({ applicationEntryId, total, onSuccess, onErro
       return
     }
 
-    // Verify with backend
+    // Verify with backend — response includes the created mission
     const verifyRes = await fetch(`/api/stripe/verify/${applicationEntryId}`)
     const verifyData = await verifyRes.json().catch(() => ({}))
     setPaying(false)
@@ -47,7 +47,10 @@ export function StripePaymentForm({ applicationEntryId, total, onSuccess, onErro
       return
     }
 
-    onSuccess()
+    // Extract mission ID from verify response so we can redirect directly
+    const missionId: number | undefined =
+      verifyData.data?.id ?? verifyData.data?.missionId ?? undefined
+    onSuccess(missionId)
   }
 
   return (

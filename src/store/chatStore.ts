@@ -93,8 +93,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         if (!msg.chatroomId) return
         set((s) => {
           const existing = s.messages[msg.chatroomId] ?? []
-          // Deduplicate by id
-          if (existing.some((m) => m.id === msg.id)) return s
+          // Deduplicate by id — only when id is defined; undefined ids are never treated as duplicates
+          if (msg.id && existing.some((m) => m.id === msg.id)) return s
           // Update room's lastMessage preview
           const rooms = s.rooms.map((r) =>
             r.id === msg.chatroomId
