@@ -19,6 +19,7 @@ import {
   Briefcase,
 } from "lucide-react"
 import { ApplicantActions } from "./components/applicant-actions"
+import { T } from "@/components/t"
 
 type Experience = {
   id?: number
@@ -125,10 +126,10 @@ export default async function ApplicantDetailPage({
       <div>
         <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2">
           <Link href={`/requests/${id}`} className="flex items-center gap-1 text-muted-foreground">
-            <ArrowLeft className="size-3" /> Back to Applicants
+            <ArrowLeft className="size-3" /> <T k="applicantDetail.backToApplicants" />
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Applicant Profile</h1>
+        <h1 className="text-2xl font-bold tracking-tight"><T k="applicantDetail.pageTitle" /></h1>
       </div>
 
       {/* Profile card */}
@@ -144,7 +145,7 @@ export default async function ApplicantDetailPage({
                 <h2 className="text-lg font-semibold">{name}</h2>
                 {entry.applicant?.accountStatus === "APPROVED" && (
                   <Badge variant="outline" className="gap-1 text-xs border-green-500 text-green-600">
-                    <ShieldCheck className="size-3" /> Verified
+                    <ShieldCheck className="size-3" /> <T k="applicantDetail.verified" />
                   </Badge>
                 )}
               </div>
@@ -161,7 +162,10 @@ export default async function ApplicantDetailPage({
                   <span className="flex items-center gap-1 text-sm">
                     <Star className="size-4 fill-amber-400 text-amber-400" />
                     <span className="font-medium">{entry.averageRating.toFixed(1)}</span>
-                    <span className="text-muted-foreground">({entry.numberOfReviews} review{entry.numberOfReviews !== 1 ? "s" : ""})</span>
+                    <span className="text-muted-foreground">
+                      ({entry.numberOfReviews}{" "}
+                      <T k={entry.numberOfReviews === 1 ? "applicantDetail.review" : "applicantDetail.reviews"} />)
+                    </span>
                   </span>
                 )}
               </div>
@@ -171,7 +175,9 @@ export default async function ApplicantDetailPage({
           {/* Skills */}
           {entry.applicant?.skills && entry.applicant.skills.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Skills</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                <T k="applicantDetail.skillsLabel" />
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {entry.applicant.skills.map((s) => (
                   <Badge key={s.id} variant="secondary">{s.name}</Badge>
@@ -183,7 +189,9 @@ export default async function ApplicantDetailPage({
           {/* Certifications */}
           {entry.applicant?.certifications && entry.applicant.certifications.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Certifications</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                <T k="applicantDetail.certsLabel" />
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {entry.applicant.certifications.map((c, i) => (
                   <Badge key={i} variant="outline">{c.name}</Badge>
@@ -198,7 +206,7 @@ export default async function ApplicantDetailPage({
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <MessageSquare className="size-4" /> Proposal
+            <MessageSquare className="size-4" /> <T k="applicantDetail.proposalTitle" />
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -209,7 +217,9 @@ export default async function ApplicantDetailPage({
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
             {entry.bid > 0 && (
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">Proposed Price</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                  <T k="applicantDetail.proposedPrice" />
+                </span>
                 <span className="font-semibold flex items-center gap-1">
                   <DollarSign className="size-3.5 text-muted-foreground" />
                   ${Number(entry.bid).toLocaleString()} CAD
@@ -218,7 +228,9 @@ export default async function ApplicantDetailPage({
             )}
             {entry.estimatedDelivery && (
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">Est. Completion</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                  <T k="applicantDetail.estCompletion" />
+                </span>
                 <span className="font-medium flex items-center gap-1">
                   <CalendarDays className="size-3.5 text-muted-foreground" />
                   {new Date(entry.estimatedDelivery).toLocaleDateString("en-CA", {
@@ -228,11 +240,13 @@ export default async function ApplicantDetailPage({
               </div>
             )}
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Availability</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                <T k="applicantDetail.availability" />
+              </span>
               <span className="font-medium flex items-center gap-1">
                 <Clock className="size-3.5 text-muted-foreground" />
                 {entry.availability === "now"
-                  ? "Available now"
+                  ? <T k="applicantDetail.availableNow" />
                   : new Date(entry.availability).toLocaleDateString("en-CA", {
                       month: "short", day: "numeric", year: "numeric",
                     })}
@@ -246,9 +260,10 @@ export default async function ApplicantDetailPage({
       {entry.applicant?.experiences && entry.applicant.experiences.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Experience</CardTitle>
+            <CardTitle className="text-base"><T k="applicantDetail.experienceTitle" /></CardTitle>
             <CardDescription>
-              {entry.applicant.experiences.length} {entry.applicant.experiences.length === 1 ? "entry" : "entries"}
+              {entry.applicant.experiences.length}{" "}
+              <T k={entry.applicant.experiences.length === 1 ? "applicantDetail.experienceEntry" : "applicantDetail.experienceEntries"} />
             </CardDescription>
           </CardHeader>
           <Separator />
@@ -267,7 +282,7 @@ export default async function ApplicantDetailPage({
                       <p className="text-xs text-muted-foreground">{exp.location}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {fmtDate(exp.startDate)} – {exp.current ? "Present" : fmtDate(exp.endDate)}
+                      {fmtDate(exp.startDate)} – {exp.current ? <T k="applicantDetail.present" /> : fmtDate(exp.endDate)}
                     </p>
                     {exp.description && (
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{exp.description}</p>
@@ -284,12 +299,14 @@ export default async function ApplicantDetailPage({
       {reviews.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Reviews</CardTitle>
+            <CardTitle className="text-base"><T k="applicantDetail.reviewsTitle" /></CardTitle>
             <CardDescription>
               {entry.averageRating > 0 && (
                 <span className="flex items-center gap-1">
                   <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                  {entry.averageRating.toFixed(1)} · {entry.numberOfReviews} review{entry.numberOfReviews !== 1 ? "s" : ""}
+                  {entry.averageRating.toFixed(1)} ·{" "}
+                  {entry.numberOfReviews}{" "}
+                  <T k={entry.numberOfReviews === 1 ? "applicantDetail.review" : "applicantDetail.reviews"} />
                 </span>
               )}
             </CardDescription>
@@ -309,7 +326,9 @@ export default async function ApplicantDetailPage({
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{review.reviewer?.fullName ?? "Anonymous"}</p>
+                        <p className="text-sm font-medium truncate">
+                          {review.reviewer?.fullName ?? <T k="applicantDetail.anonymous" />}
+                        </p>
                         {review.serviceRequestIssue && (
                           <p className="text-xs text-muted-foreground truncate">{review.serviceRequestIssue}</p>
                         )}

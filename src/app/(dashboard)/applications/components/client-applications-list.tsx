@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,26 +28,27 @@ export function ClientApplicationsList({
 }: {
   applications: ClientApplication[]
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Applications</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("applications.title")}</h1>
         <p className="text-muted-foreground mt-1 text-sm">
           {applications.length > 0
-            ? `${applications.length} request${applications.length !== 1 ? "s" : ""} with applicants`
-            : "Experts who apply to your requests will appear here."}
+            ? t(applications.length === 1 ? "applications.requestWithApplicants" : "applications.requestsWithApplicants", { n: applications.length })
+            : t("applications.noClientApplicationsHint")}
         </p>
       </div>
 
       {applications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
           <FileText className="size-12 text-muted-foreground/40" />
-          <p className="font-semibold">No applications yet</p>
+          <p className="font-semibold">{t("applications.noApplications")}</p>
           <p className="text-sm text-muted-foreground max-w-xs">
-            Once experts apply to your service requests, they&apos;ll appear here.
+            {t("applications.noClientApplicationsHint")}
           </p>
           <Button variant="outline" size="sm" asChild className="mt-2">
-            <Link href="/requests">View My Requests</Link>
+            <Link href="/requests">{t("applications.viewMyRequests")}</Link>
           </Button>
         </div>
       ) : (
@@ -59,7 +63,7 @@ export function ClientApplicationsList({
                   {app.applicants > 0 && (
                     <span className="flex items-center gap-1 text-xs font-semibold text-primary">
                       <Users className="size-3" />
-                      {app.applicants} applicant{app.applicants !== 1 ? "s" : ""}
+                      {t(app.applicants === 1 ? "applications.applicant" : "applications.applicants_count", { n: app.applicants })}
                     </span>
                   )}
                 </div>
@@ -81,7 +85,7 @@ export function ClientApplicationsList({
                   {app.daysLeft > 0 && (
                     <span className="flex items-center gap-1">
                       <Clock className="size-3" />
-                      {app.daysLeft} day{app.daysLeft !== 1 ? "s" : ""} left
+                      {t(app.daysLeft === 1 ? "applications.daysLeft" : "applications.daysLeftMany", { n: app.daysLeft })}
                     </span>
                   )}
                   {app.postedAgo && (
@@ -93,7 +97,7 @@ export function ClientApplicationsList({
               <CardFooter className="pt-3 border-t">
                 <Button size="sm" asChild className="w-full gap-1">
                   <Link href={`/applications/${app.id}/applicants`}>
-                    View Applicants <ArrowRight className="size-3" />
+                    {t("applications.viewApplicants")} <ArrowRight className="size-3" />
                   </Link>
                 </Button>
               </CardFooter>

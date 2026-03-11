@@ -10,6 +10,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 export function ResetPasswordForm({
   token,
@@ -17,6 +18,7 @@ export function ResetPasswordForm({
   ...props
 }: React.ComponentProps<"div"> & { token: string }) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -26,7 +28,7 @@ export function ResetPasswordForm({
     e.preventDefault()
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match")
+      setError(t("auth.resetPassword.passwordsNoMatch"))
       return
     }
 
@@ -55,11 +57,11 @@ export function ResetPasswordForm({
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card className="overflow-hidden p-0">
           <CardContent className="p-6 md:p-8 text-center">
-            <p className="text-red-600 font-medium">Invalid or missing reset token.</p>
+            <p className="text-red-600 font-medium">{t("auth.resetPassword.invalidToken")}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Please request a new{" "}
+              {t("auth.resetPassword.requestNew")}{" "}
               <Link href="/auth/forgot-password" className="underline">
-                password reset link
+                {t("auth.resetPassword.resetLink")}
               </Link>
               .
             </p>
@@ -84,13 +86,13 @@ export function ResetPasswordForm({
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Set new password</h1>
+                <h1 className="text-2xl font-bold">{t("auth.resetPassword.title")}</h1>
                 <p className="text-muted-foreground text-balance">
-                  Choose a strong password for your account
+                  {t("auth.resetPassword.subtitle")}
                 </p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t("auth.resetPassword.newPassword")}</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -100,10 +102,10 @@ export function ResetPasswordForm({
                   onChange={(e) => setNewPassword(e.target.value)}
                   autoComplete="new-password"
                 />
-                <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
+                <p className="text-xs text-muted-foreground">{t("auth.resetPassword.minChars")}</p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t("auth.resetPassword.confirmPassword")}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -121,11 +123,11 @@ export function ResetPasswordForm({
               )}
 
               <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading ? t("auth.resetPassword.resetting") : t("auth.resetPassword.submit")}
               </Button>
               <div className="text-center text-sm">
                 <Link href="/auth/sign-in" className="underline underline-offset-4">
-                  Back to sign in
+                  {t("auth.forgotPassword.backToSignIn")}
                 </Link>
               </div>
             </div>

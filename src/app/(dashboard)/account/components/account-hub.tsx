@@ -24,6 +24,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   fullName: string | null
@@ -42,58 +43,59 @@ const statusVariant: Record<string, "default" | "secondary" | "outline" | "destr
   UNVERIFIED:              "secondary",
 }
 
-const statusLabel: Record<string, string> = {
-  ACTIVE:                  "Active",
-  VERIFIED:                "Verified",
-  PENDING_ID_VERIFICATION: "Pending ID",
-  UNVERIFIED:              "Unverified",
-}
-
-type NavTile = {
-  icon: React.ElementType
-  label: string
-  description: string
-  href: string
-}
-
-const expertTiles: NavTile[] = [
-  { icon: User,      label: "Edit Profile",           description: "Name, photo, title, address",   href: "/profile" },
-  { icon: Award,     label: "Skills & Certifications", description: "Manage your expertise",         href: "/account/skills" },
-  { icon: Briefcase, label: "Experience",              description: "Work history and projects",     href: "/account/experience" },
-  { icon: Receipt,   label: "Tax Details",             description: "TPS/TVQ registration numbers",  href: "/account/tax" },
-]
-
 export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, userType }: Props) {
   const router = useRouter()
+  const { t } = useTranslation()
   const initials = (fullName ?? "").split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase() || "?"
+
+  const statusLabel: Record<string, string> = {
+    ACTIVE:                  t("account.status.ACTIVE"),
+    VERIFIED:                t("account.status.VERIFIED"),
+    PENDING_ID_VERIFICATION: t("account.status.PENDING"),
+    UNVERIFIED:              t("account.status.UNVERIFIED"),
+  }
+
+  type NavTile = {
+    icon: React.ElementType
+    label: string
+    description: string
+    href: string
+  }
+
+  const expertTiles: NavTile[] = [
+    { icon: User,      label: t("account.editProfile"),    description: t("account.editProfileHint"),  href: "/profile" },
+    { icon: Award,     label: t("account.skills"),         description: t("account.skillsHint"),       href: "/account/skills" },
+    { icon: Briefcase, label: t("account.experience"),     description: t("account.experienceHint"),   href: "/account/experience" },
+    { icon: Receipt,   label: t("account.tax"),            description: t("account.taxHint"),          href: "/account/tax" },
+  ]
 
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", { method: "POST" })
       router.push("/auth/sign-in")
     } catch {
-      toast.error("Failed to sign out")
+      toast.error(t("account.logoutFailed"))
     }
   }
 
   const status = accountStatus as string | null
   const tiles = userType === "expert" ? expertTiles : [
-    { icon: User,    label: "Edit Profile", description: "Name, photo, address", href: "/profile" },
-    { icon: Receipt, label: "Tax Details",  description: "TPS/TVQ numbers",      href: "/account/tax" },
+    { icon: User,    label: t("account.editProfile"), description: t("account.editProfileHint"), href: "/profile" },
+    { icon: Receipt, label: t("account.tax"),         description: t("account.taxHint"),   href: "/account/tax" },
   ]
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Account</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your profile, expertise, and account settings.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("account.title")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("account.subtitle")}</p>
       </div>
 
       {/* Profile card */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Profile</CardTitle>
-          <CardDescription>Your public profile information.</CardDescription>
+          <CardTitle className="text-base">{t("account.profile")}</CardTitle>
+          <CardDescription>{t("account.profileDescription")}</CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="flex items-center gap-4 pt-4">
@@ -114,7 +116,7 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
             )}
           </div>
           <Button variant="outline" size="sm" asChild className="shrink-0">
-            <Link href="/profile">Edit</Link>
+            <Link href="/profile">{t("common.edit")}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -123,12 +125,12 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
       {userType === "expert" && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Profile & Expertise</CardTitle>
-            <CardDescription>Manage your professional details and credentials.</CardDescription>
+            <CardTitle className="text-base">{t("account.profileExpertise")}</CardTitle>
+            <CardDescription>{t("account.profileExpertiseHint")}</CardDescription>
           </CardHeader>
           <Separator />
           <CardContent className="p-0">
-            {tiles.filter(t => t.href !== "/profile").map((tile, i) => (
+            {tiles.filter(tile => tile.href !== "/profile").map((tile, i) => (
               <div key={tile.href}>
                 {i > 0 && <Separator />}
                 <Link href={tile.href} className="flex items-center gap-4 px-5 py-3.5 hover:bg-muted/50 transition-colors">
@@ -151,12 +153,12 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
       {userType !== "expert" && tiles.length > 1 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Business Details</CardTitle>
-            <CardDescription>Manage your tax registration information.</CardDescription>
+            <CardTitle className="text-base">{t("account.businessDetails")}</CardTitle>
+            <CardDescription>{t("account.businessDetailsHint")}</CardDescription>
           </CardHeader>
           <Separator />
           <CardContent className="p-0">
-            {tiles.filter(t => t.href !== "/profile").map((tile, i) => (
+            {tiles.filter(tile => tile.href !== "/profile").map((tile, i) => (
               <div key={tile.href}>
                 {i > 0 && <Separator />}
                 <Link href={tile.href} className="flex items-center gap-4 px-5 py-3.5 hover:bg-muted/50 transition-colors">
@@ -178,8 +180,8 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
       {/* Security & Status */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Security & Status</CardTitle>
-          <CardDescription>Account security settings and identity verification.</CardDescription>
+          <CardTitle className="text-base">{t("account.security")}</CardTitle>
+          <CardDescription>{t("account.securityCardHint")}</CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="p-0">
@@ -188,8 +190,8 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
               <KeyRound className="size-4 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">Security</p>
-              <p className="text-xs text-muted-foreground">Password and account settings</p>
+              <p className="text-sm font-medium">{t("account.security")}</p>
+              <p className="text-xs text-muted-foreground">{t("account.passwordHint")}</p>
             </div>
             <ChevronRight className="size-4 text-muted-foreground shrink-0" />
           </Link>
@@ -199,8 +201,8 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
               <ShieldCheck className="size-4 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">Account Status</p>
-              <p className="text-xs text-muted-foreground">Identity verification and account standing</p>
+              <p className="text-sm font-medium">{t("account.identityVerification")}</p>
+              <p className="text-xs text-muted-foreground">{t("account.identityHint")}</p>
             </div>
             <ChevronRight className="size-4 text-muted-foreground shrink-0" />
           </Link>
@@ -215,7 +217,7 @@ export function AccountHub({ fullName, email, avatarUrl, title, accountStatus, u
           onClick={handleLogout}
         >
           <LogOut className="size-4 mr-2" />
-          Sign Out
+          {t("common.signOut")}
         </Button>
       </div>
     </div>

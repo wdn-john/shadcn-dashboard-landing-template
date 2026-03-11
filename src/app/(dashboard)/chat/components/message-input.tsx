@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import {
   Send,
   Paperclip,
@@ -26,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui/tooltip"
+import { useTranslation } from "react-i18next"
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void
@@ -34,25 +35,46 @@ interface MessageInputProps {
   placeholder?: string
 }
 
+// How long after the last keystroke before we broadcast "stopped typing"
+const TYPING_STOP_DELAY = 2000
+
 export function MessageInput({
   onSendMessage,
   onTypingChange,
   disabled = false,
-  placeholder = "Type a message..."
+  placeholder,
 }: MessageInputProps) {
+  const { t } = useTranslation()
+  const resolvedPlaceholder = placeholder ?? t("chat.typeMessage")
   const [message, setMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const typingActiveRef = useRef(false)
+
+  const stopTyping = useCallback(() => {
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current)
+      typingTimerRef.current = null
+    }
+    if (!typingActiveRef.current) return
+    typingActiveRef.current = false
+    onTypingChange?.(false)
+  }, [onTypingChange])
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+    }
+  }, [])
 
   const handleSendMessage = () => {
     const trimmedMessage = message.trim()
     if (trimmedMessage && !disabled) {
+      stopTyping()
       onSendMessage(trimmedMessage)
       setMessage("")
-      setIsTyping(false)
-      onTypingChange?.(false)
 
-      // Reset textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto"
       }
@@ -76,18 +98,21 @@ export function MessageInput({
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`
     }
 
-    // Handle typing indicator
-    if (value.trim() && !isTyping) {
-      setIsTyping(true)
-      onTypingChange?.(true)
-    } else if (!value.trim() && isTyping) {
-      setIsTyping(false)
-      onTypingChange?.(false)
+    if (value.trim()) {
+      // Broadcast typing:start only once per typing burst
+      if (!typingActiveRef.current) {
+        typingActiveRef.current = true
+        onTypingChange?.(true)
+      }
+      // Reset inactivity timer — fires stopTyping after silence
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+      typingTimerRef.current = setTimeout(stopTyping, TYPING_STOP_DELAY)
+    } else {
+      stopTyping()
     }
   }
 
   const handleFileUpload = (type: "image" | "file") => {
-    // In a real app, this would open a file picker
     console.log(`Upload ${type}`)
   }
 
@@ -111,7 +136,7 @@ export function MessageInput({
                 </DropdownMenuTrigger>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Attach file</p>
+                <p>{t("chat.attachFile")}</p>
               </TooltipContent>
             </Tooltip>
             <DropdownMenuContent side="top" align="start">
@@ -120,14 +145,14 @@ export function MessageInput({
                 className="cursor-pointer"
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
-                Photo or video
+                {t("chat.photoOrVideo")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleFileUpload("file")}
                 className="cursor-pointer"
               >
                 <FileText className="h-4 w-4 mr-2" />
-                Document
+                {t("chat.document")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -137,14 +162,14 @@ export function MessageInput({
         <div className="flex-1 relative">
           <Textarea
             ref={textareaRef}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             value={message}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyPress}
             disabled={disabled}
             className={cn(
               "min-h-[40px] max-h-[120px] resize-none cursor-text disabled:cursor-not-allowed",
-              "pr-20" // Space for emoji and more buttons
+              "pr-20"
             )}
             rows={1}
           />
@@ -164,7 +189,7 @@ export function MessageInput({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Add emoji</p>
+                  <p>{t("chat.addEmoji")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -213,18 +238,11 @@ export function MessageInput({
               )}
             </TooltipTrigger>
             <TooltipContent>
-              <p>{message.trim() ? "Send message" : "Voice message"}</p>
+              <p>{message.trim() ? t("chat.sendMessage") : t("chat.voiceMessage")}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
-
-      {/* Typing indicator */}
-      {isTyping && (
-        <div className="text-xs text-muted-foreground mt-2">
-          You are typing...
-        </div>
-      )}
     </div>
   )
 }

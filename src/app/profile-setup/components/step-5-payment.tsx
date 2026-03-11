@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
+import { useTranslation } from "react-i18next"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -56,28 +57,29 @@ const COUNTRIES = [
 
 // ─── Expert: Stripe Connect ───────────────────────────────────────────────────
 
-const EXPERT_BENEFITS = [
-  {
-    title: "Fast, secure payouts",
-    text: "Get paid directly to your bank account within 2–7 business days after client approval.",
-  },
-  {
-    title: "Industry-standard security",
-    text: "Stripe is trusted by millions of businesses worldwide with bank-grade encryption.",
-  },
-  {
-    title: "Full payment control",
-    text: "Track your earnings, manage your payout schedule, and view transaction history.",
-  },
-]
-
 function ExpertPayment() {
+  const { t } = useTranslation()
   const { personal, payment, setPayment, nextStep, prevStep } = useProfileSetupStore()
   const [connecting, setConnecting] = useState(false)
   const [verifying, setVerifying] = useState(false)
   const [onboardingOpened, setOnboardingOpened] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const stripeConnected = payment.stripeConnected
+
+  const EXPERT_BENEFITS = [
+    {
+      title: t("profileSetup.step5.expert.benefit1Title"),
+      text: t("profileSetup.step5.expert.benefit1Text"),
+    },
+    {
+      title: t("profileSetup.step5.expert.benefit2Title"),
+      text: t("profileSetup.step5.expert.benefit2Text"),
+    },
+    {
+      title: t("profileSetup.step5.expert.benefit3Title"),
+      text: t("profileSetup.step5.expert.benefit3Text"),
+    },
+  ]
 
   async function handleConnect() {
     setConnecting(true)
@@ -89,9 +91,9 @@ function ExpertPayment() {
         body: JSON.stringify({ firstName: personal.firstName, lastName: personal.lastName }),
       })
       const json = await res.json()
-      if (!res.ok || !json.ok) throw new Error(json.message ?? "Could not start Stripe onboarding")
+      if (!res.ok || !json.ok) throw new Error(json.message ?? t("profileSetup.step5.expert.couldNotStart"))
       const url: string = json.data?.url
-      if (!url) throw new Error("No onboarding URL returned")
+      if (!url) throw new Error(t("profileSetup.step5.expert.noUrl"))
       window.open(url, "_blank", "noopener,noreferrer")
       setOnboardingOpened(true)
     } catch (err: any) {
@@ -107,12 +109,12 @@ function ExpertPayment() {
     try {
       const res = await fetch("/api/stripe/connect")
       const json = await res.json()
-      if (!res.ok || !json.ok) throw new Error(json.message ?? "Could not check status")
+      if (!res.ok || !json.ok) throw new Error(json.message ?? t("profileSetup.step5.expert.couldNotCheck"))
       const connected: boolean = json.data?.connected ?? json.data?.status === "active"
       if (connected) {
         setPayment({ stripeConnected: true, skipped: false })
       } else {
-        setError("Your Stripe account is not connected yet. Complete the onboarding in the Stripe tab and try again.")
+        setError(t("profileSetup.step5.expert.notConnectedError"))
       }
     } catch (err: any) {
       setError(err.message)
@@ -128,9 +130,9 @@ function ExpertPayment() {
           <StripeLogo className="h-5 w-12" />
         </div>
         <div>
-          <p className="font-semibold text-sm">Connect your Stripe account</p>
+          <p className="font-semibold text-sm">{t("profileSetup.step5.expert.connectTitle")}</p>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Required to receive payouts when clients approve your work.
+            {t("profileSetup.step5.expert.connectDesc")}
           </p>
         </div>
       </div>
@@ -153,9 +155,9 @@ function ExpertPayment() {
         <div className="flex items-center gap-3">
           <Link2 className="size-5 text-muted-foreground" />
           <div className="flex-1">
-            <p className="text-sm font-semibold">Stripe account</p>
+            <p className="text-sm font-semibold">{t("profileSetup.step5.expert.stripeAccount")}</p>
             <p className={cn("text-sm", stripeConnected ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
-              {stripeConnected ? "Connected" : "Not connected"}
+              {stripeConnected ? t("profileSetup.step5.expert.connected") : t("profileSetup.step5.expert.notConnected")}
             </p>
           </div>
           <div className={cn("size-2.5 rounded-full shrink-0", stripeConnected ? "bg-emerald-500" : "bg-muted-foreground/30")} />
@@ -164,22 +166,22 @@ function ExpertPayment() {
         {stripeConnected ? (
           <div className="flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
             <ShieldCheck className="size-4 shrink-0" />
-            Your Stripe account is connected. You&apos;re ready to receive payouts.
+            {t("profileSetup.step5.expert.connectedStatus")}
           </div>
         ) : (
           <div className="space-y-3">
             <Button type="button" variant="outline" className="w-full gap-2" onClick={handleConnect} disabled={connecting}>
               <ExternalLink className="size-4" />
-              {connecting ? "Opening Stripe…" : "Connect with Stripe"}
+              {connecting ? t("profileSetup.step5.expert.opening") : t("profileSetup.step5.expert.connectWithStripe")}
             </Button>
             {onboardingOpened && (
               <Button type="button" variant="secondary" className="w-full gap-2" onClick={handleVerify} disabled={verifying}>
                 <RefreshCw className={cn("size-4", verifying && "animate-spin")} />
-                {verifying ? "Checking…" : "Verify connection"}
+                {verifying ? t("profileSetup.step5.expert.checking") : t("profileSetup.step5.expert.verifyConnection")}
               </Button>
             )}
             <p className="text-center text-xs text-muted-foreground">
-              You&apos;ll be redirected to Stripe&apos;s secure onboarding in a new tab.
+              {t("profileSetup.step5.expert.redirectNote")}
             </p>
           </div>
         )}
@@ -188,21 +190,21 @@ function ExpertPayment() {
       <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-3 flex gap-2 text-sm">
         <Info className="size-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
         <p className="text-amber-800 dark:text-amber-300">
-          <span className="font-semibold">Important:</span> You must connect Stripe before accepting your first mission. You can also do this later from your account settings.
+          {t("profileSetup.step5.expert.importantNote")}
         </p>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={prevStep}>Back</Button>
+        <Button variant="outline" onClick={prevStep}>{t("profileSetup.step5.expert.back")}</Button>
         <div className="flex gap-3">
           {!stripeConnected && (
             <Button variant="ghost" onClick={() => { setPayment({ skipped: true }); nextStep() }}>
-              Skip for now
+              {t("profileSetup.step5.expert.skipForNow")}
             </Button>
           )}
-          {stripeConnected && <Button onClick={nextStep}>Continue</Button>}
+          {stripeConnected && <Button onClick={nextStep}>{t("profileSetup.step5.expert.continue")}</Button>}
         </div>
       </div>
     </div>
@@ -212,6 +214,7 @@ function ExpertPayment() {
 // ─── Client: Card collection ──────────────────────────────────────────────────
 
 function ClientCardFormInner() {
+  const { t } = useTranslation()
   const { payment, setPayment, nextStep, prevStep } = useProfileSetupStore()
   const stripe = useStripe()
   const elements = useElements()
@@ -241,7 +244,6 @@ function ClientCardFormInner() {
   async function handleContinue() {
     setError(null)
 
-    // If card is fully filled in, save the payment method before advancing
     if (cardComplete) {
       if (!stripe || !elements) return
       setSaving(true)
@@ -274,7 +276,6 @@ function ClientCardFormInner() {
       }
       setSaving(false)
     } else {
-      // Card not filled — skip silently (matches mobile behaviour)
       setPayment({ skipped: true })
     }
 
@@ -291,9 +292,9 @@ function ClientCardFormInner() {
           <CreditCard className="size-5 text-violet-600 dark:text-violet-400" />
         </div>
         <div>
-          <p className="font-semibold text-sm">Add a payment method</p>
+          <p className="font-semibold text-sm">{t("profileSetup.step5.client.addPaymentTitle")}</p>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Securely pay for missions through Workedin&apos;s protected checkout.
+            {t("profileSetup.step5.client.addPaymentDesc")}
           </p>
         </div>
       </div>
@@ -301,17 +302,17 @@ function ClientCardFormInner() {
       {/* Card details */}
       <div className="rounded-xl border bg-card p-5 space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="cardholderName">Cardholder name</Label>
+          <Label htmlFor="cardholderName">{t("profileSetup.step5.client.cardholderName")}</Label>
           <Input
             id="cardholderName"
-            placeholder="Name on card"
+            placeholder={t("profileSetup.step5.client.namePlaceholder")}
             value={cardholderName}
             onChange={(e) => setCardholderName(e.target.value)}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Card details</Label>
+          <Label>{t("profileSetup.step5.client.cardDetails")}</Label>
           <div className={cn(
             "rounded-md border px-3 py-3 transition-colors",
             "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
@@ -327,11 +328,11 @@ function ClientCardFormInner() {
         <div className="space-y-3 pt-1">
           <div className="flex items-center gap-2 text-sm font-medium">
             <MapPin className="size-4 text-muted-foreground" />
-            Billing address
+            {t("profileSetup.step5.client.billingAddress")}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="billingCountry">Country</Label>
+            <Label htmlFor="billingCountry">{t("profileSetup.step5.client.country")}</Label>
             <Select value={billingCountry} onValueChange={setBillingCountry}>
               <SelectTrigger id="billingCountry">
                 <SelectValue>
@@ -349,10 +350,10 @@ function ClientCardFormInner() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="billingPostal">Postal / ZIP code</Label>
+            <Label htmlFor="billingPostal">{t("profileSetup.step5.client.postalZip")}</Label>
             <Input
               id="billingPostal"
-              placeholder="e.g. H3Z 2Y7"
+              placeholder={t("profileSetup.step5.client.postalPlaceholder")}
               value={billingPostalCode}
               onChange={(e) => setBillingPostalCode(e.target.value.toUpperCase())}
             />
@@ -366,7 +367,7 @@ function ClientCardFormInner() {
       <div className="flex items-center justify-center gap-4">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Lock className="size-3" />
-          SSL encrypted
+          {t("profileSetup.step5.client.sslEncrypted")}
         </div>
         <div className="flex gap-1.5">
           {["VISA", "MC", "AMEX"].map((brand) => (
@@ -381,14 +382,14 @@ function ClientCardFormInner() {
       <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-3 flex gap-2 text-sm">
         <Info className="size-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
         <p className="text-amber-800 dark:text-amber-300">
-          Your card will only be charged when you approve an expert&apos;s work. You can update your payment method anytime.
+          {t("profileSetup.step5.client.chargeNote")}
         </p>
       </div>
 
       <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={prevStep}>Back</Button>
+        <Button variant="outline" onClick={prevStep}>{t("profileSetup.step5.client.back")}</Button>
         <Button variant="ghost" onClick={handleContinue} disabled={saving}>
-          {saving ? "Saving…" : "Skip for now"}
+          {saving ? t("profileSetup.step5.client.saving") : t("profileSetup.step5.client.skipForNow")}
         </Button>
       </div>
     </div>

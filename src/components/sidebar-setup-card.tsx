@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ShieldAlert, CreditCard, X } from "lucide-react"
 import type { UserRole } from "@/types/auth"
+import { useTranslation } from "react-i18next"
 
 interface Props {
   accountStatus: string | null
@@ -13,6 +14,7 @@ interface Props {
 export function SidebarSetupCard({ accountStatus, role }: Props) {
   const [stripeConnected, setStripeConnected] = useState<boolean | null>(null)
   const [dismissed, setDismissed] = useState(false)
+  const { t } = useTranslation()
 
   const isExpert = role === "ROLE_EXPERT"
   const isVerified = accountStatus === "VERIFIED" || accountStatus === "ACTIVE"
@@ -42,12 +44,12 @@ export function SidebarSetupCard({ accountStatus, role }: Props) {
     <div className="mx-2 mb-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 p-3">
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 leading-tight">
-          Setup Required
+          {t("sidebarSetup.title")}
         </p>
         <button
           onClick={() => setDismissed(true)}
           className="text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200 shrink-0 mt-px"
-          aria-label="Dismiss"
+          aria-label={t("sidebarSetup.dismiss")}
         >
           <X className="size-3" />
         </button>
@@ -60,7 +62,7 @@ export function SidebarSetupCard({ accountStatus, role }: Props) {
             className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 hover:underline"
           >
             <ShieldAlert className="size-3.5 shrink-0" />
-            Verify your identity
+            {t("sidebarSetup.verifyIdentity")}
           </Link>
         )}
 
@@ -79,7 +81,7 @@ export function SidebarSetupCard({ accountStatus, role }: Props) {
             }}
           >
             <CreditCard className="size-3.5 shrink-0" />
-            Set up Stripe payments
+            {t("sidebarSetup.setupStripe")}
           </button>
         )}
       </div>

@@ -21,28 +21,42 @@ import { Upload } from "lucide-react"
 import { useRef, useState } from "react"
 import { Separator } from "@/components/ui/separator"
 import { Logo } from "@/components/logo"
+import { useTranslation } from "react-i18next"
 
-const userFormSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  website: z.string().optional(),
-  location: z.string().optional(),
-  role: z.string().optional(),
-  bio: z.string().optional(),
-  company: z.string().optional(),
-  timezone: z.string().optional(),
-  language: z.string().optional(),
-})
-
-type UserFormValues = z.infer<typeof userFormSchema>
+type UserFormValues = {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  website?: string
+  location?: string
+  role?: string
+  bio?: string
+  company?: string
+  timezone?: string
+  language?: string
+}
 
 export default function UserSettingsPage() {
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [useDefaultIcon, setUseDefaultIcon] = useState(true)
-  
+
+  const userFormSchema = z.object({
+    firstName: z.string().min(1, t("settings.user.firstNameRequired")),
+    lastName: z.string().min(1, t("settings.user.lastNameRequired")),
+    email: z.string().email(t("settings.user.invalidEmail")),
+    phone: z.string().optional(),
+    website: z.string().optional(),
+    location: z.string().optional(),
+    role: z.string().optional(),
+    bio: z.string().optional(),
+    company: z.string().optional(),
+    timezone: z.string().optional(),
+    language: z.string().optional(),
+  })
+
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
@@ -95,8 +109,8 @@ export default function UserSettingsPage() {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <Card>
               <CardHeader>
-                <CardTitle>Profile Settings</CardTitle>
-                <CardDescription>Update your personal information and preferences</CardDescription>
+                <CardTitle>{t("settings.user.title")}</CardTitle>
+                <CardDescription>{t("settings.user.subtitle")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
             {/* Profile Picture Section */}
@@ -113,26 +127,26 @@ export default function UserSettingsPage() {
               )}
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2">
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     size="sm"
                     onClick={handleFileUpload}
                     className="cursor-pointer"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    Upload new photo
+                    {t("settings.user.uploadPhoto")}
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={handleReset}
                     className="cursor-pointer"
                   >
-                    Reset
+                    {t("common.reset")}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Allowed JPG, GIF or PNG. Max size of 800K
+                  {t("settings.user.photoHint")}
                 </p>
               </div>
               <input
@@ -153,9 +167,9 @@ export default function UserSettingsPage() {
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>{t("common.firstName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your first name" {...field} />
+                      <Input placeholder={t("settings.user.firstNamePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -168,9 +182,9 @@ export default function UserSettingsPage() {
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name</FormLabel>
+                    <FormLabel>{t("common.lastName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your last name" {...field} />
+                      <Input placeholder={t("settings.user.lastNamePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,9 +197,9 @@ export default function UserSettingsPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>E-mail</FormLabel>
+                    <FormLabel>{t("common.email")}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Enter your email" {...field} />
+                      <Input type="email" placeholder={t("settings.user.emailPlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,9 +212,9 @@ export default function UserSettingsPage() {
                 name="company"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company</FormLabel>
+                    <FormLabel>{t("common.company")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your company" {...field} />
+                      <Input placeholder={t("settings.user.companyPlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,9 +227,9 @@ export default function UserSettingsPage() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>{t("common.phoneNumber")}</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Enter your phone number" {...field} />
+                      <Input type="tel" placeholder={t("settings.user.phonePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -228,9 +242,9 @@ export default function UserSettingsPage() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>{t("common.location")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your location" {...field} />
+                      <Input placeholder={t("settings.user.locationPlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -243,9 +257,9 @@ export default function UserSettingsPage() {
                 name="website"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Website</FormLabel>
+                    <FormLabel>{t("common.website")}</FormLabel>
                     <FormControl>
-                      <Input type="url" placeholder="Enter your website" {...field} />
+                      <Input type="url" placeholder={t("settings.user.websitePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -258,20 +272,20 @@ export default function UserSettingsPage() {
                 name="language"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Language</FormLabel>
+                    <FormLabel>{t("common.language")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Language" />
+                          <SelectValue placeholder={t("settings.user.selectLanguage")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="english">English</SelectItem>
-                        <SelectItem value="spanish">Spanish</SelectItem>
-                        <SelectItem value="french">French</SelectItem>
-                        <SelectItem value="german">German</SelectItem>
-                        <SelectItem value="italian">Italian</SelectItem>
-                        <SelectItem value="portuguese">Portuguese</SelectItem>
+                        <SelectItem value="english">{t("languages.english")}</SelectItem>
+                        <SelectItem value="spanish">{t("languages.spanish")}</SelectItem>
+                        <SelectItem value="french">{t("languages.french")}</SelectItem>
+                        <SelectItem value="german">{t("languages.german")}</SelectItem>
+                        <SelectItem value="italian">{t("languages.italian")}</SelectItem>
+                        <SelectItem value="portuguese">{t("languages.portuguese")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -285,9 +299,9 @@ export default function UserSettingsPage() {
                 name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Role</FormLabel>
+                    <FormLabel>{t("common.role")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your role" {...field} />
+                      <Input placeholder={t("settings.user.rolePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -300,11 +314,11 @@ export default function UserSettingsPage() {
                 name="timezone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Timezone</FormLabel>
+                    <FormLabel>{t("common.timezone")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Timezone" />
+                          <SelectValue placeholder={t("settings.user.selectTimezone")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -330,10 +344,10 @@ export default function UserSettingsPage() {
               name="bio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bio</FormLabel>
+                  <FormLabel>{t("common.bio")}</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Tell us a little about yourself..." 
+                    <Textarea
+                      placeholder={t("settings.user.bioPlaceholder")}
                       className="min-h-[100px]"
                       {...field}
                     />
@@ -346,10 +360,10 @@ export default function UserSettingsPage() {
             {/* Action Buttons */}
             <div className="flex justify-start gap-3">
               <Button type="submit" className="cursor-pointer">
-                Save Changes
+                {t("common.saveChanges")}
               </Button>
               <Button variant="outline" type="button" className="cursor-pointer">
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
           </CardContent>

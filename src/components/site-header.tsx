@@ -9,6 +9,7 @@ import { CommandSearch, SearchTrigger } from "@/components/command-search"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useNotificationPreferenceStore } from "@/store/notificationPreferenceStore"
 import type { UserRole } from "@/types/auth"
+import { useTranslation } from "react-i18next"
 
 interface SiteHeaderProps {
   role?: UserRole
@@ -18,6 +19,7 @@ export function SiteHeader({ role }: SiteHeaderProps) {
   const [searchOpen, setSearchOpen] = React.useState(false)
   const notifStyle = useNotificationPreferenceStore((s) => s.notifStyle)
   const toggle = useNotificationPreferenceStore((s) => s.toggle)
+  const { t } = useTranslation()
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -51,8 +53,8 @@ export function SiteHeader({ role }: SiteHeaderProps) {
                 onClick={toggle}
                 title={
                   notifStyle === "modal"
-                    ? "Switch to toast notifications"
-                    : "Switch to popup notifications"
+                    ? t("header.switchToToast")
+                    : t("header.switchToPopup")
                 }
               >
                 {notifStyle === "modal" ? (
@@ -62,8 +64,8 @@ export function SiteHeader({ role }: SiteHeaderProps) {
                 )}
                 <span className="sr-only">
                   {notifStyle === "modal"
-                    ? "Switch to toast notifications"
-                    : "Switch to popup notifications"}
+                    ? t("header.switchToToast")
+                    : t("header.switchToPopup")}
                 </span>
               </Button>
             )}

@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { SocketInitializer } from "@/components/socket-initializer"
+import { StaleTokenLogout } from "@/components/stale-token-logout"
 import { getSession } from "@/lib/server/getSession"
 import type { UserRole } from "@/types/auth"
 import { Session } from "@/types/Session"
@@ -15,6 +16,8 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession()
 
+  console.log("Session in DashboardLayout:", session)
+
   if (!session.isAuthenticated) {
     redirect("/auth/sign-in")
   }
@@ -23,7 +26,7 @@ export default async function DashboardLayout({
     redirect("/profile-setup")
   }
 
-  const rawRole = (session as Session)?.user?.role.roleName;
+  const rawRole = (session as Session)?.user?.role.roleName
   const role: UserRole =
     rawRole === "ROLE_CLIENT" ||
     rawRole === "ROLE_EXPERT" ||
@@ -40,11 +43,14 @@ export default async function DashboardLayout({
   const p = session.profile
   const u = session.user
   const sidebarUser = {
-    name: p?.fullName
-      ?? (p?.firstName && p?.lastName ? `${p.firstName} ${p.lastName}` : undefined)
-      ?? p?.firstName
-      ?? u?.email
-      ?? "Workedin User",
+    name:
+      p?.fullName ??
+      (p?.firstName && p?.lastName
+        ? `${p.firstName} ${p.lastName}`
+        : undefined) ??
+      p?.firstName ??
+      u?.email ??
+      "Workedin User",
     email: u?.email ?? "",
     avatar: p?.avatarUrl ?? "",
   }
@@ -114,7 +120,6 @@ export default async function DashboardLayout({
           />
         </>
       )}
-
     </SidebarProvider>
   )
 }

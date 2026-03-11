@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
 export type ProfileDTO = {
   id: string
@@ -62,6 +63,7 @@ export function ProfileEditor({ profile }: Props) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatarUrl ?? null)
   const [avatarBase64, setAvatarBase64]   = useState<string | null>(null)
   const [saving, setSaving]             = useState(false)
+  const { t } = useTranslation()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -108,10 +110,10 @@ export function ProfileEditor({ profile }: Props) {
       })
 
       if (!res.ok) throw new Error()
-      toast.success("Profile updated successfully")
+      toast.success(t("profile.saveSuccess"))
       setAvatarBase64(null)
     } catch {
-      toast.error("Failed to save profile")
+      toast.error(t("profile.saveFailed"))
     } finally {
       setSaving(false)
     }
@@ -122,14 +124,14 @@ export function ProfileEditor({ profile }: Props) {
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
-        <p className="text-muted-foreground mt-1">Update your public profile information.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("profile.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("profile.subtitle")}</p>
       </div>
 
       {/* Avatar */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Profile Photo</CardTitle>
+          <CardTitle className="text-base">{t("profile.photo")}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-5">
           <div className="relative">
@@ -146,15 +148,15 @@ export function ProfileEditor({ profile }: Props) {
             </button>
           </div>
           <div>
-            <p className="text-sm font-medium">{fullName || "Your Name"}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{title || "No title set"}</p>
+            <p className="text-sm font-medium">{fullName || t("profile.yourName")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{title || t("profile.noTitle")}</p>
             <Button
               variant="outline"
               size="sm"
               className="mt-2"
               onClick={() => fileInputRef.current?.click()}
             >
-              Change photo
+              {t("profile.changePhoto")}
             </Button>
           </div>
           <input
@@ -170,19 +172,19 @@ export function ProfileEditor({ profile }: Props) {
       {/* Personal Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Personal Information</CardTitle>
+          <CardTitle className="text-base">{t("profile.personalInfo")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2 grid gap-1.5">
-            <Label htmlFor="fullName">Full Name</Label>
+            <Label htmlFor="fullName">{t("profile.fullName")}</Label>
             <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="title">Professional Title</Label>
+            <Label htmlFor="title">{t("profile.professionalTitle")}</Label>
             <Input id="title" placeholder="e.g. Senior IT Consultant" value={title} onChange={e => setTitle(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">{t("profile.phoneNumber")}</Label>
             <Input id="phone" placeholder="+1 (555) 000-0000" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
           </div>
         </CardContent>
@@ -191,17 +193,17 @@ export function ProfileEditor({ profile }: Props) {
       {/* Professional Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Professional Information</CardTitle>
-          <CardDescription>Visible to clients browsing your profile.</CardDescription>
+          <CardTitle className="text-base">{t("profile.professionalInfo")}</CardTitle>
+          <CardDescription>{t("profile.professionalInfoHint")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5">
-            <Label htmlFor="industry">Industry</Label>
+            <Label htmlFor="industry">{t("profile.industry")}</Label>
             <Input id="industry" placeholder="e.g. Information Technology" value={industry} onChange={e => setIndustry(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="businessName">Business Name</Label>
-            <Input id="businessName" placeholder="Optional" value={businessName} onChange={e => setBusinessName(e.target.value)} />
+            <Label htmlFor="businessName">{t("profile.businessName")}</Label>
+            <Input id="businessName" placeholder={t("common.optional")} value={businessName} onChange={e => setBusinessName(e.target.value)} />
           </div>
         </CardContent>
       </Card>
@@ -209,27 +211,27 @@ export function ProfileEditor({ profile }: Props) {
       {/* Address */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Address</CardTitle>
+          <CardTitle className="text-base">{t("profile.address")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2 grid gap-1.5">
-            <Label htmlFor="street">Street</Label>
+            <Label htmlFor="street">{t("profile.street")}</Label>
             <Input id="street" value={street} onChange={e => setStreet(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="city">City</Label>
+            <Label htmlFor="city">{t("common.city")}</Label>
             <Input id="city" value={city} onChange={e => setCity(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="region">Province / State</Label>
+            <Label htmlFor="region">{t("profile.region")}</Label>
             <Input id="region" value={region} onChange={e => setRegion(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="postalCode">Postal Code</Label>
+            <Label htmlFor="postalCode">{t("common.postalCode")}</Label>
             <Input id="postalCode" value={postalCode} onChange={e => setPostalCode(e.target.value)} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="country">Country</Label>
+            <Label htmlFor="country">{t("common.country")}</Label>
             <Input id="country" value={country} onChange={e => setCountry(e.target.value)} />
           </div>
         </CardContent>
@@ -238,12 +240,12 @@ export function ProfileEditor({ profile }: Props) {
       {/* Tax Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Tax Information</CardTitle>
-          <CardDescription>Required for invoicing if you are a tax-registered business.</CardDescription>
+          <CardTitle className="text-base">{t("profile.taxInfo")}</CardTitle>
+          <CardDescription>{t("profile.taxInfoDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="taxRegistered">I am tax-registered</Label>
+            <Label htmlFor="taxRegistered">{t("profile.taxRegistered")}</Label>
             <Switch
               id="taxRegistered"
               checked={isTaxRegistered}
@@ -255,11 +257,11 @@ export function ProfileEditor({ profile }: Props) {
               <Separator />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1.5">
-                  <Label htmlFor="tpsNumber">TPS / GST Number</Label>
+                  <Label htmlFor="tpsNumber">{t("profile.tpsNumber")}</Label>
                   <Input id="tpsNumber" value={tpsNumber} onChange={e => setTpsNumber(e.target.value)} />
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="tvqNumber">TVQ / QST Number</Label>
+                  <Label htmlFor="tvqNumber">{t("profile.tvqNumber")}</Label>
                   <Input id="tvqNumber" value={tvqNumber} onChange={e => setTvqNumber(e.target.value)} />
                 </div>
               </div>
@@ -271,7 +273,7 @@ export function ProfileEditor({ profile }: Props) {
       <div className="flex justify-end pb-8">
         <Button onClick={handleSave} disabled={saving} size="lg">
           {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-          Save Changes
+          {t("profile.saveChanges")}
         </Button>
       </div>
     </div>

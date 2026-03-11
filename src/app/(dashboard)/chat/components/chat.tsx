@@ -11,11 +11,14 @@ import { MessageList } from "./message-list"
 import { MessageInput } from "./message-input"
 import { useChat, type Conversation, type Message, type User } from "../use-chat"
 import { useChatSocketStore } from "@/store/chatSocketStore"
+import { useChatStore } from "@/store/chatStore"
+import { useTranslation } from "react-i18next"
 
 interface ChatProps {
   conversations: Conversation[]
   messages: Record<string, Message[]>
   users: User[]
+  currentUserId?: string
   onSelectConversation?: (conversationId: string) => void
   onSendMessage?: (conversationId: string, content: string) => void
   defaultConversationId?: string
@@ -25,6 +28,7 @@ export function Chat({
   conversations,
   messages,
   users,
+  currentUserId,
   onSelectConversation,
   onSendMessage,
   defaultConversationId,
@@ -40,14 +44,34 @@ export function Chat({
   } = useChat()
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { t } = useTranslation()
   const sendWsMessage = useChatSocketStore((s) => s.sendMessage)
+  const typing = useChatStore((s) => s.typing)
+  const isRecipientTyping = selectedConversation
+    ? (typing[Number(selectedConversation)] ?? []).some((id) => id !== currentUserId)
+    : false
+
+  const currentConversation = conversations.find((conv) => conv.id === selectedConversation)
+  const currentMessages = selectedConversation ? messages[selectedConversation] ?? [] : []
 
   const handleTypingChange = (isTyping: boolean) => {
     if (!selectedConversation) return
-    sendWsMessage({
-      type: "typing",
-      payload: { chatroomId: Number(selectedConversation), isTyping },
-    })
+    const roomId = Number(selectedConversation)
+    const recipientId = currentConversation?.participants[0]
+
+    if (isTyping) {
+      // Match mobile sendTyping: type "typing:update" + destination (recipientId)
+      sendWsMessage({
+        type: "typing:update",
+        payload: { topic: "typing:update", roomId, destination: recipientId, isTyping: true },
+      })
+    } else {
+      // Match mobile stopTyping: type "typing" + roomId only
+      sendWsMessage({
+        type: "typing",
+        payload: { topic: "typing", roomId, isTyping: false },
+      })
+    }
   }
 
   // Close sidebar when clicking outside on mobile
@@ -87,9 +111,6 @@ export function Chat({
       if (target) setSelectedConversation(target.id)
     }
   }, [conversations, messages, users, selectedConversation, defaultConversationId, setConversations, setMessages, setUsers, setSelectedConversation])
-
-  const currentConversation = conversations.find(conv => conv.id === selectedConversation)
-  const currentMessages = selectedConversation ? messages[selectedConversation] || [] : []
 
   const handleSendMessage = (content: string) => {
     if (!selectedConversation) return
@@ -138,7 +159,7 @@ export function Chat({
         `}>
           {/* Sidebar Header with Close Button (Mobile Only) */}
           <div className="lg:hidden p-4 border-b flex items-center justify-between bg-background">
-            <h2 className="text-lg font-semibold">Messages</h2>
+            <h2 className="text-lg font-semibold">{t("chat.messages")}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -190,21 +211,25 @@ export function Chat({
                 <MessageList
                   messages={currentMessages}
                   users={users}
+                  currentUserId={currentUserId}
+                  isRecipientTyping={isRecipientTyping}
+                  recipientAvatar={currentConversation?.avatar}
+                  recipientName={currentConversation?.name}
                 />
 
                 {/* Message Input */}
                 <MessageInput
                   onSendMessage={handleSendMessage}
                   onTypingChange={handleTypingChange}
-                  placeholder={`Message ${currentConversation?.name || ""}...`}
+                  placeholder={t("chat.messagePlaceholder", { name: currentConversation?.name || "" })}
                 />
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-2">Welcome to Chat</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t("chat.welcome")}</h3>
                   <p className="text-muted-foreground">
-                    Select a conversation to start messaging
+                    {t("chat.selectConversation")}
                   </p>
                 </div>
               </div>

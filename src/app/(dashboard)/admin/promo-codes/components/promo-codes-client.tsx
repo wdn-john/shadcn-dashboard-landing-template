@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,6 +37,7 @@ type FormState = {
 const emptyForm: FormState = { code: "", discountValue: "" }
 
 export function PromoCodesClient({ initialCodes }: Props) {
+  const { t } = useTranslation()
   const [codes, setCodes] = useState(initialCodes)
   const [dialog, setDialog] = useState<"create" | "edit" | "delete" | null>(null)
   const [selected, setSelected] = useState<PromoCode | null>(null)
@@ -70,14 +72,14 @@ export function PromoCodesClient({ initialCodes }: Props) {
       })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        toast.error(typeof data === "string" ? data : "Failed to create promo code")
+        toast.error(typeof data === "string" ? data : t("admin.promoCodes.createFailed"))
         return
       }
       setCodes(prev => [data, ...prev])
-      toast.success("Promo code created")
+      toast.success(t("admin.promoCodes.created"))
       setDialog(null)
     } catch {
-      toast.error("Failed to create promo code")
+      toast.error(t("admin.promoCodes.createFailed"))
     } finally {
       setSaving(false)
     }
@@ -94,14 +96,14 @@ export function PromoCodesClient({ initialCodes }: Props) {
       })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        toast.error("Failed to update promo code")
+        toast.error(t("admin.promoCodes.updateFailed"))
         return
       }
       setCodes(prev => prev.map(c => c.id === selected.id ? data : c))
-      toast.success("Promo code updated")
+      toast.success(t("admin.promoCodes.updated"))
       setDialog(null)
     } catch {
-      toast.error("Failed to update promo code")
+      toast.error(t("admin.promoCodes.updateFailed"))
     } finally {
       setSaving(false)
     }
@@ -114,10 +116,10 @@ export function PromoCodesClient({ initialCodes }: Props) {
       const res = await fetch(`/api/admin/promo-codes/${selected.id}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
       setCodes(prev => prev.filter(c => c.id !== selected.id))
-      toast.success("Promo code deleted")
+      toast.success(t("admin.promoCodes.deleted"))
       setDialog(null)
     } catch {
-      toast.error("Failed to delete promo code")
+      toast.error(t("admin.promoCodes.deleteFailed"))
     } finally {
       setSaving(false)
     }
@@ -127,23 +129,23 @@ export function PromoCodesClient({ initialCodes }: Props) {
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Promo Codes</h1>
-          <p className="text-muted-foreground mt-1">{codes.length} code{codes.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("admin.promoCodes.title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("admin.promoCodes.codeCount", { n: codes.length })}</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4 mr-2" />
-          New Code
+          {t("admin.promoCodes.newCode")}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">All Codes</CardTitle>
-          <CardDescription>Discount codes available at checkout</CardDescription>
+          <CardTitle className="text-base">{t("admin.promoCodes.allCodes")}</CardTitle>
+          <CardDescription>{t("admin.promoCodes.allCodesDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {codes.length === 0 ? (
-            <p className="text-sm text-muted-foreground px-6 py-8 text-center">No promo codes yet</p>
+            <p className="text-sm text-muted-foreground px-6 py-8 text-center">{t("admin.promoCodes.noCodes")}</p>
           ) : (
             <div className="divide-y">
               {codes.map(code => (
@@ -151,12 +153,12 @@ export function PromoCodesClient({ initialCodes }: Props) {
                   <div className="flex-1 min-w-0">
                     <p className="font-mono font-semibold text-sm">{code.code}</p>
                     <p className="text-xs text-muted-foreground">
-                      {code.discountValue}% discount
+                      {t("admin.promoCodes.discountPercent", { n: code.discountValue })}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <Badge variant={code.used ? "secondary" : "outline"}>
-                      {code.used ? "Used" : "Available"}
+                      {code.used ? t("admin.promoCodes.used") : t("admin.promoCodes.available")}
                     </Badge>
                     <Button
                       size="icon"
@@ -189,41 +191,41 @@ export function PromoCodesClient({ initialCodes }: Props) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{dialog === "create" ? "Create Promo Code" : "Edit Promo Code"}</DialogTitle>
+            <DialogTitle>{dialog === "create" ? t("admin.promoCodes.createTitle") : t("admin.promoCodes.editTitle")}</DialogTitle>
             <DialogDescription>
-              {dialog === "create" ? "Add a new discount code." : "Update the promo code details."}
+              {dialog === "create" ? t("admin.promoCodes.createDesc") : t("admin.promoCodes.editDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-1.5">
-              <Label htmlFor="code">Code</Label>
+              <Label htmlFor="code">{t("admin.promoCodes.code")}</Label>
               <Input
                 id="code"
-                placeholder="e.g. SUMMER25"
+                placeholder={t("admin.promoCodes.codePlaceholder")}
                 value={form.code}
                 onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="discount">Discount (%)</Label>
+              <Label htmlFor="discount">{t("admin.promoCodes.discountLabel")}</Label>
               <Input
                 id="discount"
                 type="number"
                 min={1}
                 max={100}
-                placeholder="e.g. 20"
+                placeholder={t("admin.promoCodes.discountPlaceholder")}
                 value={form.discountValue}
                 onChange={e => setForm(f => ({ ...f, discountValue: e.target.value }))}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialog(null)}>{t("common.cancel")}</Button>
             <Button
               disabled={saving || !form.code.trim() || !form.discountValue}
               onClick={dialog === "create" ? handleCreate : handleEdit}
             >
-              {dialog === "create" ? "Create" : "Save"}
+              {dialog === "create" ? t("common.add") : t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -233,15 +235,15 @@ export function PromoCodesClient({ initialCodes }: Props) {
       <Dialog open={dialog === "delete"} onOpenChange={open => !open && setDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Promo Code</DialogTitle>
+            <DialogTitle>{t("admin.promoCodes.deleteTitle")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <span className="font-mono font-semibold">{selected?.code}</span>? This cannot be undone.
+              {t("admin.promoCodes.deleteConfirm", { code: selected?.code ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialog(null)}>{t("common.cancel")}</Button>
             <Button variant="destructive" disabled={saving} onClick={handleDelete}>
-              Delete
+              {t("common.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -21,6 +21,7 @@ import {
   Star,
   Briefcase,
 } from "lucide-react"
+import { T } from "@/components/t"
 
 type ApplicantEntry = {
   id: number
@@ -123,7 +124,7 @@ export default async function RequestDetailPage({
             href="/requests"
             className="flex items-center gap-1 text-muted-foreground"
           >
-            <ArrowLeft className="size-3" /> My Requests
+            <ArrowLeft className="size-3" /> <T k="requests.title" />
           </Link>
         </Button>
         <div className="flex items-start justify-between gap-4">
@@ -148,7 +149,7 @@ export default async function RequestDetailPage({
       {/* Request details */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Request Details</CardTitle>
+          <CardTitle className="text-base"><T k="requests.detail.requestDetails" /></CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -160,13 +161,13 @@ export default async function RequestDetailPage({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 text-sm">
             <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Category
+                <T k="requests.detail.category" />
               </span>
               <span className="font-medium">{request.category ?? "—"}</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Priority
+                <T k="requests.detail.priority" />
               </span>
               <Badge
                 variant={priorityVariant(request.priority)}
@@ -177,7 +178,7 @@ export default async function RequestDetailPage({
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Work Location
+                <T k="requests.detail.workLocation" />
               </span>
               <span className="font-medium flex items-center gap-1">
                 <MapPin className="size-3 text-muted-foreground" />
@@ -186,7 +187,7 @@ export default async function RequestDetailPage({
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Budget
+                <T k="requests.detail.budget" />
               </span>
               <span className="font-medium flex items-center gap-1">
                 <DollarSign className="size-3 text-muted-foreground" />
@@ -199,7 +200,7 @@ export default async function RequestDetailPage({
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Posted
+                <T k="requests.detail.posted" />
               </span>
               <span className="font-medium flex items-center gap-1">
                 <Calendar className="size-3 text-muted-foreground" />
@@ -215,7 +216,7 @@ export default async function RequestDetailPage({
             {request.desiredCompletionDate && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Desired By
+                  <T k="requests.detail.desiredBy" />
                 </span>
                 <span className="font-medium">
                   {new Date(request.desiredCompletionDate).toLocaleDateString(
@@ -232,7 +233,7 @@ export default async function RequestDetailPage({
             {request.address?.city && (
               <div className="flex flex-col gap-1 col-span-2">
                 <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Location
+                  <T k="requests.detail.location" />
                 </span>
                 <span className="font-medium">
                   {[
@@ -256,14 +257,15 @@ export default async function RequestDetailPage({
             <div>
               <CardTitle className="text-base flex items-center gap-2">
                 <Users className="size-4" />
-                Applicants
+                <T k="requests.detail.applicants" />
               </CardTitle>
               <CardDescription>
                 {applicantList.length === 0
-                  ? "No applications yet"
-                  : `${applicantList.length} expert${
-                      applicantList.length !== 1 ? "s" : ""
-                    } applied`}
+                  ? <T k="requests.detail.noApplicationsYet" />
+                  : <T
+                      k={applicantList.length === 1 ? "requests.detail.expertApplied" : "requests.detail.expertsApplied"}
+                      values={{ n: applicantList.length }}
+                    />}
               </CardDescription>
             </div>
           </div>
@@ -273,7 +275,7 @@ export default async function RequestDetailPage({
             <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
               <Briefcase className="size-10 text-muted-foreground/40" />
               <p className="text-muted-foreground text-sm">
-                No experts have applied yet. Check back soon.
+                <T k="requests.detail.noExpertsHint" />
               </p>
             </div>
           ) : (
@@ -308,7 +310,7 @@ export default async function RequestDetailPage({
                       </Badge>
                       {entry.chosen && (
                         <Badge variant="default" className="text-xs">
-                          Selected
+                          <T k="requests.detail.selected" />
                         </Badge>
                       )}
                     </div>
@@ -326,20 +328,28 @@ export default async function RequestDetailPage({
                         </span>
                       )}
                       {entry.estimatedDelivery && (
-                        <span>Delivery: {entry.estimatedDelivery}</span>
+                        <span>
+                          <T k="requests.detail.delivery" values={{ date: entry.estimatedDelivery }} />
+                        </span>
                       )}
                       {entry.allowedRevisions > 0 && (
                         <span>
-                          {entry.allowedRevisions} revision
-                          {entry.allowedRevisions !== 1 ? "s" : ""}
+                          <T
+                            k={entry.allowedRevisions === 1 ? "requests.detail.revision" : "requests.detail.revisions"}
+                            values={{ n: entry.allowedRevisions }}
+                          />
                         </span>
                       )}
                       <span>
-                        Applied{" "}
-                        {new Date(entry.createdAt).toLocaleDateString("en-CA", {
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        <T
+                          k="requests.detail.applied"
+                          values={{
+                            date: new Date(entry.createdAt).toLocaleDateString("en-CA", {
+                              month: "short",
+                              day: "numeric",
+                            }),
+                          }}
+                        />
                       </span>
                     </div>
                   </div>
@@ -347,7 +357,7 @@ export default async function RequestDetailPage({
                   <div className="flex gap-2 shrink-0">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/requests/${id}/applicants/${entry.id}`}>
-                        View Profile
+                        <T k="requests.detail.viewProfile" />
                       </Link>
                     </Button>
                   </div>

@@ -1,19 +1,15 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EarningsSummaryCard, type EarningsSummary } from "./components/earnings-summary-card"
 import { EarningsList, type JobDetail } from "./components/earnings-list"
 
 type Category = "ALL" | "CURRENT_MONTH" | "CURRENT_WEEK"
 
-const TAB_LABELS: { value: Category; label: string }[] = [
-  { value: "ALL", label: "All Time" },
-  { value: "CURRENT_MONTH", label: "This Month" },
-  { value: "CURRENT_WEEK", label: "This Week" },
-]
-
 export default function EarningsPage() {
+  const { t } = useTranslation()
   const [summary, setSummary] = useState<EarningsSummary | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(true)
 
@@ -66,11 +62,17 @@ export default function EarningsPage() {
     setJobs([])
   }
 
+  const tabLabels: { value: Category; label: string }[] = [
+    { value: "ALL", label: t("earnings.allTime") },
+    { value: "CURRENT_MONTH", label: t("earnings.thisMonth") },
+    { value: "CURRENT_WEEK", label: t("earnings.thisWeek") },
+  ]
+
   return (
     <div className="px-4 md:px-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Earnings</h1>
-        <p className="text-muted-foreground text-sm mt-1">Track your income and job performance.</p>
+        <h1 className="text-2xl font-bold">{t("earnings.title")}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t("earnings.subtitle")}</p>
       </div>
 
       <EarningsSummaryCard summary={summary} loading={summaryLoading} />
@@ -78,7 +80,7 @@ export default function EarningsPage() {
       <div className="space-y-4">
         <Tabs value={category} onValueChange={handleTabChange}>
           <TabsList>
-            {TAB_LABELS.map(({ value, label }) => (
+            {tabLabels.map(({ value, label }) => (
               <TabsTrigger key={value} value={value}>
                 {label}
               </TabsTrigger>

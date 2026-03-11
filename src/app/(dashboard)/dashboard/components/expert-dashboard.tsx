@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Search, Send, Briefcase, ArrowRight, MapPin } from "lucide-react"
+import { T } from "@/components/t"
 
 type AvailableRequest = {
   id: number
@@ -45,16 +46,18 @@ export function ExpertDashboard({ firstName, availableRequests, totalAvailable }
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            {firstName ? `Welcome back, ${firstName}` : "Dashboard"}
+            {firstName
+              ? <T k="dashboard.welcome" values={{ name: firstName }} />
+              : <T k="dashboard.title" />}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Browse available IT requests and manage your active missions.
+            <T k="dashboard.expert.subtitle" />
           </p>
         </div>
         <Button asChild>
           <Link href="/browse-requests">
             <Search className="size-4" />
-            Browse Requests
+            <T k="dashboard.expert.browseRequests" />
           </Link>
         </Button>
       </div>
@@ -63,40 +66,40 @@ export function ExpertDashboard({ firstName, availableRequests, totalAvailable }
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>Available Requests</CardDescription>
+            <CardDescription><T k="dashboard.expert.availableRequests" /></CardDescription>
             <Search className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">{totalAvailable}</p>
           </CardContent>
           <CardFooter className="text-sm text-muted-foreground">
-            Open requests you can apply to
+            <T k="dashboard.expert.openRequestsHint" />
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>My Applications</CardDescription>
+            <CardDescription><T k="dashboard.expert.myApplications" /></CardDescription>
             <Send className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">—</p>
           </CardContent>
           <CardFooter className="text-sm text-muted-foreground">
-            Submitted applications pending review
+            <T k="dashboard.expert.applicationsHint" />
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>Active Missions</CardDescription>
+            <CardDescription><T k="dashboard.expert.activeMissions" /></CardDescription>
             <Briefcase className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">—</p>
           </CardContent>
           <CardFooter className="text-sm text-muted-foreground">
-            Missions currently in progress
+            <T k="dashboard.expert.missionsHint" />
           </CardFooter>
         </Card>
       </div>
@@ -105,12 +108,12 @@ export function ExpertDashboard({ firstName, availableRequests, totalAvailable }
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Recent Requests</CardTitle>
-            <CardDescription>Latest IT service requests from clients</CardDescription>
+            <CardTitle><T k="dashboard.expert.recentRequests" /></CardTitle>
+            <CardDescription><T k="dashboard.expert.recentRequestsDesc" /></CardDescription>
           </div>
           <Button variant="ghost" size="sm" asChild>
             <Link href="/browse-requests" className="flex items-center gap-1">
-              Browse all <ArrowRight className="size-3" />
+              <T k="dashboard.expert.browseAll" /> <ArrowRight className="size-3" />
             </Link>
           </Button>
         </CardHeader>
@@ -118,9 +121,9 @@ export function ExpertDashboard({ firstName, availableRequests, totalAvailable }
           {availableRequests.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
               <Search className="size-10 text-muted-foreground/50" />
-              <p className="text-muted-foreground font-medium">No requests available</p>
+              <p className="text-muted-foreground font-medium"><T k="dashboard.expert.noRequests" /></p>
               <p className="text-sm text-muted-foreground">
-                New requests will appear here as clients post them.
+                <T k="dashboard.expert.noRequestsHint" />
               </p>
             </div>
           ) : (
@@ -150,7 +153,7 @@ export function ExpertDashboard({ firstName, availableRequests, totalAvailable }
                     </div>
                   </div>
                   <Button variant="outline" size="sm" asChild className="shrink-0">
-                    <Link href={`/browse-requests/${req.id}`}>Apply</Link>
+                    <Link href={`/browse-requests/${req.id}`}><T k="dashboard.expert.apply" /></Link>
                   </Button>
                 </div>
               ))}

@@ -59,6 +59,8 @@ export const useChatSocketStore = create<ChatSocketStore>((set, get) => ({
     ws.onopen = () => {
       if (socket !== ws) return
 
+      console.log("Chat is connected")
+
       set({ connected: true, connecting: false })
       reconnectAttempts = 0
 
@@ -78,7 +80,10 @@ export const useChatSocketStore = create<ChatSocketStore>((set, get) => ({
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data as string) as { type: string; payload: unknown }
+        const data = JSON.parse(event.data as string) as {
+          type: string
+          payload: unknown
+        }
         const handler = eventHandlers[data.type]
         if (handler) handler(data.payload)
       } catch {

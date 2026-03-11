@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { Briefcase } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 export type JobDetail = {
   id: string
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export function EarningsList({ jobs, loading, hasMore, onLoadMore, loadingMore }: Props) {
+  const { t } = useTranslation()
+
   if (loading && jobs.length === 0) {
     return (
       <div className="space-y-3">
@@ -44,7 +47,7 @@ export function EarningsList({ jobs, loading, hasMore, onLoadMore, loadingMore }
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center text-muted-foreground">
         <Briefcase className="h-8 w-8 opacity-40" />
-        <p className="text-sm">No earnings found for this period.</p>
+        <p className="text-sm">{t("earnings.noEarnings")}</p>
       </div>
     )
   }
@@ -71,7 +74,7 @@ export function EarningsList({ jobs, loading, hasMore, onLoadMore, loadingMore }
               variant={job.status === "COMPLETED" ? "default" : "secondary"}
               className="text-xs"
             >
-              {job.status === "COMPLETED" ? "Paid" : "Pending"}
+              {job.status === "COMPLETED" ? t("payments.status.COMPLETED") : t("payments.status.PENDING")}
             </Badge>
             <span className="font-semibold text-sm">${job.amount.toFixed(2)}</span>
           </div>
@@ -81,7 +84,7 @@ export function EarningsList({ jobs, loading, hasMore, onLoadMore, loadingMore }
       {hasMore && (
         <div className="flex justify-center pt-2">
           <Button variant="outline" onClick={onLoadMore} disabled={loadingMore}>
-            {loadingMore ? "Loading..." : "Load more"}
+            {loadingMore ? t("common.loading") : t("common.loadMore")}
           </Button>
         </div>
       )}

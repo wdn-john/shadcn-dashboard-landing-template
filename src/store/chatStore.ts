@@ -8,7 +8,8 @@ interface ChatStore {
   // State
   rooms: ChatListItem[]
   messages: Record<number, Message[]>
-  typingRooms: Record<number, boolean>
+  /** Per-room list of user IDs currently typing (matches shared store shape) */
+  typing: Record<number, string[]>
   activeRoomId: number | null
   roomsLoading: boolean
   messagesLoading: Record<number, boolean>
@@ -27,7 +28,7 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>((set, get) => ({
   rooms: [],
   messages: {},
-  typingRooms: {},
+  typing: {},
   activeRoomId: null,
   roomsLoading: false,
   messagesLoading: {},
@@ -87,6 +88,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   handleEvent: (type, payload) => {
+    console.log("Chat handler called with type:", type, "and payload:", payload)
     switch (type) {
       case "new:chat:message": {
         const msg = payload as Message
@@ -125,13 +127,23 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }
 
       case "typing:update": {
-        const { chatroomId, isTyping } = payload as {
-          chatroomId: number
+        // Server sends { roomId, userId (or typingUserId), isTyping }
+        const p = payload as {
+          roomId?: number
+          userId?: string
+          typingUserId?: string
           isTyping: boolean
         }
-        set((s) => ({
-          typingRooms: { ...s.typingRooms, [chatroomId]: isTyping },
-        }))
+        const roomId = p.roomId
+        const typingUserId = p.userId ?? p.typingUserId
+        if (!roomId || !typingUserId) break
+        set((s) => {
+          const current = s.typing[roomId] ?? []
+          const updated = p.isTyping
+            ? Array.from(new Set([...current, typingUserId]))
+            : current.filter((id) => id !== typingUserId)
+          return { typing: { ...s.typing, [roomId]: updated } }
+        })
         break
       }
 

@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useTranslation } from "react-i18next"
 
 export function ForbiddenError() {
   const router = useRouter()
+  const { t } = useTranslation()
 
   return (
     <div className='mx-auto flex min-h-dvh flex-col items-center justify-center gap-8 p-8 md:gap-12 md:p-16'>
@@ -18,12 +20,12 @@ export function ForbiddenError() {
       />
       <div className='text-center'>
         <h1 className='mb-4 text-3xl font-bold'>403</h1>
-        <h2 className="mb-3 text-2xl font-semibold">Forbidden</h2>
-        <p>Access to this resource is forbidden. You don&apos;t have the necessary permissions to view this page.</p>
+        <h2 className="mb-3 text-2xl font-semibold">{t("errors.forbidden.title")}</h2>
+        <p>{t("errors.forbidden.desc")}</p>
         <div className='mt-6 flex items-center justify-center gap-4 md:mt-8'>
-          <Button className='cursor-pointer' onClick={() => router.push('/dashboard')}>Go Back Home</Button>
+          <Button className='cursor-pointer' onClick={() => router.push('/dashboard')}>{t("errors.forbidden.goHome")}</Button>
           <Button variant='outline' className='flex cursor-pointer items-center gap-1' onClick={() => router.push('#')}>
-            Contact Us
+            {t("errors.forbidden.contactUs")}
           </Button>
         </div>
       </div>

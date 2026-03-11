@@ -26,42 +26,13 @@ import { MissionDocuments } from "@/components/mission-documents"
 import type { MissionDetailsDTO } from "@/types/MissionDetailsDTO"
 import type { MissionProgressDTO } from "@/types/MissionProgress"
 import type { InstallmentStatus } from "@/types/PaymentDTO"
+import { T } from "@/components/t"
 
 function priorityVariant(p: string) {
   switch (p) {
     case "HIGH": return "destructive" as const
     case "MEDIUM": return "secondary" as const
     default: return "outline" as const
-  }
-}
-
-function missionStatusConfig(status: string) {
-  switch (status) {
-    case "IN_PROGRESS": return { label: "In Progress", variant: "secondary" as const }
-    case "COMPLETED": return { label: "Completed", variant: "default" as const }
-    case "WAITING_APPROVAL":
-    case "WAITING_PHASE_APPROVAL": return { label: "Awaiting Approval", variant: "outline" as const }
-    default: return { label: "Pending", variant: "outline" as const }
-  }
-}
-
-function installmentStatusConfig(status: InstallmentStatus) {
-  switch (status) {
-    case "COMPLETED": return { label: "Paid", className: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400" }
-    case "PROCESSING": return { label: "Processing", className: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400" }
-    case "FAILED": return { label: "Failed", className: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400" }
-    case "CANCELLED": return { label: "Cancelled", className: "bg-muted text-muted-foreground" }
-    default: return { label: "Pending", className: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400" }
-  }
-}
-
-function payoutStatusConfig(status: string) {
-  switch (status) {
-    case "COMPLETED": return { label: "Transferred", className: "text-green-600 dark:text-green-400", icon: CheckCircle2 }
-    case "TRANSFERRING": return { label: "Transferring", className: "text-blue-600 dark:text-blue-400", icon: Clock }
-    case "FAILED": return { label: "Failed", className: "text-destructive", icon: AlertCircle }
-    case "ON_HOLD": return { label: "On Hold", className: "text-amber-600 dark:text-amber-400", icon: Clock }
-    default: return { label: "Pending", className: "text-muted-foreground", icon: Clock }
   }
 }
 
@@ -98,14 +69,57 @@ export default async function MissionDetailPage({
       ].filter(Boolean).join(", ")
     : null
 
-  const statusCfg = missionStatusConfig(details.status)
-  const payoutCfg = payoutStatusConfig(details.payoutStatus)
-  const PayoutIcon = payoutCfg.icon
-
   const installments = details.paymentDetails?.installments ?? []
   const isCompleted = details.status === "COMPLETED"
   const isWaitingApproval =
     details.status === "WAITING_APPROVAL" || details.status === "WAITING_PHASE_APPROVAL"
+
+  const missionStatusVariant = (s: string) => {
+    switch (s) {
+      case "IN_PROGRESS": return "secondary" as const
+      case "COMPLETED": return "default" as const
+      case "WAITING_APPROVAL":
+      case "WAITING_PHASE_APPROVAL": return "outline" as const
+      default: return "outline" as const
+    }
+  }
+
+  const missionStatusKey = (s: string) => {
+    if (s === "WAITING_APPROVAL" || s === "WAITING_PHASE_APPROVAL") return "missions.status.WAITING_APPROVAL"
+    return `missions.status.${s}`
+  }
+
+  const payoutVariantClass = (s: string) => {
+    switch (s) {
+      case "COMPLETED": return "text-green-600 dark:text-green-400"
+      case "TRANSFERRING": return "text-blue-600 dark:text-blue-400"
+      case "FAILED": return "text-destructive"
+      case "ON_HOLD": return "text-amber-600 dark:text-amber-400"
+      default: return "text-muted-foreground"
+    }
+  }
+
+  const payoutIcon = (s: string) => {
+    switch (s) {
+      case "COMPLETED": return CheckCircle2
+      case "TRANSFERRING": return Clock
+      case "FAILED": return AlertCircle
+      case "ON_HOLD": return Clock
+      default: return Clock
+    }
+  }
+
+  const PayoutIcon = payoutIcon(details.payoutStatus)
+
+  const installmentStatusClass = (status: InstallmentStatus) => {
+    switch (status) {
+      case "COMPLETED": return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+      case "PROCESSING": return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
+      case "FAILED": return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400"
+      case "CANCELLED": return "bg-muted text-muted-foreground"
+      default: return "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6 max-w-5xl">
@@ -114,13 +128,15 @@ export default async function MissionDetailPage({
       <div>
         <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2">
           <Link href="/missions" className="flex items-center gap-1 text-muted-foreground">
-            <ArrowLeft className="size-3" /> My Missions
+            <ArrowLeft className="size-3" /> <T k="missions.backToMissions" />
           </Link>
         </Button>
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <h1 className="text-2xl font-bold tracking-tight">{details.title}</h1>
           <div className="flex gap-2 flex-wrap">
-            <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
+            <Badge variant={missionStatusVariant(details.status)}>
+              <T k={missionStatusKey(details.status)} />
+            </Badge>
             <Badge variant={priorityVariant(details.priority)}>{details.priority}</Badge>
             <Badge variant="outline">{details.workLocation.replace("_", " ")}</Badge>
           </div>
@@ -129,10 +145,10 @@ export default async function MissionDetailPage({
           <p className={`text-sm mt-1 flex items-center gap-1.5 ${daysLeft < 0 ? "text-destructive" : daysLeft <= 3 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
             <CalendarDays className="size-3.5" />
             {daysLeft < 0
-              ? `${Math.abs(daysLeft)} days overdue`
+              ? <T k="missions.daysOverdue" values={{ n: Math.abs(daysLeft) }} />
               : daysLeft === 0
-              ? "Due today"
-              : `${daysLeft} days remaining`}
+              ? <T k="missions.dueToday" />
+              : <T k="missions.daysRemaining" values={{ n: daysLeft }} />}
           </p>
         )}
       </div>
@@ -142,9 +158,9 @@ export default async function MissionDetailPage({
         <div className="rounded-xl border border-teal-200 bg-teal-50/70 dark:border-teal-800 dark:bg-teal-950/30 px-4 py-4 flex gap-3">
           <Clock className="size-5 shrink-0 text-teal-600 dark:text-teal-400 mt-0.5" />
           <div>
-            <p className="font-semibold text-teal-800 dark:text-teal-300">Awaiting Client Approval</p>
+            <p className="font-semibold text-teal-800 dark:text-teal-300"><T k="missions.awaiting.title" /></p>
             <p className="text-sm text-teal-700 dark:text-teal-400 mt-0.5">
-              All steps completed. Your client has been notified and will review your work shortly.
+              <T k="missions.awaiting.desc" />
             </p>
           </div>
         </div>
@@ -153,9 +169,9 @@ export default async function MissionDetailPage({
         <div className="rounded-xl border border-green-200 bg-green-50/70 dark:border-green-800 dark:bg-green-950/30 px-4 py-4 flex gap-3">
           <CheckCircle2 className="size-5 shrink-0 text-green-600 dark:text-green-400 mt-0.5" />
           <div>
-            <p className="font-semibold text-green-800 dark:text-green-300">Mission Approved</p>
+            <p className="font-semibold text-green-800 dark:text-green-300"><T k="missions.approved.title" /></p>
             <p className="text-sm text-green-700 dark:text-green-400 mt-0.5">
-              The client approved your work. Payment is on its way — allow 3–5 business days to reflect in your account.
+              <T k="missions.approved.desc" />
             </p>
           </div>
         </div>
@@ -170,7 +186,7 @@ export default async function MissionDetailPage({
           {/* Description */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Mission Description</CardTitle>
+              <CardTitle className="text-base"><T k="missions.detail.description" /></CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground leading-relaxed">{details.description}</p>
@@ -180,7 +196,7 @@ export default async function MissionDetailPage({
           {/* Project details */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Project Details</CardTitle>
+              <CardTitle className="text-base"><T k="missions.detail.projectDetails" /></CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4 text-sm">
               {/* Work location */}
@@ -193,14 +209,14 @@ export default async function MissionDetailPage({
                 <div>
                   <p className="font-medium">
                     {details.workLocation === "REMOTE"
-                      ? "Remote"
+                      ? <T k="missions.detail.remote" />
                       : details.workLocation === "ON_SITE"
-                      ? "On-site"
-                      : "Flexible"}
+                      ? <T k="missions.detail.onSite" />
+                      : <T k="missions.detail.flexible" />}
                   </p>
                   {details.workLocation === "REMOTE" && (
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Work will be performed remotely. Coordinate access details with your client via chat.
+                      <T k="missions.detail.remoteNote" />
                     </p>
                   )}
                   {details.workLocation === "ON_SITE" && fullAddress && (
@@ -213,7 +229,9 @@ export default async function MissionDetailPage({
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Due Date</span>
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                    <T k="missions.detail.dueDate" />
+                  </span>
                   {details.desiredCompletionDate ? (
                     <span className="font-medium flex items-center gap-1">
                       <CalendarDays className="size-3.5 text-muted-foreground" />
@@ -222,15 +240,19 @@ export default async function MissionDetailPage({
                       })}
                     </span>
                   ) : (
-                    <span className="text-muted-foreground">Not set</span>
+                    <span className="text-muted-foreground"><T k="missions.detail.notSet" /></span>
                   )}
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Revisions</span>
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                    <T k="missions.detail.revisions" />
+                  </span>
                   <span className="font-medium flex items-center gap-1">
                     <RotateCcw className="size-3.5 text-muted-foreground" />
-                    {details.revisionCount > 0 ? `${details.revisionCount} requested` : "None"}
+                    {details.revisionCount > 0
+                      ? <T k="missions.detail.revisionsRequested" values={{ n: details.revisionCount }} />
+                      : <T k="missions.detail.noRevisions" />}
                   </span>
                 </div>
               </div>
@@ -242,9 +264,9 @@ export default async function MissionDetailPage({
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Paperclip className="size-4" /> Attachments
+                  <Paperclip className="size-4" /> <T k="missions.detail.attachments" />
                   <span className="ml-auto text-xs font-normal text-muted-foreground">
-                    {details.attachments.length} file{details.attachments.length !== 1 ? "s" : ""}
+                    <T k={details.attachments.length === 1 ? "missions.detail.file" : "missions.detail.files"} values={{ n: details.attachments.length }} />
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -261,7 +283,7 @@ export default async function MissionDetailPage({
                     >
                       <Paperclip className="size-4 text-muted-foreground shrink-0" />
                       <span className="flex-1 text-sm font-medium truncate group-hover:underline">
-                        {att.label || `Attachment ${i + 1}`}
+                        {att.label || <T k="missions.detail.attachment" values={{ n: i + 1 }} />}
                       </span>
                       <span className="text-xs text-muted-foreground shrink-0">
                         {new Date(att.createdAt).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
@@ -289,7 +311,7 @@ export default async function MissionDetailPage({
           {/* Client card */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Client</CardTitle>
+              <CardTitle className="text-base"><T k="missions.detail.clientCard" /></CardTitle>
             </CardHeader>
             <Separator />
             <CardContent className="pt-4 flex flex-col gap-3">
@@ -312,7 +334,7 @@ export default async function MissionDetailPage({
               </div>
               <Button variant="outline" size="sm" className="w-full gap-2" asChild>
                 <Link href="/chat">
-                  <MessageSquare className="size-3.5" /> Message Client
+                  <MessageSquare className="size-3.5" /> <T k="missions.detail.messageClient" />
                 </Link>
               </Button>
             </CardContent>
@@ -322,14 +344,14 @@ export default async function MissionDetailPage({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <CreditCard className="size-4" /> Payment
+                <CreditCard className="size-4" /> <T k="missions.detail.payment" />
               </CardTitle>
             </CardHeader>
             <Separator />
             <CardContent className="pt-4 flex flex-col gap-3 text-sm">
               {/* Agreed price */}
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Agreed price</span>
+                <span className="text-muted-foreground"><T k="missions.detail.agreedPrice" /></span>
                 <span className="font-semibold flex items-center gap-1">
                   <DollarSign className="size-3.5 text-muted-foreground" />
                   {Number(details.finalQuotedPrice).toLocaleString("en-CA", { minimumFractionDigits: 2 })} CAD
@@ -338,10 +360,10 @@ export default async function MissionDetailPage({
 
               {/* Payout status */}
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Payout status</span>
-                <span className={`flex items-center gap-1 font-medium ${payoutCfg.className}`}>
+                <span className="text-muted-foreground"><T k="missions.detail.payoutStatus" /></span>
+                <span className={`flex items-center gap-1 font-medium ${payoutVariantClass(details.payoutStatus)}`}>
                   <PayoutIcon className="size-3.5" />
-                  {payoutCfg.label}
+                  <T k={`missions.payout.${details.payoutStatus}`} />
                 </span>
               </div>
 
@@ -351,33 +373,30 @@ export default async function MissionDetailPage({
                   <Separator />
                   <div className="flex flex-col gap-2">
                     <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-                      Installments ({installments.length})
+                      <T k="missions.detail.installments" values={{ n: installments.length }} />
                     </p>
-                    {installments.map((inst, i) => {
-                      const instCfg = installmentStatusConfig(inst.expertPayoutAmountTransferStatus)
-                      return (
-                        <div key={inst.id} className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-semibold shrink-0">
-                              {i + 1}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              ${Number(inst.expertPayoutAmount).toLocaleString("en-CA", { minimumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${instCfg.className}`}>
-                            {instCfg.label}
+                    {installments.map((inst, i) => (
+                      <div key={inst.id} className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-semibold shrink-0">
+                            {i + 1}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            ${Number(inst.expertPayoutAmount).toLocaleString("en-CA", { minimumFractionDigits: 2 })}
                           </span>
                         </div>
-                      )
-                    })}
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${installmentStatusClass(inst.expertPayoutAmountTransferStatus)}`}>
+                          <T k={`missions.installment.${inst.expertPayoutAmountTransferStatus}`} />
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </>
               )}
 
               {details.payoutStatus === "COMPLETED" && (
                 <p className="text-xs text-muted-foreground bg-muted/60 rounded-md px-3 py-2 leading-relaxed">
-                  Payment has been transferred to your Stripe account. Allow 3–5 business days.
+                  <T k="missions.detail.paymentNote" />
                 </p>
               )}
 

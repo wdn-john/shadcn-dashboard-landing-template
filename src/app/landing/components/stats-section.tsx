@@ -8,36 +8,39 @@ import {
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { DotPattern } from '@/components/dot-pattern'
+import { useTranslation } from 'react-i18next'
 
-
-const stats = [
-  {
-    icon: Package,
-    value: '500+',
-    label: 'Components',
-    description: 'Ready-to-use blocks'
-  },
-  {
-    icon: Download,
-    value: '25K+',
-    label: 'Downloads',
-    description: 'Trusted worldwide'
-  },
-  {
-    icon: Users,
-    value: '10K+',
-    label: 'Developers',
-    description: 'Active community'
-  },
-  {
-    icon: Star,
-    value: '4.9',
-    label: 'Rating',
-    description: 'User satisfaction'
-  }
-]
 
 export function StatsSection() {
+  const { t } = useTranslation()
+
+  const stats = [
+    {
+      icon: Package,
+      value: '500+',
+      label: t("landing.stats.components.label"),
+      description: t("landing.stats.components.description"),
+    },
+    {
+      icon: Download,
+      value: '25K+',
+      label: t("landing.stats.downloads.label"),
+      description: t("landing.stats.downloads.description"),
+    },
+    {
+      icon: Users,
+      value: '10K+',
+      label: t("landing.stats.developers.label"),
+      description: t("landing.stats.developers.description"),
+    },
+    {
+      icon: Star,
+      value: '4.9',
+      label: t("landing.stats.rating.label"),
+      description: t("landing.stats.rating.description"),
+    },
+  ]
+
   return (
     <section className="py-12 sm:py-16 relative">
       {/* Background with transparency */}

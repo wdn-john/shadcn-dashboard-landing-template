@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -42,6 +43,7 @@ function fmtDate(d: string | undefined) {
 }
 
 export function ExperienceClient({ initialExperiences }: { initialExperiences: Experience[] }) {
+  const { t } = useTranslation()
   const [items, setItems] = useState(initialExperiences)
   const [dialog, setDialog] = useState<"add" | "edit" | "delete" | null>(null)
   const [selected, setSelected] = useState<Experience | null>(null)
@@ -97,7 +99,7 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
         if (!res.ok) throw new Error()
         const created = Array.isArray(data) ? data[0] : data
         if (created) setItems(prev => [created, ...prev])
-        toast.success("Experience added")
+        toast.success(t("experience.addSuccess"))
       } else if (selected) {
         const res = await fetch(`/api/experiences/${selected.id}`, {
           method: "PATCH",
@@ -107,11 +109,11 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
         const data = await res.json().catch(() => null)
         if (!res.ok) throw new Error()
         setItems(prev => prev.map(x => x.id === selected.id ? { ...x, ...data } : x))
-        toast.success("Experience updated")
+        toast.success(t("experience.updateSuccess"))
       }
       setDialog(null)
     } catch {
-      toast.error("Failed to save experience")
+      toast.error(t("experience.saveFailed"))
     } finally {
       setSaving(false)
     }
@@ -124,10 +126,10 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
       const res = await fetch(`/api/experiences/${selected.id}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
       setItems(prev => prev.filter(x => x.id !== selected.id))
-      toast.success("Experience removed")
+      toast.success(t("experience.removeSuccess"))
       setDialog(null)
     } catch {
-      toast.error("Failed to remove experience")
+      toast.error(t("experience.removeFailed"))
     } finally {
       setSaving(false)
     }
@@ -140,29 +142,29 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
           <Link href="/account"><ArrowLeft className="size-4" /></Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">Experience</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">Your work history and projects.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("experience.title")}</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">{t("experience.subtitle")}</p>
         </div>
         <Button size="sm" onClick={openAdd}>
-          <Plus className="size-4 mr-1.5" /> Add
+          <Plus className="size-4 mr-1.5" /> {t("common.add")}
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Work Experience</CardTitle>
+          <CardTitle className="text-base">{t("experience.workExperience")}</CardTitle>
           <CardDescription>
             {items.length === 0
-              ? "Add your work history to strengthen your profile."
-              : `${items.length} ${items.length === 1 ? "entry" : "entries"}`}
+              ? t("experience.addPrompt")
+              : t(items.length === 1 ? "experience.entry" : "experience.entries", { n: items.length })}
           </CardDescription>
         </CardHeader>
         <Separator />
         {items.length === 0 ? (
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <Briefcase className="size-7 text-muted-foreground" />
-            <p className="font-medium text-sm">No experience yet</p>
-            <Button size="sm" variant="outline" onClick={openAdd}>Add Experience</Button>
+            <p className="font-medium text-sm">{t("experience.noExperience")}</p>
+            <Button size="sm" variant="outline" onClick={openAdd}>{t("experience.addExperience")}</Button>
           </CardContent>
         ) : (
           <CardContent className="p-0">
@@ -180,7 +182,7 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
                       <p className="text-xs text-muted-foreground">{item.location}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {fmtDate(item.startDate)} – {item.current ? "Present" : fmtDate(item.endDate)}
+                      {fmtDate(item.startDate)} – {item.current ? t("experience.presentLabel") : fmtDate(item.endDate)}
                     </p>
                     {item.description && (
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
@@ -206,33 +208,33 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
       <Dialog open={dialog === "add" || dialog === "edit"} onOpenChange={open => !open && setDialog(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{dialog === "add" ? "Add Experience" : "Edit Experience"}</DialogTitle>
+            <DialogTitle>{dialog === "add" ? t("experience.addExperience") : t("experience.editExperience")}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-1.5">
-              <Label>Job Title *</Label>
+              <Label>{t("experience.jobTitle")} *</Label>
               <Input placeholder="e.g. Senior IT Consultant" value={form.title} onChange={set("title")} />
             </div>
             <div className="grid gap-1.5">
-              <Label>Company *</Label>
+              <Label>{t("experience.company")} *</Label>
               <Input placeholder="Company name" value={form.company} onChange={set("company")} />
             </div>
             <div className="grid gap-1.5">
-              <Label>Location</Label>
+              <Label>{t("experience.location")}</Label>
               <Input placeholder="e.g. Montreal, QC" value={form.location} onChange={set("location")} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-1.5">
-                <Label>Start Date *</Label>
+                <Label>{t("experience.startDate")} *</Label>
                 <Input type="date" value={form.startDate} onChange={set("startDate")} />
               </div>
               <div className="grid gap-1.5">
-                <Label>End Date</Label>
+                <Label>{t("experience.endDate")}</Label>
                 <Input type="date" value={form.endDate} onChange={set("endDate")} disabled={form.current} />
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="current">I currently work here</Label>
+              <Label htmlFor="current">{t("experience.currentRole")}</Label>
               <Switch
                 id="current"
                 checked={form.current}
@@ -240,9 +242,9 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
               />
             </div>
             <div className="grid gap-1.5">
-              <Label>Description</Label>
+              <Label>{t("experience.description")}</Label>
               <Textarea
-                placeholder="Describe your responsibilities and achievements..."
+                placeholder={t("experience.descPlaceholder")}
                 rows={3}
                 value={form.description}
                 onChange={set("description")}
@@ -250,10 +252,10 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialog(null)}>{t("common.cancel")}</Button>
             <Button disabled={saving || !form.title.trim() || !form.company.trim() || !form.startDate} onClick={handleSave}>
               {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-              {dialog === "add" ? "Add" : "Save"}
+              {dialog === "add" ? t("common.add") : t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -263,14 +265,14 @@ export function ExperienceClient({ initialExperiences }: { initialExperiences: E
       <Dialog open={dialog === "delete"} onOpenChange={open => !open && setDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove Experience</DialogTitle>
+            <DialogTitle>{t("experience.removeTitle")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Remove <strong>{selected?.title}</strong> at <strong>{selected?.company}</strong>? This cannot be undone.
+            <strong>{selected?.title}</strong> {t("common.at")} <strong>{selected?.company}</strong> — {t("experience.removeConfirmText")}
           </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
-            <Button variant="destructive" disabled={saving} onClick={handleDelete}>Remove</Button>
+            <Button variant="outline" onClick={() => setDialog(null)}>{t("common.cancel")}</Button>
+            <Button variant="destructive" disabled={saving} onClick={handleDelete}>{t("common.remove")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

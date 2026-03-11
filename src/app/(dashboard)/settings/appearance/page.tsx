@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -26,6 +27,7 @@ const appearanceFormSchema = z.object({
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
 
 export default function AppearanceSettings() {
+  const { t } = useTranslation()
   const form = useForm<AppearanceFormValues>({
     resolver: zodResolver(appearanceFormSchema),
     defaultValues: {
@@ -45,16 +47,16 @@ export default function AppearanceSettings() {
   return (
     <div className="space-y-6 px-4 lg:px-6">
         <div>
-          <h1 className="text-3xl font-bold">Appearance</h1>
+          <h1 className="text-3xl font-bold">{t("settings.appearance.title")}</h1>
           <p className="text-muted-foreground">
-            Customize the appearance of the application.
+            {t("settings.appearance.customize")}
           </p>
         </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Theme Section */}
-            <h3 className="text-lg font-medium mb-2">Theme</h3>
+            <h3 className="text-lg font-medium mb-2">{t("settings.appearance.theme")}</h3>
             <FormField
               control={form.control}
               name="theme"
@@ -87,7 +89,7 @@ export default function AppearanceSettings() {
                                   </div>
                                 </div>
                               </div>
-                              <span className="text-sm font-medium">Light</span>
+                              <span className="text-sm font-medium">{t("settings.appearance.light")}</span>
                             </div>
                           </div>
                         </FormLabel>
@@ -113,7 +115,7 @@ export default function AppearanceSettings() {
                                   </div>
                                 </div>
                               </div>
-                              <span className="text-sm font-medium">Dark</span>
+                              <span className="text-sm font-medium">{t("settings.appearance.dark")}</span>
                             </div>
                           </div>
                         </FormLabel>
@@ -130,11 +132,11 @@ export default function AppearanceSettings() {
               name="fontFamily"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Font Family</FormLabel>
+                  <FormLabel>{t("settings.appearance.fontFamily")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="cursor-pointer">
-                        <SelectValue placeholder="Select a font" />
+                        <SelectValue placeholder={t("settings.appearance.selectFont")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -152,17 +154,17 @@ export default function AppearanceSettings() {
               name="fontSize"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Font Size</FormLabel>
+                  <FormLabel>{t("settings.appearance.fontSize")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="cursor-pointer">
-                        <SelectValue placeholder="Select font size" />
+                        <SelectValue placeholder={t("settings.appearance.selectFontSize")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="small">Small</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="large">Large</SelectItem>
+                      <SelectItem value="small">{t("settings.appearance.small")}</SelectItem>
+                      <SelectItem value="medium">{t("settings.appearance.medium")}</SelectItem>
+                      <SelectItem value="large">{t("settings.appearance.large")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -176,17 +178,17 @@ export default function AppearanceSettings() {
               name="sidebarWidth"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sidebar Width</FormLabel>
+                  <FormLabel>{t("settings.appearance.sidebarWidth")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="cursor-pointer">
-                        <SelectValue placeholder="Select sidebar width" />
+                        <SelectValue placeholder={t("settings.appearance.selectSidebarWidth")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="compact">Compact</SelectItem>
-                      <SelectItem value="comfortable">Comfortable</SelectItem>
-                      <SelectItem value="spacious">Spacious</SelectItem>
+                      <SelectItem value="compact">{t("settings.appearance.compact")}</SelectItem>
+                      <SelectItem value="comfortable">{t("settings.appearance.comfortable")}</SelectItem>
+                      <SelectItem value="spacious">{t("settings.appearance.spacious")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -198,17 +200,17 @@ export default function AppearanceSettings() {
               name="contentWidth"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Content Width</FormLabel>
+                  <FormLabel>{t("settings.appearance.contentWidth")}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="cursor-pointer">
-                        <SelectValue placeholder="Select content width" />
+                        <SelectValue placeholder={t("settings.appearance.selectContentWidth")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="fixed">Fixed</SelectItem>
-                      <SelectItem value="fluid">Fluid</SelectItem>
-                      <SelectItem value="container">Container</SelectItem>
+                      <SelectItem value="fixed">{t("settings.appearance.fixed")}</SelectItem>
+                      <SelectItem value="fluid">{t("settings.appearance.fluid")}</SelectItem>
+                      <SelectItem value="container">{t("settings.appearance.container")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -218,9 +220,9 @@ export default function AppearanceSettings() {
 
             <div className="flex space-x-2 mt-12">
               <Button type="submit" className="cursor-pointer">
-                Save Preferences
+                {t("settings.appearance.savePreferences")}
               </Button>
-              <Button variant="outline" type="button" className="cursor-pointer">Cancel</Button>
+              <Button variant="outline" type="button" className="cursor-pointer">{t("common.cancel")}</Button>
             </div>
           </form>
         </Form>

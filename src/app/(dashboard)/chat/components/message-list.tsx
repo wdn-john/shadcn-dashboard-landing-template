@@ -7,7 +7,6 @@ import { CheckCheck, MoreHorizontal, Reply, Copy, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,14 +15,26 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { type Message, type User } from "../use-chat"
+import { useTranslation } from "react-i18next"
 
 interface MessageListProps {
   messages: Message[]
   users: User[]
   currentUserId?: string
+  isRecipientTyping?: boolean
+  recipientAvatar?: string
+  recipientName?: string
 }
 
-export function MessageList({ messages, users, currentUserId = "current-user" }: MessageListProps) {
+export function MessageList({
+  messages,
+  users,
+  currentUserId = "current-user",
+  isRecipientTyping = false,
+  recipientAvatar,
+  recipientName,
+}: MessageListProps) {
+  const { t } = useTranslation()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const previousMessageCountRef = useRef(0)
@@ -39,22 +50,30 @@ export function MessageList({ messages, users, currentUserId = "current-user" }:
     }
   }, [messages])
 
-  // Auto-scroll to bottom only when new messages are added (not on initial load)
+  // Scroll to bottom: instant on initial load / room switch, smooth on new messages
   useEffect(() => {
-    // Skip auto-scroll on initial load
+    if (!bottomRef.current) return
+
     if (isInitialLoadRef.current) {
       isInitialLoadRef.current = false
       previousMessageCountRef.current = messages.length
+      bottomRef.current.scrollIntoView()
       return
     }
 
-    // Only auto-scroll if new messages were added
-    if (messages.length > previousMessageCountRef.current && bottomRef.current) {
+    if (messages.length > previousMessageCountRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" })
     }
 
     previousMessageCountRef.current = messages.length
   }, [messages])
+
+  // Scroll to bottom when the typing indicator appears
+  useEffect(() => {
+    if (isRecipientTyping) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [isRecipientTyping])
 
   const getUserById = (userId: string) => {
     if (userId === currentUserId) {
@@ -131,9 +150,9 @@ export function MessageList({ messages, users, currentUserId = "current-user" }:
   const formatDateHeader = (dateString: string) => {
     const date = new Date(dateString)
     if (isToday(date)) {
-      return "Today"
+      return t("chat.today")
     } else if (isYesterday(date)) {
-      return "Yesterday"
+      return t("chat.yesterday")
     } else {
       return format(date, "EEEE, MMMM d")
     }
@@ -142,7 +161,7 @@ export function MessageList({ messages, users, currentUserId = "current-user" }:
   const messageGroups = groupMessagesByDay(messages)
 
   return (
-    <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
+    <div className="flex-1 min-h-0 overflow-y-auto px-4" ref={scrollAreaRef}>
       <div className="space-y-4 py-4">
         {messageGroups.map((group) => (
           <div key={group.date}>
@@ -234,7 +253,7 @@ export function MessageList({ messages, users, currentUserId = "current-user" }:
                           )}>
                             <span>{formatMessageTime(message.timestamp)}</span>
                             {message.isEdited && (
-                              <span className="italic">(edited)</span>
+                              <span className="italic">{t("chat.edited")}</span>
                             )}
                             {isOwnMessage && (
                               <div className="flex">
@@ -260,18 +279,18 @@ export function MessageList({ messages, users, currentUserId = "current-user" }:
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem className="cursor-pointer">
                                 <Reply className="h-4 w-4 mr-2" />
-                                Reply
+                                {t("chat.reply")}
                               </DropdownMenuItem>
                               <DropdownMenuItem className="cursor-pointer">
                                 <Copy className="h-4 w-4 mr-2" />
-                                Copy
+                                {t("chat.copy")}
                               </DropdownMenuItem>
                               {isOwnMessage && (
                                 <>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem className="cursor-pointer text-destructive">
                                     <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete
+                                    {t("chat.delete")}
                                   </DropdownMenuItem>
                                 </>
                               )}
@@ -287,9 +306,30 @@ export function MessageList({ messages, users, currentUserId = "current-user" }:
           </div>
         ))}
 
+        {/* Typing indicator — rendered as an incoming bubble like mobile */}
+        {isRecipientTyping && (
+          <div className="flex gap-3 items-end">
+            <div className="w-8 shrink-0">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={recipientAvatar} alt={recipientName} />
+                <AvatarFallback className="text-xs">
+                  {recipientName?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="bg-muted rounded-lg px-4 py-3">
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Scroll anchor */}
         <div ref={bottomRef} />
       </div>
-    </ScrollArea>
+    </div>
   )
 }

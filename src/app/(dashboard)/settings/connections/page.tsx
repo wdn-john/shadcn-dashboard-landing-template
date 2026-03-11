@@ -6,7 +6,11 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Github, Slack, Twitter, Zap, Globe, Database, Apple, Chrome, Facebook, Instagram, Dribbble } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
+
 export default function ConnectionSettings() {
+  const { t } = useTranslation()
+
   // Controlled state for switches
   const [appleConnected, setAppleConnected] = useState(true)
   const [googleConnected, setGoogleConnected] = useState(false)
@@ -19,18 +23,18 @@ export default function ConnectionSettings() {
   return (
     <div className="space-y-6 px-4 lg:px-6">
         <div>
-          <h1 className="text-3xl font-bold">Connections</h1>
+          <h1 className="text-3xl font-bold">{t("settings.connections.title")}</h1>
           <p className="text-muted-foreground">
-            Connect your account with third-party services and integrations.
+            {t("settings.connections.subtitle")}
           </p>
         </div>
 
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Connected Accounts</CardTitle>
+              <CardTitle>{t("settings.connections.connectedAccounts")}</CardTitle>
               <CardDescription>
-                Display content from your connected accounts on your site
+                {t("settings.connections.connectedAccountsDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -40,7 +44,7 @@ export default function ConnectionSettings() {
                     <Apple className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Apple</div>
-                      <div className="text-sm text-muted-foreground">Calendar and contacts</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.calendarContacts")}</div>
                     </div>
                   </div>
                   <Switch
@@ -55,7 +59,7 @@ export default function ConnectionSettings() {
                     <Chrome className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Google</div>
-                      <div className="text-sm text-muted-foreground">Calendar and contacts</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.calendarContacts")}</div>
                     </div>
                   </div>
                   <Switch
@@ -70,7 +74,7 @@ export default function ConnectionSettings() {
                     <Github className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Github</div>
-                      <div className="text-sm text-muted-foreground">Manage your Git repositories</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.githubDesc")}</div>
                     </div>
                   </div>
                   <Switch
@@ -85,7 +89,7 @@ export default function ConnectionSettings() {
                     <Slack className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Slack</div>
-                      <div className="text-sm text-muted-foreground">Communication</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.slackDesc")}</div>
                     </div>
                   </div>
                   <Switch
@@ -100,9 +104,9 @@ export default function ConnectionSettings() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Social Accounts</CardTitle>
+              <CardTitle>{t("settings.connections.socialAccounts")}</CardTitle>
               <CardDescription>
-                Display content from your connected accounts on your site
+                {t("settings.connections.connectedAccountsDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -113,9 +117,9 @@ export default function ConnectionSettings() {
                     <div>
                       <div className="font-medium">
                         Facebook
-                        <Badge variant="outline" className="ml-2">Not Connected</Badge>
+                        <Badge variant="outline" className="ml-2">{t("settings.connections.notConnected")}</Badge>
                       </div>
-                      <div className="text-sm text-muted-foreground">Share updates on Facebook</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.facebookDesc")}</div>
                     </div>
                   </div>
                   <Button variant="outline" size="icon" className="cursor-pointer">
@@ -129,9 +133,9 @@ export default function ConnectionSettings() {
                     <div>
                       <div className="font-medium">
                         Twitter
-                        <Badge variant="secondary" className="ml-2">connected</Badge>
+                        <Badge variant="secondary" className="ml-2">{t("settings.connections.connected")}</Badge>
                       </div>
-                      <div className="text-sm text-muted-foreground">Share updates on Twitter</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.twitterDesc")}</div>
                     </div>
                   </div>
                   <Button variant="outline" size="icon" className="cursor-pointer text-destructive">
@@ -145,9 +149,9 @@ export default function ConnectionSettings() {
                     <div>
                       <div className="font-medium">
                         Instagram
-                        <Badge variant="secondary" className="ml-2">connected</Badge>
+                        <Badge variant="secondary" className="ml-2">{t("settings.connections.connected")}</Badge>
                       </div>
-                      <div className="text-sm text-muted-foreground">Stay connected at Instagram</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.instagramDesc")}</div>
                     </div>
                   </div>
                   <Button variant="outline" size="icon" className="cursor-pointer text-destructive">
@@ -161,9 +165,9 @@ export default function ConnectionSettings() {
                     <div>
                       <div className="font-medium">
                         Dribbble
-                        <Badge variant="outline" className="ml-2">Not Connected</Badge>
+                        <Badge variant="outline" className="ml-2">{t("settings.connections.notConnected")}</Badge>
                       </div>
-                      <div className="text-sm text-muted-foreground">Stay connected at Dribbble</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.dribbbleDesc")}</div>
                     </div>
                   </div>
                   <Button variant="outline" size="icon" className="cursor-pointer">
@@ -177,9 +181,9 @@ export default function ConnectionSettings() {
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>API Integrations</CardTitle>
+              <CardTitle>{t("settings.connections.apiIntegrations")}</CardTitle>
               <CardDescription>
-                Configure API connections and webhooks.
+                {t("settings.connections.apiIntegrationsDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -189,7 +193,7 @@ export default function ConnectionSettings() {
                     <Zap className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Zapier</div>
-                      <div className="text-sm text-muted-foreground">Automate workflows with Zapier</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.zapierDesc")}</div>
                     </div>
                   </div>
                   <Switch
@@ -204,7 +208,7 @@ export default function ConnectionSettings() {
                     <Globe className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Webhooks</div>
-                      <div className="text-sm text-muted-foreground">Configure custom webhook endpoints</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.webhooksDesc")}</div>
                     </div>
                   </div>
                   <Switch
@@ -219,7 +223,7 @@ export default function ConnectionSettings() {
                     <Database className="h-8 w-8" />
                     <div>
                       <div className="font-medium">Database Sync</div>
-                      <div className="text-sm text-muted-foreground">Sync data with external databases</div>
+                      <div className="text-sm text-muted-foreground">{t("settings.connections.dbSyncDesc")}</div>
                     </div>
                   </div>
                   <Switch
@@ -234,45 +238,45 @@ export default function ConnectionSettings() {
 
           <Card>
             <CardHeader>
-              <CardTitle>API Keys</CardTitle>
+              <CardTitle>{t("settings.connections.apiKeys")}</CardTitle>
               <CardDescription>
-                Manage your API keys and access tokens.
+                {t("settings.connections.apiKeysDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
-                    <div className="font-medium">Production API Key</div>
+                    <div className="font-medium">{t("settings.connections.productionKey")}</div>
                     <div className="text-sm text-muted-foreground font-mono">sk_live_••••••••••••••••••••••••4234</div>
                   </div>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm" className="cursor-pointer">
-                      Regenerate
+                      {t("settings.connections.regenerate")}
                     </Button>
                     <Button variant="outline" size="sm" className="cursor-pointer">
-                      Copy
+                      {t("common.copy")}
                     </Button>
                   </div>
                 </div>
                 <Separator />
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
-                    <div className="font-medium">Development API Key</div>
+                    <div className="font-medium">{t("settings.connections.developmentKey")}</div>
                     <div className="text-sm text-muted-foreground font-mono">sk_test_••••••••••••••••••••••••5678</div>
                   </div>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm" className="cursor-pointer">
-                      Regenerate
+                      {t("settings.connections.regenerate")}
                     </Button>
                     <Button variant="outline" size="sm" className="cursor-pointer">
-                      Copy
+                      {t("common.copy")}
                     </Button>
                   </div>
                 </div>
                 <Separator />
                 <div className="pt-4">
-                  <Button variant="outline" className="cursor-pointer">Add New API Key</Button>
+                  <Button variant="outline" className="cursor-pointer">{t("settings.connections.addApiKey")}</Button>
                 </div>
               </div>
             </CardContent>

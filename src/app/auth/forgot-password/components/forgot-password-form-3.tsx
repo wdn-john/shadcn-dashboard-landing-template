@@ -9,6 +9,7 @@ import { Logo } from "@/components/logo"
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 export function ForgotPasswordForm3({
   className,
@@ -18,6 +19,7 @@ export function ForgotPasswordForm3({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
+  const { t } = useTranslation()
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -53,33 +55,32 @@ export function ForgotPasswordForm3({
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Forgot your password?</h1>
+                <h1 className="text-2xl font-bold">{t("auth.forgotPassword.title")}</h1>
                 <p className="text-muted-foreground text-balance">
-                  Enter your email and we&apos;ll send you a reset link
+                  {t("auth.forgotPassword.subtitle")}
                 </p>
               </div>
 
               {sent ? (
                 <div className="flex flex-col gap-4">
                   <p className="text-sm text-center text-green-600 bg-green-50 dark:bg-green-950/20 rounded-md px-3 py-3">
-                    Reset link sent! Check your inbox at{" "}
-                    <strong>{email}</strong>.
+                    {t("auth.forgotPassword.sentMessage", { email })}
                   </p>
                   <p className="text-center text-sm text-muted-foreground">
-                    Didn&apos;t receive it?{" "}
+                    {t("auth.forgotPassword.didntReceive")}{" "}
                     <button
                       type="button"
                       className="underline underline-offset-4 hover:text-primary"
                       onClick={() => setSent(false)}
                     >
-                      Try again
+                      {t("auth.forgotPassword.tryAgain")}
                     </button>
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="grid gap-3">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("common.email")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -102,18 +103,18 @@ export function ForgotPasswordForm3({
                     className="w-full cursor-pointer"
                     disabled={loading}
                   >
-                    {loading ? "Sending..." : "Send Reset Link"}
+                    {loading ? t("auth.forgotPassword.sending") : t("auth.forgotPassword.sendLink")}
                   </Button>
                 </>
               )}
 
               <div className="text-center text-sm">
-                Remember your password?{" "}
+                {t("auth.forgotPassword.rememberPassword")}{" "}
                 <Link
                   href="/auth/sign-in"
                   className="underline underline-offset-4"
                 >
-                  Back to sign in
+                  {t("auth.forgotPassword.backToSignIn")}
                 </Link>
               </div>
             </div>
@@ -129,7 +130,7 @@ export function ForgotPasswordForm3({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        Need help? <a href="#">Contact support</a>
+        {t("auth.forgotPassword.needHelp")} <a href="#">{t("auth.forgotPassword.contactSupport")}</a>
       </div>
     </div>
   )

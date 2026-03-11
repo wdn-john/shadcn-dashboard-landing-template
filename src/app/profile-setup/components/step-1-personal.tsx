@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useProfileSetupStore } from "@/store/profileSetupStore"
+import { useTranslation } from "react-i18next"
 
 const schema = z.object({
   firstName: z.string().min(2, "Min 2 characters").max(100),
@@ -27,6 +28,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export function Step1Personal() {
+  const { t } = useTranslation()
   const { personal, setPersonal, nextStep } = useProfileSetupStore()
 
   const {
@@ -59,43 +61,43 @@ export function Step1Personal() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="firstName">First name *</Label>
+          <Label htmlFor="firstName">{t("profileSetup.step1.firstName")}</Label>
           <Input id="firstName" {...register("firstName")} />
           {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Last name *</Label>
+          <Label htmlFor="lastName">{t("profileSetup.step1.lastName")}</Label>
           <Input id="lastName" {...register("lastName")} />
           {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="preferredName">Preferred name <span className="text-muted-foreground">(optional)</span></Label>
-        <Input id="preferredName" {...register("preferredName")} placeholder="How should we call you?" />
+        <Label htmlFor="preferredName">{t("profileSetup.step1.preferredName")}</Label>
+        <Input id="preferredName" {...register("preferredName")} placeholder={t("profileSetup.step1.preferredNameHint")} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="dateOfBirth">Date of birth *</Label>
+          <Label htmlFor="dateOfBirth">{t("profileSetup.step1.dob")}</Label>
           <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
           {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone number *</Label>
-          <Input id="phone" type="tel" placeholder="+1 (514) 000-0000" {...register("phone")} />
+          <Label htmlFor="phone">{t("profileSetup.step1.phone")}</Label>
+          <Input id="phone" type="tel" placeholder={t("profileSetup.step1.phonePlaceholder")} {...register("phone")} />
           {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Job title *</Label>
-          <Input id="title" placeholder="e.g. IT Manager" {...register("title")} />
+          <Label htmlFor="title">{t("profileSetup.step1.jobTitle")}</Label>
+          <Input id="title" placeholder={t("profileSetup.step1.jobTitlePlaceholder")} {...register("title")} />
           {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Preferred language *</Label>
+          <Label>{t("profileSetup.step1.preferredLanguage")}</Label>
           <Select
             defaultValue={personal.language ?? "en"}
             onValueChange={(v) => setValue("language", v as "en" | "fr")}
@@ -104,26 +106,26 @@ export function Step1Personal() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="fr">French</SelectItem>
+              <SelectItem value="en">{t("profileSetup.step1.english")}</SelectItem>
+              <SelectItem value="fr">{t("profileSetup.step1.french")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="organizationName">Organization <span className="text-muted-foreground">(optional)</span></Label>
-        <Input id="organizationName" placeholder="Company name" {...register("organizationName")} />
+        <Label htmlFor="organizationName">{t("profileSetup.step1.organization")}</Label>
+        <Input id="organizationName" placeholder={t("profileSetup.step1.organizationPlaceholder")} {...register("organizationName")} />
       </div>
 
       {orgName && (
         <div className="space-y-2">
-          <Label htmlFor="organizationEmployees">Number of employees *</Label>
+          <Label htmlFor="organizationEmployees">{t("profileSetup.step1.employees")}</Label>
           <Input
             id="organizationEmployees"
             type="number"
             min="1"
-            placeholder="e.g. 10"
+            placeholder={t("profileSetup.step1.employeesPlaceholder")}
             {...register("organizationEmployees")}
           />
           {errors.organizationEmployees && (
@@ -133,7 +135,7 @@ export function Step1Personal() {
       )}
 
       <div className="flex justify-end pt-2">
-        <Button type="submit">Continue</Button>
+        <Button type="submit">{t("profileSetup.step1.continue")}</Button>
       </div>
     </form>
   )

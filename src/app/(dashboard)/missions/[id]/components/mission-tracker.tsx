@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { useMissionSyncStore } from "@/store/missionSyncStore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -36,26 +37,6 @@ type Props = {
   clientName?: string
 }
 
-const STATUS_CONFIG = {
-  COMPLETED: {
-    label: "Completed",
-    variant: "default" as const,
-    icon: CheckCircle2,
-  },
-  IN_PROGRESS: {
-    label: "In Progress",
-    variant: "secondary" as const,
-    icon: Clock,
-  },
-  PENDING: { label: "Pending", variant: "outline" as const, icon: Clock },
-  BLOCKED: {
-    label: "Blocked",
-    variant: "destructive" as const,
-    icon: AlertTriangle,
-  },
-  SKIPPED: { label: "Skipped", variant: "outline" as const, icon: SkipForward },
-}
-
 export function MissionTracker({
   missionId,
   missionEntityId,
@@ -63,11 +44,40 @@ export function MissionTracker({
   allStepsCompleted,
   clientName,
 }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [progress, setProgress] = useState<MissionProgressDTO | null>(
     initialProgress
   )
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set())
+
+  const STATUS_CONFIG = {
+    COMPLETED: {
+      label: t("missions.status.COMPLETED"),
+      variant: "default" as const,
+      icon: CheckCircle2,
+    },
+    IN_PROGRESS: {
+      label: t("missions.status.IN_PROGRESS"),
+      variant: "secondary" as const,
+      icon: Clock,
+    },
+    PENDING: {
+      label: t("missions.status.PENDING"),
+      variant: "outline" as const,
+      icon: Clock,
+    },
+    BLOCKED: {
+      label: t("missions.status.BLOCKED"),
+      variant: "destructive" as const,
+      icon: AlertTriangle,
+    },
+    SKIPPED: {
+      label: t("missions.status.SKIPPED"),
+      variant: "outline" as const,
+      icon: SkipForward,
+    },
+  }
 
   // Real-time sync from WebSocket
   const syncedDetails = useMissionSyncStore((s) => s.syncedDetails)
@@ -101,15 +111,14 @@ export function MissionTracker({
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Play className="size-4" /> Start Mission
+            <Play className="size-4" /> {t("missions.tracker.startTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {!generatedSteps ? (
             <>
               <p className="text-sm text-muted-foreground">
-                Generate a structured step plan using AI, review it, then start
-                the mission.
+                {t("missions.tracker.startDescription")}
               </p>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button
@@ -119,11 +128,13 @@ export function MissionTracker({
               >
                 {generatingSteps ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Generating...
+                    <Loader2 className="size-4 animate-spin" />{" "}
+                    {t("missions.tracker.generating")}
                   </>
                 ) : (
                   <>
-                    <Wand2 className="size-4" /> Generate Steps
+                    <Wand2 className="size-4" />{" "}
+                    {t("missions.tracker.generateSteps")}
                   </>
                 )}
               </Button>
@@ -148,16 +159,18 @@ export function MissionTracker({
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
-            <CardTitle className="text-base">Mission Progress</CardTitle>
+            <CardTitle className="text-base">
+              {t("missions.tracker.missionProgress")}
+            </CardTitle>
             <div className="flex items-center gap-2">
               {isWaitingApproval && (
                 <Badge variant="secondary" className="text-xs">
-                  Awaiting Client Approval
+                  {t("missions.tracker.awaitingApproval")}
                 </Badge>
               )}
               {isCompleted && (
                 <Badge variant="default" className="text-xs">
-                  Completed
+                  {t("missions.tracker.completed")}
                 </Badge>
               )}
               <span className="text-sm font-semibold">
@@ -188,6 +201,7 @@ export function MissionTracker({
               updating={updatingStep === step.id}
               isWaitingApproval={isWaitingApproval}
               isCompleted={isCompleted}
+              statusConfig={STATUS_CONFIG}
               onToggleExpand={() => {
                 setExpandedSteps((prev) => {
                   const next = new Set(prev)
@@ -218,11 +232,13 @@ export function MissionTracker({
               >
                 {requestingApproval ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Requesting...
+                    <Loader2 className="size-4 animate-spin" />{" "}
+                    {t("missions.tracker.requesting")}
                   </>
                 ) : (
                   <>
-                    <SendHorizonal className="size-4" /> Request Client Approval
+                    <SendHorizonal className="size-4" />{" "}
+                    {t("missions.tracker.requestApproval")}
                   </>
                 )}
               </Button>
@@ -231,12 +247,12 @@ export function MissionTracker({
 
           {isWaitingApproval && (
             <p className="text-sm text-muted-foreground text-center pt-2">
-              All steps completed. Waiting for client to review and approve.
+              {t("missions.tracker.allStepsCompleted")}
             </p>
           )}
           {isCompleted && (
             <p className="text-sm text-green-600 font-medium text-center pt-2">
-              Mission approved. Payment has been released.
+              {t("missions.tracker.missionApproved")}
             </p>
           )}
         </CardContent>
@@ -255,7 +271,7 @@ export function MissionTracker({
     const data = await res.json().catch(() => ({}))
     setGeneratingSteps(false)
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to generate steps")
+      setError(data.message ?? t("missions.tracker.generateFailed"))
       return
     }
     setGeneratedSteps(data.data?.steps ?? [])
@@ -272,7 +288,7 @@ export function MissionTracker({
     const data = await res.json().catch(() => ({}))
     setStartingMission(false)
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to start mission")
+      setError(data.message ?? t("missions.tracker.startFailed"))
       return
     }
     setProgress(data.data)
@@ -313,7 +329,7 @@ export function MissionTracker({
     setUpdatingStep(null)
 
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to update step")
+      setError(data.message ?? t("missions.tracker.updateFailed"))
       return
     }
     setProgress(data.data)
@@ -331,11 +347,17 @@ export function MissionTracker({
     const data = await res.json().catch(() => ({}))
     setRequestingApproval(false)
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to request approval")
+      setError(data.message ?? t("missions.tracker.approvalFailed"))
       return
     }
     setProgress(data.data)
   }
+}
+
+type StatusConfig = {
+  label: string
+  variant: "default" | "secondary" | "outline" | "destructive"
+  icon: React.ComponentType<{ className?: string }>
 }
 
 // ── Step card ──
@@ -347,6 +369,7 @@ function StepCard({
   updating,
   isWaitingApproval,
   isCompleted,
+  statusConfig,
   onToggleExpand,
   onNoteChange,
   onUpdateStatus,
@@ -358,11 +381,13 @@ function StepCard({
   updating: boolean
   isWaitingApproval: boolean
   isCompleted: boolean
+  statusConfig: Record<string, StatusConfig>
   onToggleExpand: () => void
   onNoteChange: (v: string) => void
   onUpdateStatus: (s: MissionStep["status"]) => void
 }) {
-  const cfg = STATUS_CONFIG[step.status]
+  const { t } = useTranslation()
+  const cfg = statusConfig[step.status]
   const Icon = cfg.icon
   const locked = isWaitingApproval || isCompleted
 
@@ -415,20 +440,21 @@ function StepCard({
           {!locked && (
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">
-                Note{" "}
                 {step.status === "COMPLETED" || step.status === "IN_PROGRESS"
-                  ? "(required to complete)"
-                  : "(optional)"}
+                  ? t("missions.tracker.noteRequired")
+                  : t("missions.tracker.noteOptional")}
               </label>
               <Textarea
                 rows={3}
-                placeholder="Add a note about this step..."
+                placeholder={t("missions.tracker.notePlaceholder")}
                 value={note}
                 onChange={(e) => onNoteChange(e.target.value)}
               />
               {note.length > 0 && note.length < 15 && (
                 <p className="text-xs text-muted-foreground">
-                  {15 - note.length} more characters needed
+                  {t("missions.tracker.noteCharsNeeded", {
+                    n: 15 - note.length,
+                  })}
                 </p>
               )}
             </div>
@@ -456,7 +482,7 @@ function StepCard({
                   ) : (
                     <Clock className="size-3 mr-1" />
                   )}
-                  Start
+                  {t("missions.tracker.start")}
                 </Button>
               )}
               {(step.status === "IN_PROGRESS" || step.status === "PENDING") && (
@@ -470,7 +496,7 @@ function StepCard({
                   ) : (
                     <CheckCircle2 className="size-3 mr-1" />
                   )}
-                  Mark Complete
+                  {t("missions.tracker.markComplete")}
                 </Button>
               )}
               {step.status === "COMPLETED" && (
@@ -480,7 +506,7 @@ function StepCard({
                   disabled={updating}
                   onClick={() => onUpdateStatus("IN_PROGRESS")}
                 >
-                  Reopen
+                  {t("missions.tracker.reopen")}
                 </Button>
               )}
               {step.status !== "BLOCKED" && step.status !== "COMPLETED" && (
@@ -491,7 +517,8 @@ function StepCard({
                   disabled={updating}
                   onClick={() => onUpdateStatus("BLOCKED")}
                 >
-                  <AlertTriangle className="size-3 mr-1" /> Block
+                  <AlertTriangle className="size-3 mr-1" />{" "}
+                  {t("missions.tracker.block")}
                 </Button>
               )}
               {step.status !== "SKIPPED" && step.status !== "COMPLETED" && (
@@ -501,7 +528,8 @@ function StepCard({
                   disabled={updating}
                   onClick={() => onUpdateStatus("SKIPPED")}
                 >
-                  <SkipForward className="size-3 mr-1" /> Skip
+                  <SkipForward className="size-3 mr-1" />{" "}
+                  {t("missions.tracker.skip")}
                 </Button>
               )}
             </div>
@@ -526,6 +554,8 @@ function GeneratedStepsPreview({
   starting: boolean
   error: string | null
 }) {
+  const { t } = useTranslation()
+
   function removeStep(id: number) {
     setSteps(steps.filter((s) => s.id !== id))
   }
@@ -533,8 +563,7 @@ function GeneratedStepsPreview({
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-muted-foreground">
-        Review the generated steps below. Remove any that don&apos;t apply, then
-        start the mission.
+        {t("missions.tracker.reviewSteps")}
       </p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       {steps.map((step, idx) => (
@@ -572,16 +601,17 @@ function GeneratedStepsPreview({
         >
           {starting ? (
             <>
-              <Loader2 className="size-4 animate-spin" /> Starting...
+              <Loader2 className="size-4 animate-spin" />{" "}
+              {t("missions.tracker.starting")}
             </>
           ) : (
             <>
-              <Play className="size-4" /> Start Mission
+              <Play className="size-4" /> {t("missions.tracker.startMission")}
             </>
           )}
         </Button>
         <Button variant="ghost" size="sm" disabled>
-          <Plus className="size-3 mr-1" /> Add Step
+          <Plus className="size-3 mr-1" /> {t("missions.tracker.addStep")}
         </Button>
       </div>
     </div>

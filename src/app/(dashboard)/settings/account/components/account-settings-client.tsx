@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -27,31 +28,12 @@ import { Loader2, Mail, ShieldCheck, User } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { toast } from "sonner"
 
-const passwordSchema = z
-  .object({
-    oldPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "Must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .refine(d => d.newPassword === d.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  })
-
-type PasswordValues = z.infer<typeof passwordSchema>
-
 type Props = {
   email: string
   signUpMethod: string | null
   createdAt: string | null
   accountStatus: string | null
   role: string | null
-}
-
-const roleLabel: Record<string, string> = {
-  ROLE_CLIENT: "Client",
-  ROLE_EXPERT: "Expert",
-  ROLE_ADMIN:  "Admin",
 }
 
 const statusVariant: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
@@ -67,7 +49,27 @@ function fmtDate(d: string | null) {
 }
 
 export function AccountSettingsClient({ email, signUpMethod, createdAt, accountStatus, role }: Props) {
+  const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
+
+  const roleLabel: Record<string, string> = {
+    ROLE_CLIENT: t("settings.account.roleClient"),
+    ROLE_EXPERT: t("settings.account.roleExpert"),
+    ROLE_ADMIN:  t("settings.account.roleAdmin"),
+  }
+
+  const passwordSchema = z
+    .object({
+      oldPassword: z.string().min(1, t("settings.account.oldPasswordRequired")),
+      newPassword: z.string().min(8, t("settings.account.newPasswordMin")),
+      confirmPassword: z.string().min(1, t("settings.account.confirmPasswordRequired")),
+    })
+    .refine(d => d.newPassword === d.confirmPassword, {
+      message: t("settings.account.passwordsMismatch"),
+      path: ["confirmPassword"],
+    })
+
+  type PasswordValues = z.infer<typeof passwordSchema>
 
   const form = useForm<PasswordValues>({
     resolver: zodResolver(passwordSchema),
@@ -84,12 +86,12 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
       })
       if (!res.ok) {
         const body = await res.json().catch(() => null)
-        throw new Error(body?.message ?? "Failed to change password")
+        throw new Error(body?.message ?? t("settings.account.passwordFailed"))
       }
-      toast.success("Password changed successfully")
+      toast.success(t("settings.account.passwordUpdated"))
       form.reset()
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to change password")
+      toast.error(err instanceof Error ? err.message : t("settings.account.passwordFailed"))
     } finally {
       setSaving(false)
     }
@@ -100,21 +102,21 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Account Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account and security.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("settings.account.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("settings.account.manageSubtitle")}</p>
       </div>
 
       {/* Account Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Account Information</CardTitle>
-          <CardDescription>Your account details and current status.</CardDescription>
+          <CardTitle className="text-base">{t("settings.account.accountInfo")}</CardTitle>
+          <CardDescription>{t("settings.account.accountInfoDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <Mail className="size-4 text-muted-foreground shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="text-xs text-muted-foreground">{t("settings.account.emailLabel")}</p>
               <p className="text-sm font-medium truncate">{email || "—"}</p>
             </div>
           </div>
@@ -122,7 +124,7 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
           <div className="flex items-center gap-3">
             <User className="size-4 text-muted-foreground shrink-0" />
             <div className="flex-1">
-              <p className="text-xs text-muted-foreground">Role</p>
+              <p className="text-xs text-muted-foreground">{t("settings.account.roleLabel")}</p>
               <p className="text-sm font-medium">{role ? (roleLabel[role] ?? role) : "—"}</p>
             </div>
           </div>
@@ -130,7 +132,7 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
           <div className="flex items-center gap-3">
             <ShieldCheck className="size-4 text-muted-foreground shrink-0" />
             <div className="flex-1">
-              <p className="text-xs text-muted-foreground">Account Status</p>
+              <p className="text-xs text-muted-foreground">{t("settings.account.statusLabel")}</p>
               <div className="mt-0.5">
                 {accountStatus ? (
                   <Badge variant={statusVariant[accountStatus] ?? "secondary"}>
@@ -144,12 +146,12 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
           </div>
           <Separator />
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Member since</span>
+            <span className="text-muted-foreground">{t("settings.account.memberSince")}</span>
             <span className="font-medium">{fmtDate(createdAt)}</span>
           </div>
           {signUpMethod && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Sign-up method</span>
+              <span className="text-muted-foreground">{t("settings.account.signUpMethod")}</span>
               <span className="font-medium capitalize">{signUpMethod.toLowerCase()}</span>
             </div>
           )}
@@ -159,17 +161,17 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
       {/* Change Password */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Change Password</CardTitle>
+          <CardTitle className="text-base">{t("settings.account.changePassword")}</CardTitle>
           <CardDescription>
             {isSocialLogin
-              ? `You signed up with ${signUpMethod?.toLowerCase()}. Password changes are not available for social logins.`
-              : "Keep your account secure with a strong password."}
+              ? t("settings.account.socialLoginDesc", { method: signUpMethod?.toLowerCase() })
+              : t("settings.account.passwordDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isSocialLogin ? (
             <p className="text-sm text-muted-foreground">
-              To change your password, please use your {signUpMethod?.toLowerCase()} account settings.
+              {t("settings.account.socialLoginBody", { method: signUpMethod?.toLowerCase() })}
             </p>
           ) : (
             <Form {...form}>
@@ -179,9 +181,9 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
                   name="oldPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Current Password</FormLabel>
+                      <FormLabel>{t("settings.account.oldPassword")}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter current password" {...field} />
+                        <Input type="password" placeholder={t("settings.account.oldPasswordPlaceholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -192,9 +194,9 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
                   name="newPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>New Password</FormLabel>
+                      <FormLabel>{t("settings.account.newPassword")}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="At least 8 characters" {...field} />
+                        <Input type="password" placeholder={t("settings.account.newPasswordPlaceholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -205,9 +207,9 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormLabel>{t("settings.account.confirmPassword")}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Repeat new password" {...field} />
+                        <Input type="password" placeholder={t("settings.account.confirmPasswordPlaceholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -216,7 +218,7 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
                 <div className="flex justify-end pt-2">
                   <Button type="submit" disabled={saving}>
                     {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-                    Update Password
+                    {t("settings.account.updatePassword")}
                   </Button>
                 </div>
               </form>
@@ -228,23 +230,23 @@ export function AccountSettingsClient({ email, signUpMethod, createdAt, accountS
       {/* Danger Zone */}
       <Card className="border-destructive/30">
         <CardHeader>
-          <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
-          <CardDescription>Irreversible and destructive actions.</CardDescription>
+          <CardTitle className="text-base text-destructive">{t("settings.account.dangerZone")}</CardTitle>
+          <CardDescription>{t("settings.account.dangerDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Delete Account</p>
+              <p className="text-sm font-medium">{t("settings.account.deleteAccount")}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Permanently delete your account and all associated data.
+                {t("settings.account.deleteAccountDesc")}
               </p>
             </div>
             <Button
               variant="destructive"
               size="sm"
-              onClick={() => toast.error("Please contact support to delete your account.")}
+              onClick={() => toast.error(t("settings.account.deleteAccountContact"))}
             >
-              Delete Account
+              {t("settings.account.deleteAccount")}
             </Button>
           </div>
         </CardContent>

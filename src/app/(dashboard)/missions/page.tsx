@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
 import { Briefcase, ChevronRight } from "lucide-react"
+import { T } from "@/components/t"
 
 type MissionListItem = {
   id: number
@@ -37,18 +38,18 @@ export default async function MissionsPage() {
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Missions</h1>
+        <h1 className="text-2xl font-bold tracking-tight"><T k="missions.title" /></h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Track and manage your active missions.
+          <T k="missions.subtitle" />
         </p>
       </div>
 
       {missions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <Briefcase className="size-12 text-muted-foreground/30" />
-          <p className="font-medium">No missions yet</p>
+          <p className="font-medium"><T k="missions.noMissions" /></p>
           <p className="text-sm text-muted-foreground">
-            Once a client selects you and completes checkout, your mission will appear here.
+            <T k="missions.noMissionsHint" />
           </p>
         </div>
       ) : (
@@ -64,7 +65,7 @@ export default async function MissionsPage() {
                         {m.status}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Client: {m.clientName}</p>
+                    <p className="text-xs text-muted-foreground mb-2"><T k="missions.client" values={{ name: m.clientName }} /></p>
                     <div className="flex items-center gap-2">
                       <Progress value={m.progress} className="h-1.5 flex-1" />
                       <span className="text-xs text-muted-foreground shrink-0">{m.progress}%</span>

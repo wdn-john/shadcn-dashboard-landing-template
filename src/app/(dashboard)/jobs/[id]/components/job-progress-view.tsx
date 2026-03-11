@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 import { useJobSyncStore } from "@/store/jobSyncStore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -57,26 +58,6 @@ type Props = {
   expertName?: string
 }
 
-const STATUS_CONFIG = {
-  COMPLETED: {
-    label: "Completed",
-    variant: "default" as const,
-    icon: CheckCircle2,
-  },
-  IN_PROGRESS: {
-    label: "In Progress",
-    variant: "secondary" as const,
-    icon: Clock,
-  },
-  PENDING: { label: "Pending", variant: "outline" as const, icon: Clock },
-  BLOCKED: {
-    label: "Blocked",
-    variant: "destructive" as const,
-    icon: AlertTriangle,
-  },
-  SKIPPED: { label: "Skipped", variant: "outline" as const, icon: SkipForward },
-}
-
 export function JobProgressView({
   jobId,
   initialProgress,
@@ -84,6 +65,14 @@ export function JobProgressView({
   isCompleted,
   expertName,
 }: Props) {
+  const { t } = useTranslation()
+  const STATUS_CONFIG = {
+    COMPLETED: { label: t("missions.status.COMPLETED"), variant: "default" as const, icon: CheckCircle2 },
+    IN_PROGRESS: { label: t("missions.status.IN_PROGRESS"), variant: "secondary" as const, icon: Clock },
+    PENDING: { label: t("missions.status.PENDING"), variant: "outline" as const, icon: Clock },
+    BLOCKED: { label: t("missions.status.BLOCKED"), variant: "destructive" as const, icon: AlertTriangle },
+    SKIPPED: { label: t("missions.status.SKIPPED"), variant: "outline" as const, icon: SkipForward },
+  }
   const router = useRouter()
   const [progress, setProgress] = useState(initialProgress)
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set())
@@ -106,7 +95,7 @@ export function JobProgressView({
     return (
       <Card>
         <CardContent className="py-10 text-center text-sm text-muted-foreground">
-          No progress data available yet.
+          {t("jobs.noProgress")}
         </CardContent>
       </Card>
     )
@@ -117,7 +106,7 @@ export function JobProgressView({
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
-            <CardTitle className="text-base">Work Progress</CardTitle>
+            <CardTitle className="text-base">{t("jobs.workProgress")}</CardTitle>
             <span className="text-sm font-semibold">
               {progress.completionPercentage}%
             </span>
@@ -198,7 +187,7 @@ export function JobProgressView({
                       {step.note?.text && (
                         <div className="rounded-md bg-muted px-3 py-2 text-sm">
                           <p className="text-xs text-muted-foreground mb-1">
-                            Expert&apos;s note
+                            {t("jobs.expertNote")}
                           </p>
                           <p>{step.note.text}</p>
                         </div>
@@ -220,12 +209,11 @@ export function JobProgressView({
               >
                 {approving ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Approving...
+                    <Loader2 className="size-4 animate-spin" /> {t("jobs.approving")}
                   </>
                 ) : (
                   <>
-                    <ThumbsUp className="size-4" /> Approve &amp; Release
-                    Payment
+                    <ThumbsUp className="size-4" /> {t("jobs.approveRelease")}
                   </>
                 )}
               </Button>
@@ -235,7 +223,7 @@ export function JobProgressView({
                 disabled={approving}
                 className="gap-2"
               >
-                <RefreshCw className="size-4" /> Request Revision
+                <RefreshCw className="size-4" /> {t("jobs.requestRevision")}
               </Button>
             </div>
           )}
@@ -243,7 +231,7 @@ export function JobProgressView({
           {isCompleted && (
             <div className="flex items-center gap-2 text-sm text-green-600 font-medium pt-1">
               <CheckCircle2 className="size-4" />
-              Mission completed and payment released.
+              {t("jobs.missionCompleted")}
             </div>
           )}
         </CardContent>
@@ -263,22 +251,21 @@ export function JobProgressView({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Request Revision</DialogTitle>
+            <DialogTitle>{t("jobs.requestRevision")}</DialogTitle>
             <DialogDescription>
-              Explain what needs to be corrected. The expert will be notified
-              and asked to revise their work.
+              {t("jobs.revisionDescription")}
             </DialogDescription>
           </DialogHeader>
           <Textarea
             rows={4}
-            placeholder="Describe what you'd like the expert to fix or improve..."
+            placeholder={t("jobs.revisionPlaceholder")}
             value={revisionMessage}
             onChange={(e) => setRevisionMessage(e.target.value)}
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button variant="outline" onClick={() => setRevisionOpen(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleRevision}
@@ -287,11 +274,11 @@ export function JobProgressView({
             >
               {submittingRevision ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" /> Sending...
+                  <Loader2 className="size-4 animate-spin" /> {t("jobs.sending")}
                 </>
               ) : (
                 <>
-                  <RefreshCw className="size-4" /> Send Revision Request
+                  <RefreshCw className="size-4" /> {t("jobs.sendRevision")}
                 </>
               )}
             </Button>
@@ -308,7 +295,7 @@ export function JobProgressView({
     const data = await res.json().catch(() => ({}))
     setApproving(false)
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to approve job")
+      setError(data.message ?? t("jobs.approveFailed"))
       return
     }
     setProgress(data.data)
@@ -327,7 +314,7 @@ export function JobProgressView({
     const data = await res.json().catch(() => ({}))
     setSubmittingRevision(false)
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to send revision request")
+      setError(data.message ?? t("jobs.revisionFailed"))
       return
     }
     setRevisionOpen(false)

@@ -4,12 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PricingPlans } from "@/components/pricing-plans"
 import { CurrentPlanCard } from "./components/current-plan-card"
 import { BillingHistoryCard } from "./components/billing-history-card"
+import { useTranslation } from "react-i18next"
 
 // Import data
 import currentPlanData from "./data/current-plan.json"
 import billingHistoryData from "./data/billing-history.json"
 
 export default function BillingSettings() {
+  const { t } = useTranslation()
+
   const handlePlanSelect = (planId: string) => {
     console.log('Plan selected:', planId)
     // Handle plan selection logic here
@@ -18,9 +21,9 @@ export default function BillingSettings() {
   return (
     <div className="space-y-6 px-4 lg:px-6">
         <div>
-          <h1 className="text-3xl font-bold">Plans & Billing</h1>
+          <h1 className="text-3xl font-bold">{t("settings.billing.title")}</h1>
           <p className="text-muted-foreground">
-            Manage your subscription and billing information.
+            {t("settings.billing.subtitle")}
           </p>
         </div>
 
@@ -28,18 +31,18 @@ export default function BillingSettings() {
           <CurrentPlanCard plan={currentPlanData} />
           <BillingHistoryCard history={billingHistoryData} />
         </div>
-        
+
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Available Plans</CardTitle>
+              <CardTitle>{t("settings.billing.availablePlans")}</CardTitle>
               <CardDescription>
-                Choose a plan that works best for you.
+                {t("settings.billing.availablePlansDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PricingPlans 
-                mode="billing" 
+              <PricingPlans
+                mode="billing"
                 currentPlanId="professional"
                 onPlanSelect={handlePlanSelect}
               />

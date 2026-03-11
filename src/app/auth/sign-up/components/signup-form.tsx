@@ -11,12 +11,14 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 export function SignupForm3({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -28,11 +30,11 @@ export function SignupForm3({
     e.preventDefault()
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
+      setError(t("auth.signUp.passwordMismatch"))
       return
     }
     if (!agreed) {
-      setError("You must agree to the Terms of Service")
+      setError(t("auth.signUp.mustAgreeTerms"))
       return
     }
 
@@ -49,7 +51,7 @@ export function SignupForm3({
     setLoading(false)
 
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Registration failed. Please try again.")
+      setError(data.message ?? t("auth.signUp.registrationFailed"))
       return
     }
 
@@ -64,25 +66,22 @@ export function SignupForm3({
             <div className="flex flex-col gap-6">
               <div className="flex justify-center mb-2">
                 <Link href="/" className="flex items-center gap-2 font-medium">
-                  <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
-                    <Logo size={24} />
-                  </div>
-                  <span className="text-xl font-bold">Workedin</span>
+                  <Logo />
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Create your account</h1>
+                <h1 className="text-2xl font-bold">{t("auth.signUp.title")}</h1>
                 <p className="text-muted-foreground text-balance">
-                  Join Workedin — the trusted IT services network
+                  {t("auth.signUp.subtitle")}
                 </p>
               </div>
 
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.signUp.emailLabel")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder={t("auth.signUp.emailPlaceholder")}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -90,7 +89,7 @@ export function SignupForm3({
                 />
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.signUp.passwordLabel")}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -101,11 +100,11 @@ export function SignupForm3({
                   autoComplete="new-password"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Minimum 6 characters
+                  {t("auth.signUp.passwordHint")}
                 </p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t("auth.signUp.confirmPasswordLabel")}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -122,19 +121,19 @@ export function SignupForm3({
                   onCheckedChange={(v) => setAgreed(v === true)}
                 />
                 <Label htmlFor="terms" className="text-sm leading-snug">
-                  I agree to the{" "}
+                  {t("auth.signUp.agreeTerms")}{" "}
                   <a
                     href="#"
                     className="underline underline-offset-4 hover:text-primary"
                   >
-                    Terms of Service
+                    {t("auth.signUp.termsLink")}
                   </a>{" "}
-                  and{" "}
+                  {t("common.and")}{" "}
                   <a
                     href="#"
                     className="underline underline-offset-4 hover:text-primary"
                   >
-                    Privacy Policy
+                    {t("auth.signUp.privacyLink")}
                   </a>
                 </Label>
               </div>
@@ -150,11 +149,11 @@ export function SignupForm3({
                 className="w-full cursor-pointer"
                 disabled={loading}
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {loading ? t("auth.signUp.submitting") : t("auth.signUp.submit")}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
-                  Or continue with
+                  {t("auth.signUp.orContinueWith")}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -169,7 +168,7 @@ export function SignupForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign up with Apple</span>
+                  <span className="sr-only">{t("auth.signUp.withApple")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -182,7 +181,7 @@ export function SignupForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign up with Google</span>
+                  <span className="sr-only">{t("auth.signUp.withGoogle")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -195,16 +194,16 @@ export function SignupForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign up with Meta</span>
+                  <span className="sr-only">{t("auth.signUp.withMeta")}</span>
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Already have an account?{" "}
+                {t("auth.signUp.hasAccount")}{" "}
                 <Link
                   href="/auth/sign-in"
                   className="underline underline-offset-4"
                 >
-                  Sign in
+                  {t("auth.signUp.signIn")}
                 </Link>
               </div>
             </div>
@@ -220,8 +219,8 @@ export function SignupForm3({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By signing up, you agree to our <a href="#">Terms of Service</a> and{" "}
-        <a href="#">Privacy Policy</a>.
+        {t("auth.signUp.terms")} <a href="#">{t("auth.signUp.termsLink")}</a>{" "}
+        {t("common.and")} <a href="#">{t("auth.signUp.privacyLink")}</a>.
       </div>
     </div>
   )

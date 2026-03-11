@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useTranslation } from "react-i18next"
 
 export function UnderMaintenanceError() {
   const router = useRouter()
+  const { t } = useTranslation()
 
   return (
     <div className='mx-auto flex min-h-dvh flex-col items-center justify-center gap-8 p-8 md:gap-12 md:p-16'>
@@ -18,13 +20,10 @@ export function UnderMaintenanceError() {
       />
       <div className='text-center'>
         <h1 className='mb-4 text-3xl font-bold'>503</h1>
-        <h2 className="mb-3 text-2xl font-semibold">Under Maintenance</h2>
-        <p>The service is currently unavailable. Please try again later.</p>
+        <h2 className="mb-3 text-2xl font-semibold">{t("errors.maintenance.title")}</h2>
+        <p>{t("errors.maintenance.desc")}</p>
         <div className='mt-6 flex items-center justify-center gap-4 md:mt-8'>
-          <Button className='cursor-pointer' onClick={() => router.push('/dashboard')}>Go Back Home</Button>
-          <Button variant='outline' className='flex cursor-pointer items-center gap-1' onClick={() => router.push('#')}>
-            Contact Us
-          </Button>
+          <Button className='cursor-pointer' onClick={() => router.push('/dashboard')}>{t("errors.maintenance.goHome")}</Button>
         </div>
       </div>
     </div>

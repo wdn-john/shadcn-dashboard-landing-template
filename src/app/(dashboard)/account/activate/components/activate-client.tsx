@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ function formatMembership(raw: string): string {
 }
 
 export function ActivateClient({ accountStatus }: Props) {
+  const { t } = useTranslation()
   const [value, setValue] = useState("")
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -45,12 +47,12 @@ export function ActivateClient({ accountStatus }: Props) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => null)
-        throw new Error(data?.message ?? "Invalid membership number")
+        throw new Error(data?.message ?? t("activate.failed"))
       }
       setSuccess(true)
-      toast.success("Account activated successfully!")
+      toast.success(t("activate.success"))
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Activation failed")
+      toast.error(err instanceof Error ? err.message : t("activate.failed"))
     } finally {
       setSaving(false)
     }
@@ -63,8 +65,8 @@ export function ActivateClient({ accountStatus }: Props) {
           <Link href="/account"><ArrowLeft className="size-4" /></Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Activate Account</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">Enter your membership number to activate your account.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("activate.title")}</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">{t("activate.subtitle")}</p>
         </div>
       </div>
 
@@ -72,18 +74,18 @@ export function ActivateClient({ accountStatus }: Props) {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <BadgeCheck className="size-10 text-green-500" />
-            <p className="font-semibold text-lg">Account is active</p>
-            <p className="text-sm text-muted-foreground">Your account is already activated and in good standing.</p>
+            <p className="font-semibold text-lg">{t("activate.alreadyActive")}</p>
+            <p className="text-sm text-muted-foreground">{t("activate.alreadyActiveDesc")}</p>
           </CardContent>
         </Card>
       ) : success ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <BadgeCheck className="size-10 text-green-500" />
-            <p className="font-semibold text-lg">Account Activated!</p>
-            <p className="text-sm text-muted-foreground">Your account has been successfully activated.</p>
+            <p className="font-semibold text-lg">{t("activate.activatedTitle")}</p>
+            <p className="text-sm text-muted-foreground">{t("activate.activatedDesc")}</p>
             <Button asChild className="mt-2">
-              <Link href="/account">Back to Account</Link>
+              <Link href="/account">{t("activate.backToAccount")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -92,21 +94,21 @@ export function ActivateClient({ accountStatus }: Props) {
           <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4">
             <Info className="size-4 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground">
-              Your membership number was provided when you joined Workedin. It is formatted as <span className="font-mono font-medium">XXXX-XXXX</span>. Contact support if you haven&apos;t received yours.
+              {t("activate.membershipInfo")}
             </p>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Membership Number</CardTitle>
-              <CardDescription>Enter the 8-character code from your welcome email.</CardDescription>
+              <CardTitle className="text-base">{t("activate.membershipNumber")}</CardTitle>
+              <CardDescription>{t("activate.membershipDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="grid gap-1.5">
-                <Label htmlFor="membership">Membership Number</Label>
+                <Label htmlFor="membership">{t("activate.membershipNumber")}</Label>
                 <Input
                   id="membership"
-                  placeholder="XXXX-XXXX"
+                  placeholder={t("activate.membershipPlaceholder")}
                   value={formatted}
                   onChange={handleChange}
                   className="font-mono text-base tracking-widest max-w-xs"
@@ -120,7 +122,7 @@ export function ActivateClient({ accountStatus }: Props) {
                   className="min-w-28"
                 >
                   {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-                  Activate
+                  {t("activate.submit")}
                 </Button>
               </div>
             </CardContent>

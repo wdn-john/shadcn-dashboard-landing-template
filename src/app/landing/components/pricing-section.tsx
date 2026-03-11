@@ -5,76 +5,55 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useState } from 'react'
-
-const plans = [
-  {
-    name: 'Free',
-    description: 'Perfect for getting started with essential components',
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    features: [
-      'Access to 50+ free components',
-      'Basic dashboard templates',
-      'Community support',
-      'GitHub repository access',
-      'Documentation and guides'
-    ],
-    cta: 'Get Started',
-    popular: false
-  },
-  {
-    name: 'Pro',
-    description: 'For developers who need premium templates and components',
-    monthlyPrice: 19,
-    yearlyPrice: 15,
-    features: [
-      'Premium template collection',
-      'Advanced dashboard layouts',
-      'Priority support',
-      'Commercial use license',
-      'Early access to new releases',
-      'Figma design files',
-      'Custom component requests',
-      'Direct developer access',
-      'Exclusive design resources'
-    ],
-    cta: 'Get Started',
-    popular: true,
-    includesPrevious: 'All Free features, plus'
-  },
-  {
-    name: 'Lifetime',
-    description: 'One-time payment for lifetime access to everything',
-    monthlyPrice: 299,
-    yearlyPrice: 299,
-    features: [
-      'Lifetime updates and support',
-      'Private Discord channel',
-      'No recurring fees ever',
-      'Future template access',
-      'VIP support priority',
-      'Exclusive beta features'
-    ],
-    cta: 'Get Started',
-    popular: false,
-    includesPrevious: 'All Pro features, plus'
-  }
-]
+import { useTranslation } from 'react-i18next'
 
 export function PricingSection() {
   const [isYearly, setIsYearly] = useState(false)
+  const { t } = useTranslation()
+
+  const plans = [
+    {
+      key: 'free',
+      name: t("landing.pricing.plans.free.name"),
+      description: t("landing.pricing.plans.free.description"),
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      features: t("landing.pricing.plans.free.features", { returnObjects: true }) as string[],
+      popular: false,
+    },
+    {
+      key: 'pro',
+      name: t("landing.pricing.plans.pro.name"),
+      description: t("landing.pricing.plans.pro.description"),
+      monthlyPrice: 19,
+      yearlyPrice: 15,
+      features: t("landing.pricing.plans.pro.features", { returnObjects: true }) as string[],
+      popular: true,
+      includesPrevious: t("landing.pricing.plans.pro.includesPrevious"),
+    },
+    {
+      key: 'lifetime',
+      name: t("landing.pricing.plans.lifetime.name"),
+      description: t("landing.pricing.plans.lifetime.description"),
+      monthlyPrice: 299,
+      yearlyPrice: 299,
+      features: t("landing.pricing.plans.lifetime.features", { returnObjects: true }) as string[],
+      popular: false,
+      includesPrevious: t("landing.pricing.plans.lifetime.includesPrevious"),
+    },
+  ]
 
   return (
     <section id="pricing" className="py-24 sm:py-32 bg-muted/40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center mb-12">
-          <Badge variant="outline" className="mb-4">Pricing Plans</Badge>
+          <Badge variant="outline" className="mb-4">{t("landing.pricing.badge")}</Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-            Choose your plan
+            {t("landing.pricing.title")}
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Start building with our free components or upgrade to Pro for access to premium templates and advanced features.
+            {t("landing.pricing.description")}
           </p>
 
           {/* Billing Toggle */}
@@ -89,19 +68,19 @@ export function PricingSection() {
                 value="monthly"
                 className="data-[state=on]:bg-background data-[state=on]:border-border border-transparent border px-6 !rounded-full data-[state=on]:text-foreground hover:bg-transparent cursor-pointer transition-colors"
               >
-                Monthly
+                {t("landing.pricing.monthly")}
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="yearly"
                 className="data-[state=on]:bg-background data-[state=on]:border-border border-transparent border px-6 !rounded-full data-[state=on]:text-foreground hover:bg-transparent cursor-pointer transition-colors"
               >
-                Annually
+                {t("landing.pricing.annually")}
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            <span className="text-primary font-semibold">Save 20%</span> On Annual Billing
+            <span className="text-primary font-semibold">{t("landing.pricing.saveNote")}</span>
           </p>
         </div>
 
@@ -127,16 +106,16 @@ export function PricingSection() {
                   {/* Pricing */}
                   <div>
                     <div className="text-4xl font-bold mb-1">
-                      {plan.name === 'Lifetime' ? (
+                      {plan.key === 'lifetime' ? (
                         `$${plan.monthlyPrice}`
-                      ) : plan.name === 'Free' ? (
+                      ) : plan.key === 'free' ? (
                         '$0'
                       ) : (
                         `$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}`
                       )}
                     </div>
                     <div className="text-muted-foreground text-sm">
-                      {plan.name === 'Lifetime' ? 'One-time payment' : 'Per month'}
+                      {plan.key === 'lifetime' ? t("landing.pricing.oneTime") : t("landing.pricing.perMonth")}
                     </div>
                   </div>
 
@@ -150,7 +129,7 @@ export function PricingSection() {
                       }`}
                       variant={plan.popular ? 'default' : 'secondary'}
                     >
-                      {plan.cta}
+                      {t("landing.pricing.getStarted")}
                     </Button>
                   </div>
 
@@ -162,7 +141,7 @@ export function PricingSection() {
                           {plan.includesPrevious}:
                         </li>
                       )}
-                      {plan.features.map((feature, featureIndex) => (
+                      {Array.isArray(plan.features) && plan.features.map((feature, featureIndex) => (
                         <li key={featureIndex} className="flex items-center gap-3">
                           <Check className="text-muted-foreground size-4 flex-shrink-0" strokeWidth={2.5} />
                           <span>{feature}</span>
@@ -179,10 +158,10 @@ export function PricingSection() {
         {/* Enterprise Note */}
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">
-            Need custom components or have questions? {' '}
+            {t("landing.pricing.enterpriseNote")}{' '}
             <Button variant="link" className="p-0 h-auto cursor-pointer" asChild>
               <a href="#contact">
-                Contact our team
+                {t("landing.pricing.contactTeam")}
               </a>
             </Button>
           </p>

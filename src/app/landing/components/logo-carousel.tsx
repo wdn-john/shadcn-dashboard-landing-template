@@ -1,6 +1,7 @@
 "use client"
 
 import { Card } from '@/components/ui/card'
+import { useTranslation } from 'react-i18next'
 
 // Simple icon component for company logos
 const SimpleIcon = ({ iconSlug, size = 24 }: { iconSlug: string; size?: number }) => {
@@ -60,12 +61,14 @@ const techCompanies = [
 ] as const
 
 export function LogoCarousel() {
+  const { t } = useTranslation()
+
   return (
     <section className="pb-12 sm:pb-16 lg:pb-20 pt-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <p className="text-sm font-medium text-muted-foreground mb-8">
-            Trusted by leading companies worldwide
+            {t("landing.logoCarousel.trustedBy")}
           </p>
 
           {/* Logo Carousel with Fade Effect */}

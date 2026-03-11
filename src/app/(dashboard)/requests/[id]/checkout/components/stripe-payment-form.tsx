@@ -4,6 +4,7 @@ import { useState } from "react"
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { Button } from "@/components/ui/button"
 import { Loader2, Lock, CreditCard } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   applicationEntryId: number
@@ -16,6 +17,7 @@ export function StripePaymentForm({ applicationEntryId, total, onSuccess, onErro
   const stripe = useStripe()
   const elements = useElements()
   const [paying, setPaying] = useState(false)
+  const { t } = useTranslation()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,9 +60,9 @@ export function StripePaymentForm({ applicationEntryId, total, onSuccess, onErro
       <PaymentElement />
       <Button type="submit" size="lg" disabled={!stripe || paying} className="gap-2 w-full">
         {paying ? (
-          <><Loader2 className="size-4 animate-spin" /> Processing...</>
+          <><Loader2 className="size-4 animate-spin" /> {t("checkout.processing")}</>
         ) : (
-          <><Lock className="size-4" /><CreditCard className="size-4" /> Pre-Authorize ${Number(total).toLocaleString("en-CA", { minimumFractionDigits: 2 })} CAD</>
+          <><Lock className="size-4" /><CreditCard className="size-4" /> {t("checkout.preAuthorize", { amount: Number(total).toLocaleString("en-CA", { minimumFractionDigits: 2 }) })}</>
         )}
       </Button>
     </form>

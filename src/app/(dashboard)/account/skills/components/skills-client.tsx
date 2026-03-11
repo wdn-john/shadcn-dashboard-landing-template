@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -83,6 +84,7 @@ function AddInput({
 }
 
 export function SkillsClient({ initialSkills, initialCerts }: Props) {
+  const { t } = useTranslation()
   const [skills, setSkills] = useState(initialSkills)
   const [certs, setCerts]   = useState(initialCerts)
   const [addingSkill, setAddingSkill] = useState(false)
@@ -102,9 +104,9 @@ export function SkillsClient({ initialSkills, initialCerts }: Props) {
       if (!res.ok) throw new Error()
       const created = Array.isArray(data) ? data[0] : data
       if (created) setSkills(prev => [...prev, created])
-      toast.success("Skill added")
+      toast.success(t("skills.skillAdded"))
     } catch {
-      toast.error("Failed to add skill")
+      toast.error(t("skills.skillAddFailed"))
     } finally {
       setAddingSkill(false)
     }
@@ -116,9 +118,9 @@ export function SkillsClient({ initialSkills, initialCerts }: Props) {
       const res = await fetch(`/api/skills/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
       setSkills(prev => prev.filter(s => s.id !== id))
-      toast.success("Skill removed")
+      toast.success(t("skills.skillRemoved"))
     } catch {
-      toast.error("Failed to remove skill")
+      toast.error(t("skills.skillRemoveFailed"))
     } finally {
       setRemovingSkill(null)
     }
@@ -136,9 +138,9 @@ export function SkillsClient({ initialSkills, initialCerts }: Props) {
       if (!res.ok) throw new Error()
       const created = Array.isArray(data) ? data[0] : data
       if (created) setCerts(prev => [...prev, created])
-      toast.success("Certification added")
+      toast.success(t("skills.certAdded"))
     } catch {
-      toast.error("Failed to add certification")
+      toast.error(t("skills.certAddFailed"))
     } finally {
       setAddingCert(false)
     }
@@ -150,9 +152,9 @@ export function SkillsClient({ initialSkills, initialCerts }: Props) {
       const res = await fetch(`/api/certifications/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
       setCerts(prev => prev.filter(c => c.id !== id))
-      toast.success("Certification removed")
+      toast.success(t("skills.certRemoved"))
     } catch {
-      toast.error("Failed to remove certification")
+      toast.error(t("skills.certRemoveFailed"))
     } finally {
       setRemovingCert(null)
     }
@@ -165,36 +167,36 @@ export function SkillsClient({ initialSkills, initialCerts }: Props) {
           <Link href="/account"><ArrowLeft className="size-4" /></Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Skills & Certifications</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">Highlight your expertise for clients.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("skills.title")}</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">{t("skills.subtitle")}</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Skills</CardTitle>
-          <CardDescription>{skills.length} skill{skills.length !== 1 ? "s" : ""} listed</CardDescription>
+          <CardTitle className="text-base">{t("skills.skillsSection")}</CardTitle>
+          <CardDescription>{skills.length} {t("skills.skillsSection").toLowerCase()}</CardDescription>
         </CardHeader>
         <CardContent>
           {skills.length > 0
             ? <TagList items={skills} onRemove={removeSkill} removing={removingSkill} />
-            : <p className="text-sm text-muted-foreground">No skills added yet.</p>
+            : <p className="text-sm text-muted-foreground">{t("skills.noSkills")}</p>
           }
-          <AddInput placeholder="Add a skill (e.g. React, AWS)..." onAdd={addSkill} adding={addingSkill} />
+          <AddInput placeholder={t("skills.skillPlaceholder")} onAdd={addSkill} adding={addingSkill} />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Certifications</CardTitle>
-          <CardDescription>{certs.length} certification{certs.length !== 1 ? "s" : ""} listed</CardDescription>
+          <CardTitle className="text-base">{t("skills.certificationsSection")}</CardTitle>
+          <CardDescription>{certs.length} {t("skills.certificationsSection").toLowerCase()}</CardDescription>
         </CardHeader>
         <CardContent>
           {certs.length > 0
             ? <TagList items={certs} onRemove={removeCert} removing={removingCert} />
-            : <p className="text-sm text-muted-foreground">No certifications added yet.</p>
+            : <p className="text-sm text-muted-foreground">{t("skills.noCerts")}</p>
           }
-          <AddInput placeholder="Add a certification (e.g. AWS Solutions Architect)..." onAdd={addCert} adding={addingCert} />
+          <AddInput placeholder={t("skills.certPlaceholder")} onAdd={addCert} adding={addingCert} />
         </CardContent>
       </Card>
     </div>

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   recipientId: string
@@ -20,6 +21,7 @@ export function StartChatButton({
   className,
 }: Props) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,7 +39,7 @@ export function StartChatButton({
     setLoading(false)
 
     if (!data.ok || !data.data?.id) {
-      setError("Could not start conversation. Please try again.")
+      setError(t("chat.startConversationError"))
       return
     }
 
@@ -59,7 +61,7 @@ export function StartChatButton({
         ) : (
           <MessageSquare className="size-3.5" />
         )}
-        {recipientName ? `Message ${recipientName.split(" ")[0]}` : "Send Message"}
+        {recipientName ? t("chat.messageUser", { name: recipientName.split(" ")[0] }) : t("chat.sendMessage")}
       </Button>
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>

@@ -10,6 +10,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 export function LoginForm3({
   className,
@@ -17,6 +18,7 @@ export function LoginForm3({
 }: React.ComponentProps<"div">) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useTranslation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -41,7 +43,7 @@ export function LoginForm3({
     setLoading(false)
 
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Unable to sign in")
+      setError(data.message ?? t("auth.signIn.unableToSignIn"))
       return
     }
 
@@ -56,33 +58,33 @@ export function LoginForm3({
             <div className="flex flex-col gap-6">
               <div className="flex justify-center mb-2">
                 <Link href="/" className="flex items-center gap-2 font-medium">
-                  <Logo/>
+                  <Logo />
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">{t("auth.signIn.title")}</h1>
                 <p className="text-muted-foreground text-balance">
-                  Sign in to your Workedin account
+                  {t("auth.signIn.subtitle")}
                 </p>
               </div>
 
               {registered && (
                 <p className="text-sm text-center text-green-600 bg-green-50 dark:bg-green-950/20 rounded-md px-3 py-2">
-                  Account created! Please sign in.
+                  {t("auth.signIn.accountCreated")}
                 </p>
               )}
               {passwordReset && (
                 <p className="text-sm text-center text-green-600 bg-green-50 dark:bg-green-950/20 rounded-md px-3 py-2">
-                  Password reset successful! Sign in with your new password.
+                  {t("auth.signIn.passwordResetSuccess")}
                 </p>
               )}
 
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.signIn.emailLabel")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.signIn.emailPlaceholder")}
                   required
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
@@ -91,12 +93,12 @@ export function LoginForm3({
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("auth.signIn.passwordLabel")}</Label>
                   <Link
                     href="/auth/forgot-password"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
-                    Forgot your password?
+                    {t("auth.signIn.forgotPassword")}
                   </Link>
                 </div>
                 <Input
@@ -120,12 +122,12 @@ export function LoginForm3({
                 className="w-full cursor-pointer"
                 disabled={loading}
               >
-                {loading ? "Signing in..." : "Sign in"}
+                {loading ? t("auth.signIn.submitting") : t("auth.signIn.submit")}
               </Button>
 
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
-                  Or continue with
+                  {t("auth.signIn.orContinueWith")}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -133,6 +135,7 @@ export function LoginForm3({
                   variant="outline"
                   type="button"
                   className="w-full cursor-pointer"
+                  onClick={() => { window.location.href = "/api/auth/social/apple" }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
@@ -140,12 +143,13 @@ export function LoginForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign in with Apple</span>
+                  <span className="sr-only">{t("auth.signIn.withApple")}</span>
                 </Button>
                 <Button
                   variant="outline"
                   type="button"
                   className="w-full cursor-pointer"
+                  onClick={() => { window.location.href = "/api/auth/social/google" }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
@@ -153,12 +157,13 @@ export function LoginForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign in with Google</span>
+                  <span className="sr-only">{t("auth.signIn.withGoogle")}</span>
                 </Button>
                 <Button
                   variant="outline"
                   type="button"
                   className="w-full cursor-pointer"
+                  onClick={() => { window.location.href = "/api/auth/social/facebook" }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
@@ -166,16 +171,16 @@ export function LoginForm3({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign in with Meta</span>
+                  <span className="sr-only">{t("auth.signIn.withMeta")}</span>
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
+                {t("auth.signIn.noAccount")}{" "}
                 <Link
                   href="/auth/sign-up"
                   className="underline underline-offset-4"
                 >
-                  Sign up
+                  {t("auth.signIn.signUp")}
                 </Link>
               </div>
             </div>
@@ -191,8 +196,8 @@ export function LoginForm3({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By signing in, you agree to our <a href="#">Terms of Service</a> and{" "}
-        <a href="#">Privacy Policy</a>.
+        {t("auth.signIn.terms")} <a href="#">{t("auth.signIn.termsLink")}</a>{" "}
+        {t("common.and")} <a href="#">{t("auth.signIn.privacyLink")}</a>.
       </div>
     </div>
   )

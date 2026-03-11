@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,19 +26,6 @@ type StatusConfig = {
   variant: "default" | "secondary" | "outline" | "destructive"
 }
 
-const statusMap: Record<string, StatusConfig> = {
-  PENDING:    { label: "Pending",   variant: "secondary" },
-  REVIEWING:  { label: "Reviewing", variant: "default" },
-  ACCEPTED:   { label: "Accepted",  variant: "outline" },
-  REJECTED:   { label: "Rejected",  variant: "destructive" },
-  WITHDRAWN:  { label: "Withdrawn", variant: "secondary" },
-  CHOSEN:     { label: "Chosen",    variant: "outline" },
-}
-
-function statusConfig(status: string): StatusConfig {
-  return statusMap[status?.toUpperCase()] ?? { label: status, variant: "secondary" }
-}
-
 function formatApplied(dateStr: string) {
   try {
     return formatDistanceToNow(parseISO(dateStr), { addSuffix: true })
@@ -47,7 +35,23 @@ function formatApplied(dateStr: string) {
 }
 
 export function ApplicationsList({ initialItems, totalElements }: Props) {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<"all" | "active" | "closed">("all")
+
+  function statusConfig(status: string): StatusConfig {
+    const variantMap: Record<string, StatusConfig["variant"]> = {
+      PENDING:   "secondary",
+      REVIEWING: "default",
+      ACCEPTED:  "outline",
+      REJECTED:  "destructive",
+      WITHDRAWN: "secondary",
+      CHOSEN:    "outline",
+    }
+    const key = status?.toUpperCase()
+    const variant = variantMap[key] ?? "secondary"
+    const label = t(`applications.status.${key}`, { defaultValue: status })
+    return { label, variant }
+  }
 
   const filtered = initialItems.filter(item => {
     const s = item.status?.toUpperCase()
@@ -59,8 +63,10 @@ export function ApplicationsList({ initialItems, totalElements }: Props) {
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Applications</h1>
-        <p className="text-muted-foreground mt-1">{totalElements} application{totalElements !== 1 ? "s" : ""} submitted</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("applications.title")}</h1>
+        <p className="text-muted-foreground mt-1">
+          {t(totalElements === 1 ? "applications.submitted" : "applications.submittedMany", { n: totalElements })}
+        </p>
       </div>
 
       <div className="flex gap-2">
@@ -70,9 +76,8 @@ export function ApplicationsList({ initialItems, totalElements }: Props) {
             size="sm"
             variant={filter === f ? "default" : "outline"}
             onClick={() => setFilter(f)}
-            className="capitalize"
           >
-            {f}
+            {t(`applications.tabs.${f}`)}
           </Button>
         ))}
       </div>
@@ -81,10 +86,10 @@ export function ApplicationsList({ initialItems, totalElements }: Props) {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
             <FileText className="size-8 text-muted-foreground" />
-            <p className="font-medium">No applications yet</p>
-            <p className="text-sm text-muted-foreground">Browse open requests and submit your first application.</p>
+            <p className="font-medium">{t("applications.noApplications")}</p>
+            <p className="text-sm text-muted-foreground">{t("applications.noApplicationsHint")}</p>
             <Button asChild className="mt-2">
-              <Link href="/browse-requests">Browse Requests</Link>
+              <Link href="/browse-requests">{t("applications.browseRequests")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -98,7 +103,7 @@ export function ApplicationsList({ initialItems, totalElements }: Props) {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{item.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {item.category} · Applied {formatApplied(item.appliedAgo)}
+                      {item.category} · {t("applications.applied", { date: formatApplied(item.appliedAgo) })}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">

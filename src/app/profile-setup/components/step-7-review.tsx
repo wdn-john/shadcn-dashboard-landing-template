@@ -8,8 +8,10 @@ import { Separator } from "@/components/ui/separator"
 import { useProfileSetupStore } from "@/store/profileSetupStore"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 export function Step7Review() {
+  const { t } = useTranslation()
   const router = useRouter()
   const { personal, accountType, expertise, identity, payment, avatar, prevStep, reset } = useProfileSetupStore()
   const [loading, setLoading] = useState(false)
@@ -70,7 +72,7 @@ export function Step7Review() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok || !data.ok) {
-        setError(data.message ?? "Profile setup failed. Please try again.")
+        setError(data.message ?? t("profileSetup.step7.setupFailed"))
         setLoading(false)
         return
       }
@@ -78,10 +80,13 @@ export function Step7Review() {
       reset()
       router.replace("/dashboard")
     } catch {
-      setError("An unexpected error occurred. Please try again.")
+      setError(t("profileSetup.step7.unexpectedError"))
       setLoading(false)
     }
   }
+
+  const langLabel = personal.language === "en" ? t("profileSetup.step7.english") : t("profileSetup.step7.french")
+  const yrsLabel = expertise.yearsExperience === 1 ? t("profileSetup.step7.year") : t("profileSetup.step7.years")
 
   return (
     <div className="space-y-6">
@@ -101,35 +106,40 @@ export function Step7Review() {
       </div>
 
       {/* Personal */}
-      <Section title="Personal Information">
-        <Row label="Date of birth" value={personal.dateOfBirth} />
-        <Row label="Phone" value={personal.phone} />
-        <Row label="Language" value={personal.language === "en" ? "English" : "French"} />
-        {personal.organizationName && <Row label="Organization" value={`${personal.organizationName}${personal.organizationEmployees ? ` (${personal.organizationEmployees} employees)` : ""}`} />}
+      <Section title={t("profileSetup.step7.personalInfo")}>
+        <Row label={t("profileSetup.step7.dobLabel")} value={personal.dateOfBirth} />
+        <Row label={t("profileSetup.step7.phoneLabel")} value={personal.phone} />
+        <Row label={t("profileSetup.step7.languageLabel")} value={langLabel} />
+        {personal.organizationName && (
+          <Row
+            label={t("profileSetup.step7.organizationLabel")}
+            value={`${personal.organizationName}${personal.organizationEmployees ? ` (${t("profileSetup.step7.employees", { n: personal.organizationEmployees })})` : ""}`}
+          />
+        )}
       </Section>
 
       <Separator />
 
       {/* Address */}
-      <Section title="Address">
-        <Row label="Street" value={identity.streetAddress} />
-        <Row label="City" value={identity.city} />
-        <Row label="Province" value={identity.province} />
-        <Row label="Postal code" value={identity.postalCode} />
+      <Section title={t("profileSetup.step7.address")}>
+        <Row label={t("profileSetup.step7.streetLabel")} value={identity.streetAddress} />
+        <Row label={t("profileSetup.step7.cityLabel")} value={identity.city} />
+        <Row label={t("profileSetup.step7.provinceLabel")} value={identity.province} />
+        <Row label={t("profileSetup.step7.postalLabel")} value={identity.postalCode} />
       </Section>
 
       {/* Expertise (expert only) */}
       {accountType === "expert" && (
         <>
           <Separator />
-          <Section title="Expertise">
-            <Row label="Profession" value={expertise.profession} />
-            <Row label="Category" value={expertise.category} />
-            <Row label="Experience" value={`${expertise.experienceLevel} · ${expertise.yearsExperience} yr${expertise.yearsExperience !== 1 ? "s" : ""}`} />
-            {expertise.hourlyRate && <Row label="Hourly rate" value={`$${expertise.hourlyRate} CAD/hr`} />}
+          <Section title={t("profileSetup.step7.expertise")}>
+            <Row label={t("profileSetup.step7.professionLabel")} value={expertise.profession} />
+            <Row label={t("profileSetup.step7.categoryLabel")} value={expertise.category} />
+            <Row label={t("profileSetup.step7.experienceLabel")} value={`${expertise.experienceLevel} · ${expertise.yearsExperience} ${yrsLabel}`} />
+            {expertise.hourlyRate && <Row label={t("profileSetup.step7.hourlyRateLabel")} value={`$${expertise.hourlyRate} CAD/hr`} />}
             {expertise.skills.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Skills</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profileSetup.step7.skillsLabel")}</p>
                 <div className="flex flex-wrap gap-1">
                   {expertise.skills.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
                 </div>
@@ -137,7 +147,7 @@ export function Step7Review() {
             )}
             {expertise.certifications.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Certifications</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profileSetup.step7.certsLabel")}</p>
                 <div className="flex flex-wrap gap-1">
                   {expertise.certifications.map((c) => <Badge key={c} variant="outline">{c}</Badge>)}
                 </div>
@@ -150,7 +160,7 @@ export function Step7Review() {
       {expertise.frequentlyUsedSoftwares.length > 0 && (
         <>
           <Separator />
-          <Section title="Tools & Software">
+          <Section title={t("profileSetup.step7.toolsSoftware")}>
             <div className="flex flex-wrap gap-1">
               {expertise.frequentlyUsedSoftwares.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
             </div>
@@ -160,9 +170,9 @@ export function Step7Review() {
 
       {/* Payment */}
       <Separator />
-      <Section title="Payment">
+      <Section title={t("profileSetup.step7.payment")}>
         <p className="text-sm text-muted-foreground">
-          {payment.skipped ? "Skipped — can be set up later in settings." : "Connected"}
+          {payment.skipped ? t("profileSetup.step7.paymentSkipped") : t("profileSetup.step7.paymentConnected")}
         </p>
       </Section>
 
@@ -171,12 +181,12 @@ export function Step7Review() {
       )}
 
       <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={prevStep} disabled={loading}>Back</Button>
+        <Button variant="outline" onClick={prevStep} disabled={loading}>{t("profileSetup.step7.back")}</Button>
         <Button onClick={handleSubmit} disabled={loading} className="gap-2 min-w-36">
           {loading ? (
-            <><Loader2 className="size-4 animate-spin" /> Completing setup...</>
+            <><Loader2 className="size-4 animate-spin" /> {t("profileSetup.step7.completing")}</>
           ) : (
-            <><CheckCircle2 className="size-4" /> Complete setup</>
+            <><CheckCircle2 className="size-4" /> {t("profileSetup.step7.complete")}</>
           )}
         </Button>
       </div>

@@ -15,39 +15,7 @@ import {
 } from "@/components/ui/form"
 import { Logo } from '@/components/logo'
 import { Github, Twitter, Linkedin, Youtube, Heart } from 'lucide-react'
-
-const newsletterSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-})
-
-const footerLinks = {
-  product: [
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'API', href: '#api' },
-    { name: 'Documentation', href: '#docs' },
-  ],
-  company: [
-    { name: 'About', href: '#about' },
-    { name: 'Blog', href: '#blog' },
-    { name: 'Careers', href: '#careers' },
-    { name: 'Press', href: '#press' },
-  ],
-  resources: [
-    { name: 'Help Center', href: '#help' },
-    { name: 'Community', href: '#community' },
-    { name: 'Guides', href: '#guides' },
-    { name: 'Webinars', href: '#webinars' },
-  ],
-  legal: [
-    { name: 'Privacy', href: '#privacy' },
-    { name: 'Terms', href: '#terms' },
-    { name: 'Security', href: '#security' },
-    { name: 'Status', href: '#status' },
-  ],
-}
+import { useTranslation } from 'react-i18next'
 
 const socialLinks = [
   { name: 'Twitter', href: '#', icon: Twitter },
@@ -57,6 +25,41 @@ const socialLinks = [
 ]
 
 export function LandingFooter() {
+  const { t } = useTranslation()
+
+  const newsletterSchema = z.object({
+    email: z.string().email({
+      message: t("landing.footer.newsletter.emailInvalid"),
+    }),
+  })
+
+  const footerLinks = {
+    product: [
+      { name: t("landing.footer.links.features"), href: '#features' },
+      { name: t("landing.footer.links.pricing"), href: '#pricing' },
+      { name: t("landing.footer.links.api"), href: '#api' },
+      { name: t("landing.footer.links.documentation"), href: '#docs' },
+    ],
+    company: [
+      { name: t("landing.footer.links.about"), href: '#about' },
+      { name: t("landing.footer.links.blog"), href: '#blog' },
+      { name: t("landing.footer.links.careers"), href: '#careers' },
+      { name: t("landing.footer.links.press"), href: '#press' },
+    ],
+    resources: [
+      { name: t("landing.footer.links.helpCenter"), href: '#help' },
+      { name: t("landing.footer.links.community"), href: '#community' },
+      { name: t("landing.footer.links.guides"), href: '#guides' },
+      { name: t("landing.footer.links.webinars"), href: '#webinars' },
+    ],
+    legal: [
+      { name: t("landing.footer.links.privacy"), href: '#privacy' },
+      { name: t("landing.footer.links.terms"), href: '#terms' },
+      { name: t("landing.footer.links.security"), href: '#security' },
+      { name: t("landing.footer.links.status"), href: '#status' },
+    ],
+  }
+
   const form = useForm<z.infer<typeof newsletterSchema>>({
     resolver: zodResolver(newsletterSchema),
     defaultValues: {
@@ -77,9 +80,9 @@ export function LandingFooter() {
         {/* Newsletter Section */}
         <div className="mb-16">
           <div className="mx-auto max-w-2xl text-center">
-            <h3 className="text-2xl font-bold mb-4">Stay updated</h3>
+            <h3 className="text-2xl font-bold mb-4">{t("landing.footer.newsletter.title")}</h3>
             <p className="text-muted-foreground mb-6">
-              Get the latest updates, articles, and resources sent to your inbox weekly.
+              {t("landing.footer.newsletter.description")}
             </p>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2 max-w-md mx-auto sm:flex-row">
@@ -91,7 +94,7 @@ export function LandingFooter() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={t("landing.footer.newsletter.emailPlaceholder")}
                           {...field}
                         />
                       </FormControl>
@@ -99,7 +102,7 @@ export function LandingFooter() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="cursor-pointer">Subscribe</Button>
+                <Button type="submit" className="cursor-pointer">{t("landing.footer.newsletter.subscribe")}</Button>
               </form>
             </Form>
           </div>
@@ -136,10 +139,10 @@ export function LandingFooter() {
 
           {/* Links Columns */}
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Product</h4>
+            <h4 className="font-semibold mb-4">{t("landing.footer.product")}</h4>
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <a
                     href={link.href}
                     className="text-muted-foreground hover:text-foreground transition-colors"
@@ -152,10 +155,10 @@ export function LandingFooter() {
           </div>
 
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Company</h4>
+            <h4 className="font-semibold mb-4">{t("landing.footer.company")}</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <a
                     href={link.href}
                     className="text-muted-foreground hover:text-foreground transition-colors"
@@ -168,10 +171,10 @@ export function LandingFooter() {
           </div>
 
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Resources</h4>
+            <h4 className="font-semibold mb-4">{t("landing.footer.resources")}</h4>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <a
                     href={link.href}
                     className="text-muted-foreground hover:text-foreground transition-colors"
@@ -184,10 +187,10 @@ export function LandingFooter() {
           </div>
 
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Legal</h4>
+            <h4 className="font-semibold mb-4">{t("landing.footer.legal")}</h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
-                <li key={link.name}>
+                <li key={link.href}>
                   <a
                     href={link.href}
                     className="text-muted-foreground hover:text-foreground transition-colors"
@@ -206,7 +209,7 @@ export function LandingFooter() {
         <div className="flex flex-col lg:flex-row justify-between items-center gap-2">
           <div className="flex flex-col sm:flex-row items-center gap-2 text-muted-foreground text-sm">
             <div className="flex items-center gap-1">
-              <span>Made with</span>
+              <span>{t("landing.footer.madeWith")}</span>
               <Heart className="h-4 w-4 text-red-500 fill-current" />
               <span>by</span>
               <a href="https://shadcnstore.com" target='_blank' className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
@@ -214,17 +217,17 @@ export function LandingFooter() {
               </a>
             </div>
             <span className="hidden sm:inline">•</span>
-            <span>© {new Date().getFullYear()} for the developer community</span>
+            <span>{t("landing.footer.copyright", { year: new Date().getFullYear() })}</span>
           </div>
           <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-4 md:mt-0">
             <a href="#privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
+              {t("landing.footer.privacyPolicy")}
             </a>
             <a href="#terms" className="hover:text-foreground transition-colors">
-              Terms of Service
+              {t("landing.footer.termsOfService")}
             </a>
             <a href="#cookies" className="hover:text-foreground transition-colors">
-              Cookie Policy
+              {t("landing.footer.cookiePolicy")}
             </a>
           </div>
         </div>

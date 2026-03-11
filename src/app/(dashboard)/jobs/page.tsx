@@ -1,6 +1,7 @@
 import { serverGet } from "@/lib/server/api"
 import { ClipboardList } from "lucide-react"
 import { JobList } from "./components/job-list"
+import { T } from "@/components/t"
 
 type JobListItem = {
   id: number
@@ -22,18 +23,18 @@ export default async function JobsPage() {
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Work in Progress</h1>
+        <h1 className="text-2xl font-bold tracking-tight"><T k="jobs.title" /></h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Monitor active missions and approve completed work.
+          <T k="jobs.subtitle" />
         </p>
       </div>
 
       {jobs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <ClipboardList className="size-12 text-muted-foreground/30" />
-          <p className="font-medium">No active jobs</p>
+          <p className="font-medium"><T k="jobs.noJobs" /></p>
           <p className="text-sm text-muted-foreground">
-            Once you hire an expert and they begin work, your jobs will appear here.
+            <T k="jobs.noJobsHint" />
           </p>
         </div>
       ) : (

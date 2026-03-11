@@ -115,9 +115,26 @@ export function SocketInitializer({ role }: { role?: UserRole }) {
 
   // ── Chat socket handlers (chat-specific events) ───────────────────────────
   useEffect(() => {
-    chatRegister("new:chat:message", (p) => handleEvent("new:chat:message", p))
-    chatRegister("typing:update", (p) => handleEvent("typing:update", p))
-    chatRegister("presence:update", (p) => handleEvent("presence:update", p))
+    // The server wraps each chat event payload in a named key, e.g.:
+    //   new:chat:message → { newChatMessage: { messageDto, chatListItem, ... } }
+    //   typing:update    → { typingUpdate: { roomId, userId, isTyping } }
+    //   presence:update  → { presenceUpdate: { ... } }
+    // We must unwrap before forwarding to chatStore, mirroring the mobile ChatProvider.
+
+    chatRegister("new:chat:message", (p) => {
+      const { newChatMessage } = p as {
+        newChatMessage: { messageDto: unknown }
+      }
+      handleEvent("new:chat:message", newChatMessage?.messageDto)
+    })
+    chatRegister("typing:update", (p) => {
+      const { typingUpdate } = p as { typingUpdate: unknown }
+      handleEvent("typing:update", typingUpdate)
+    })
+    chatRegister("presence:update", (p) => {
+      const { presenceUpdate } = p as { presenceUpdate: unknown }
+      handleEvent("presence:update", presenceUpdate)
+    })
 
     return () => {
       chatUnregister("new:chat:message")
@@ -278,22 +295,14 @@ export function SocketInitializer({ role }: { role?: UserRole }) {
 
     const handler = (payload: unknown) => {
       const p = payload as NewApplicationPayload
-      toast.info(p.title ?? "New Application", {
+      console.log("Application ==>", p)
+      toast.info("New Application", {
         description: (
           <div className="flex items-start gap-2.5 mt-1">
-            {p.applicantAvatarUrl ? (
-              <img
-                src={p.applicantAvatarUrl}
-                alt={p.applicantName}
-                className="size-7 rounded-full object-cover shrink-0 mt-0.5"
-              />
-            ) : (
-              <div className="size-7 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-semibold">
-                {p.applicantName?.[0]?.toUpperCase()}
-              </div>
-            )}
             <div className="min-w-0">
-              <p className="text-xs font-medium leading-none mb-1">{p.applicantName}</p>
+              <p className="text-xs font-medium leading-none mb-1">
+                {p.applicantName}
+              </p>
               <p className="text-xs text-muted-foreground line-clamp-2 leading-snug">
                 {p.message}
               </p>

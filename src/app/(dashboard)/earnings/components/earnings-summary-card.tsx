@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TrendingUp, TrendingDown, Briefcase, Star, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 export type EarningsSummary = {
   total: number
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function EarningsSummaryCard({ summary, loading }: Props) {
+  const { t } = useTranslation()
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -40,33 +42,33 @@ export function EarningsSummaryCard({ summary, loading }: Props) {
 
   const stats = [
     {
-      label: "Total Earned",
+      label: t("earnings.totalEarnings"),
       value: `$${summary.total.toFixed(2)}`,
       icon: DollarSign,
       sub: (
         <span className={cn("flex items-center gap-1 text-xs", isPositiveGrowth ? "text-green-600" : "text-red-500")}>
           {isPositiveGrowth ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-          {Math.abs(summary.growth).toFixed(1)}% vs last month
+          {t("earnings.vsLastMonth", { pct: Math.abs(summary.growth).toFixed(1) })}
         </span>
       ),
     },
     {
-      label: "Jobs Completed",
+      label: t("earnings.jobsCompleted"),
       value: summary.jobsCompleted.toString(),
       icon: Briefcase,
-      sub: <span className="text-xs text-muted-foreground">All time</span>,
+      sub: <span className="text-xs text-muted-foreground">{t("earnings.allTimeSub")}</span>,
     },
     {
-      label: "Avg per Job",
+      label: t("earnings.avgPerJob"),
       value: `$${summary.avgPerJob.toFixed(2)}`,
       icon: DollarSign,
-      sub: <span className="text-xs text-muted-foreground">Average payout</span>,
+      sub: <span className="text-xs text-muted-foreground">{t("earnings.avgPayout")}</span>,
     },
     {
-      label: "Avg Rating",
+      label: t("earnings.avgRating"),
       value: summary.avgRating.toFixed(1),
       icon: Star,
-      sub: <span className="text-xs text-muted-foreground">From clients</span>,
+      sub: <span className="text-xs text-muted-foreground">{t("earnings.fromClients")}</span>,
     },
   ]
 

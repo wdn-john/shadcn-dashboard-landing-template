@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -25,6 +24,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   entryId: number
@@ -53,6 +53,7 @@ export function ApplicantActions({
   requestTitle,
   status,
 }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const { setDetails } = useCheckoutStore()
 
@@ -74,7 +75,7 @@ export function ApplicantActions({
     if (priceOption === "custom") {
       const val = parseFloat(customPrice)
       if (!customPrice || isNaN(val) || val < 10) {
-        setPriceError("Minimum price is $10.00 CAD")
+        setPriceError(t("applicantActions.minPrice"))
         return
       }
     }
@@ -89,7 +90,7 @@ export function ApplicantActions({
     setLoading(false)
     setStep("idle")
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to reject applicant.")
+      setError(data.message ?? t("applicantActions.rejectFailed"))
       return
     }
     router.refresh()
@@ -110,7 +111,7 @@ export function ApplicantActions({
     setLoading(false)
 
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Checkout error. Please try again.")
+      setError(data.message ?? t("applicantActions.checkoutError"))
       setStep("price")
       return
     }
@@ -130,7 +131,7 @@ export function ApplicantActions({
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <X className="size-4 text-destructive" />
-        This applicant has been rejected.
+        {t("applicantActions.rejected")}
       </div>
     )
   }
@@ -139,7 +140,7 @@ export function ApplicantActions({
     return (
       <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
         <CheckCircle2 className="size-4" />
-        Expert selected — proceed to checkout from the request page.
+        {t("applicantActions.accepted")}
       </div>
     )
   }
@@ -158,10 +159,10 @@ export function ApplicantActions({
           className="text-destructive hover:text-destructive"
           onClick={() => setStep("rejecting")}
         >
-          <X className="size-4 mr-1.5" /> Reject
+          <X className="size-4 mr-1.5" /> {t("applicantActions.reject")}
         </Button>
         <Button onClick={() => setStep("price")}>
-          <CheckCircle2 className="size-4 mr-1.5" /> Accept &amp; Continue
+          <CheckCircle2 className="size-4 mr-1.5" /> {t("applicantActions.acceptContinue")}
         </Button>
       </div>
 
@@ -169,15 +170,15 @@ export function ApplicantActions({
       <Dialog open={step === "rejecting"} onOpenChange={(o) => !o && setStep("idle")}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Reject this applicant?</DialogTitle>
+            <DialogTitle>{t("applicantActions.rejectTitle")}</DialogTitle>
             <DialogDescription>
-              {expertName} will be notified that their application was not selected.
+              {t("applicantActions.rejectDesc", { name: expertName })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStep("idle")}>Cancel</Button>
+            <Button variant="outline" onClick={() => setStep("idle")}>{t("applicantActions.cancel")}</Button>
             <Button variant="destructive" onClick={handleReject} disabled={loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : "Reject"}
+              {loading ? <Loader2 className="size-4 animate-spin" /> : t("applicantActions.reject")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -187,9 +188,9 @@ export function ApplicantActions({
       <Dialog open={step === "price"} onOpenChange={(o) => !o && setStep("idle")}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Choose the Final Price</DialogTitle>
+            <DialogTitle>{t("applicantActions.priceTitle")}</DialogTitle>
             <DialogDescription>
-              Select the amount you&apos;ll pay for this mission.
+              {t("applicantActions.priceDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -198,8 +199,8 @@ export function ApplicantActions({
               <PriceCard
                 selected={priceOption === "counter"}
                 onClick={() => setPriceOption("counter")}
-                label="Accept Counter Offer"
-                description={`Expert's proposal: $${Number(expertBid).toLocaleString()} CAD`}
+                label={t("applicantActions.acceptCounter")}
+                description={t("applicantActions.expertProposal", { amount: Number(expertBid).toLocaleString() })}
                 value={`$${Number(expertBid).toLocaleString()}`}
               />
             )}
@@ -208,8 +209,8 @@ export function ApplicantActions({
               <PriceCard
                 selected={priceOption === "original"}
                 onClick={() => setPriceOption("original")}
-                label="Stick with Original Budget"
-                description={`Your posted budget: $${Number(originalBudget).toLocaleString()} CAD`}
+                label={t("applicantActions.originalBudget")}
+                description={t("applicantActions.postedBudget", { amount: Number(originalBudget).toLocaleString() })}
                 value={`$${Number(originalBudget).toLocaleString()}`}
               />
             )}
@@ -217,13 +218,13 @@ export function ApplicantActions({
             <PriceCard
               selected={priceOption === "custom"}
               onClick={() => setPriceOption("custom")}
-              label="Set Custom Price"
-              description="Enter a price you agree on with the expert"
+              label={t("applicantActions.customPrice")}
+              description={t("applicantActions.customPriceDesc")}
               value={customPrice ? `$${customPrice}` : undefined}
             >
               {priceOption === "custom" && (
                 <div className="mt-3">
-                  <Label htmlFor="customPrice" className="text-xs">Amount (CAD, min $10)</Label>
+                  <Label htmlFor="customPrice" className="text-xs">{t("applicantActions.amountLabel")}</Label>
                   <div className="relative mt-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                     <Input
@@ -248,8 +249,8 @@ export function ApplicantActions({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStep("idle")}>Cancel</Button>
-            <Button onClick={handlePriceProceed}>Proceed</Button>
+            <Button variant="outline" onClick={() => setStep("idle")}>{t("applicantActions.cancel")}</Button>
+            <Button onClick={handlePriceProceed}>{t("applicantActions.proceed")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -259,45 +260,45 @@ export function ApplicantActions({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Lock className="size-4" /> Payment Policy
+              <Lock className="size-4" /> {t("applicantActions.policyTitle")}
             </DialogTitle>
             <DialogDescription>
-              Please review how payments work on Workedin before proceeding.
+              {t("applicantActions.policyDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4 py-2 text-sm">
             <PolicyItem
               icon={<Lock className="size-4 text-primary" />}
-              title="Secure Transactions"
-              body="Your payment is held securely by Workedin. Funds are released to the expert only after you approve the completed work."
+              title={t("applicantActions.secureTitle")}
+              body={t("applicantActions.secureBody")}
             />
             <Separator />
             <PolicyItem
               icon={<CreditCard className="size-4 text-primary" />}
-              title="Accepted Payment Methods"
-              body="Visa, Mastercard, and other major credit cards via Stripe's secure checkout."
+              title={t("applicantActions.paymentMethodsTitle")}
+              body={t("applicantActions.paymentMethodsBody")}
             />
             <Separator />
             <PolicyItem
               icon={<CheckCircle2 className="size-4 text-primary" />}
-              title="Pre-Authorization"
-              body="You are not charged immediately. A pre-authorization hold is placed on your card. The charge is finalized only when you approve the expert's completed work."
+              title={t("applicantActions.preAuthTitle")}
+              body={t("applicantActions.preAuthBody")}
             />
             <Separator />
             <div className="rounded-lg bg-muted px-4 py-3 text-xs text-muted-foreground">
-              Final amount: <span className="font-semibold text-foreground">${Number(resolvedPrice()).toLocaleString()} CAD</span> + applicable taxes. By proceeding, you agree to our{" "}
-              <a href="#" className="underline">Terms of Service</a> and{" "}
-              <a href="#" className="underline">Privacy Policy</a>.
+              {t("applicantActions.finalAmountNote", { amount: Number(resolvedPrice()).toLocaleString() })}{" "}
+              <a href="#" className="underline">{t("applicantActions.terms")}</a> {t("common.and")}{" "}
+              <a href="#" className="underline">{t("applicantActions.privacy")}</a>.
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStep("price")}>Back</Button>
+            <Button variant="outline" onClick={() => setStep("price")}>{t("applicantActions.back")}</Button>
             <Button onClick={handleCheckout} disabled={loading} className="gap-2">
               {loading
-                ? <><Loader2 className="size-4 animate-spin" /> Processing...</>
-                : "Proceed to Checkout"}
+                ? <><Loader2 className="size-4 animate-spin" /> {t("applicantActions.processing")}</>
+                : t("applicantActions.proceedCheckout")}
             </Button>
           </DialogFooter>
         </DialogContent>

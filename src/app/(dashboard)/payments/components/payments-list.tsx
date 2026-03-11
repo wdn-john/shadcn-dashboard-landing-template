@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { CreditCard } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 export type PaymentItem = {
   id: string
@@ -13,13 +14,6 @@ export type PaymentItem = {
   amount: number
   status: "COMPLETED" | "PENDING" | "REFUNDED" | "PRE_AUTHORIZED"
   paidAt?: string
-}
-
-const STATUS_LABELS: Record<PaymentItem["status"], string> = {
-  COMPLETED: "Paid",
-  PENDING: "Pending",
-  REFUNDED: "Refunded",
-  PRE_AUTHORIZED: "Pre-Auth",
 }
 
 const STATUS_VARIANTS: Record<PaymentItem["status"], "default" | "secondary" | "destructive" | "outline"> = {
@@ -38,6 +32,15 @@ interface Props {
 }
 
 export function PaymentsList({ payments, loading, hasMore, onLoadMore, loadingMore }: Props) {
+  const { t } = useTranslation()
+
+  const STATUS_LABELS: Record<PaymentItem["status"], string> = {
+    COMPLETED: t("payments.status.COMPLETED"),
+    PENDING: t("payments.status.PENDING"),
+    REFUNDED: t("payments.status.REFUNDED"),
+    PRE_AUTHORIZED: t("payments.status.PRE_AUTHORIZED"),
+  }
+
   if (loading && payments.length === 0) {
     return (
       <div className="space-y-3">
@@ -58,7 +61,7 @@ export function PaymentsList({ payments, loading, hasMore, onLoadMore, loadingMo
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center text-muted-foreground">
         <CreditCard className="h-8 w-8 opacity-40" />
-        <p className="text-sm">No payment history found.</p>
+        <p className="text-sm">{t("payments.noPayments")}</p>
       </div>
     )
   }
@@ -92,7 +95,7 @@ export function PaymentsList({ payments, loading, hasMore, onLoadMore, loadingMo
       {hasMore && (
         <div className="flex justify-center pt-2">
           <Button variant="outline" onClick={onLoadMore} disabled={loadingMore}>
-            {loadingMore ? "Loading..." : "Load more"}
+            {loadingMore ? t("common.loading") : t("common.loadMore")}
           </Button>
         </div>
       )}

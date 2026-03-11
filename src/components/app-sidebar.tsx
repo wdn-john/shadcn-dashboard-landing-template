@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/sidebar"
 import { navByRole, type NavIconKey } from "@/config/nav"
 import type { UserRole } from "@/types/auth"
+import { useTranslation } from "react-i18next"
 
 export function AppSidebar({
   role,
@@ -43,6 +44,7 @@ export function AppSidebar({
   user?: { name?: string; email?: string; avatar?: string }
   accountStatus?: string | null
 } & React.ComponentProps<typeof Sidebar>) {
+  const { t } = useTranslation()
   const items = navByRole[role ?? "ROLE_CLIENT"] ?? navByRole.ROLE_CLIENT
 
   const iconMap: Record<NavIconKey, React.ElementType> = {
@@ -63,15 +65,46 @@ export function AppSidebar({
     "promo-codes": Tag,
   }
 
+  const navTitleMap: Record<string, string> = {
+    "Dashboard":         t("nav.dashboard"),
+    "Overview":          t("nav.overview"),
+    "Requests":          t("nav.requests"),
+    "Browse Requests":   t("nav.browseRequests"),
+    "Applications":      t("nav.applications"),
+    "My Applications":   t("nav.myApplications"),
+    "Work in Progress":  t("nav.workInProgress"),
+    "Messages":          t("nav.messages"),
+    "Payments":          t("nav.payments"),
+    "Earnings":          t("nav.earnings"),
+    "Missions":          t("nav.missions"),
+    "Account":           t("nav.account"),
+    "Settings":          t("nav.settings"),
+    "Verifications":     t("nav.verifications"),
+    "Users":             t("nav.users"),
+    "Promo Codes":       t("nav.promoCodes"),
+  }
+
+  const groupLabelMap: Record<string, string> = {
+    "Client Space": t("sidebar.clientSpace"),
+    "Expert Space": t("sidebar.expertSpace"),
+    "Admin":        t("sidebar.admin"),
+    "Work":         t("sidebar.work"),
+    "Account":      t("sidebar.account"),
+  }
+
   const groups = items.reduce<Record<string, any[]>>((acc, item) => {
     acc[item.group] = acc[item.group] ?? []
     const Icon = iconMap[item.icon]
-    acc[item.group].push({ title: item.title, url: item.href, icon: Icon })
+    acc[item.group].push({
+      title: navTitleMap[item.title] ?? item.title,
+      url: item.href,
+      icon: Icon,
+    })
     return acc
   }, {})
 
   const navGroups = Object.entries(groups).map(([label, groupItems]) => ({
-    label,
+    label: groupLabelMap[label] ?? label,
     items: groupItems,
   }))
 
@@ -102,7 +135,7 @@ export function AppSidebar({
                     style={{ maxHeight: "1.5rem" }}
                   />
                   <span className="truncate text-xs">
-                    Secure IT Marketplace
+                    {t("sidebar.tagline")}
                   </span>
                 </div>
               </Link>

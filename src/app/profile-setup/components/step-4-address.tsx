@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useProfileSetupStore } from "@/store/profileSetupStore"
+import { useTranslation } from "react-i18next"
 
 const PROVINCES = [
   { value: "AB", label: "Alberta" },
@@ -38,6 +39,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export function Step4Address() {
+  const { t } = useTranslation()
   const { identity, setIdentity, nextStep, prevStep } = useProfileSetupStore()
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
@@ -58,22 +60,22 @@ export function Step4Address() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="streetAddress">Street address *</Label>
-        <Input id="streetAddress" placeholder="123 Main Street" {...register("streetAddress")} />
+        <Label htmlFor="streetAddress">{t("profileSetup.step4.streetAddress")}</Label>
+        <Input id="streetAddress" placeholder={t("profileSetup.step4.streetPlaceholder")} {...register("streetAddress")} />
         {errors.streetAddress && <p className="text-xs text-destructive">{errors.streetAddress.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="city">City *</Label>
-          <Input id="city" placeholder="Montreal" {...register("city")} />
+          <Label htmlFor="city">{t("profileSetup.step4.city")}</Label>
+          <Input id="city" placeholder={t("profileSetup.step4.cityPlaceholder")} {...register("city")} />
           {errors.city && <p className="text-xs text-destructive">{errors.city.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="postalCode">Postal code *</Label>
+          <Label htmlFor="postalCode">{t("profileSetup.step4.postalCode")}</Label>
           <Input
             id="postalCode"
-            placeholder="H3Z 2Y7"
+            placeholder={t("profileSetup.step4.postalPlaceholder")}
             {...register("postalCode")}
             onChange={(e) => setValue("postalCode", formatPostalCode(e.target.value), { shouldValidate: true })}
           />
@@ -82,10 +84,10 @@ export function Step4Address() {
       </div>
 
       <div className="space-y-2">
-        <Label>Province *</Label>
+        <Label>{t("profileSetup.step4.province")}</Label>
         <Select defaultValue={identity.province} onValueChange={(v) => setValue("province", v)}>
           <SelectTrigger>
-            <SelectValue placeholder="Select province" />
+            <SelectValue placeholder={t("profileSetup.step4.selectProvince")} />
           </SelectTrigger>
           <SelectContent>
             {PROVINCES.map((p) => (
@@ -97,8 +99,8 @@ export function Step4Address() {
       </div>
 
       <div className="flex justify-between pt-2">
-        <Button type="button" variant="outline" onClick={prevStep}>Back</Button>
-        <Button type="submit">Continue</Button>
+        <Button type="button" variant="outline" onClick={prevStep}>{t("profileSetup.step4.back")}</Button>
+        <Button type="submit">{t("profileSetup.step4.continue")}</Button>
       </div>
     </form>
   )

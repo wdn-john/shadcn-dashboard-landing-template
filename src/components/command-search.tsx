@@ -25,6 +25,7 @@ import {
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -125,44 +126,45 @@ interface CommandSearchProps {
 export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
   const router = useRouter()
   const commandRef = React.useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   const searchItems: SearchItem[] = [
     // Dashboards
-    { title: "Dashboard 1", url: "/dashboard", group: "Dashboards", icon: LayoutDashboard },
-    { title: "Dashboard 2", url: "/dashboard-2", group: "Dashboards", icon: LayoutPanelLeft },
+    { title: "Dashboard 1", url: "/dashboard", group: t("commandSearch.groups.dashboards"), icon: LayoutDashboard },
+    { title: "Dashboard 2", url: "/dashboard-2", group: t("commandSearch.groups.dashboards"), icon: LayoutPanelLeft },
 
     // Apps
-    { title: "Mail", url: "/mail", group: "Apps", icon: Mail },
-    { title: "Tasks", url: "/tasks", group: "Apps", icon: CheckSquare },
-    { title: "Chat", url: "/chat", group: "Apps", icon: MessageCircle },
-    { title: "Calendar", url: "/calendar", group: "Apps", icon: Calendar },
+    { title: "Mail", url: "/mail", group: t("commandSearch.groups.apps"), icon: Mail },
+    { title: "Tasks", url: "/tasks", group: t("commandSearch.groups.apps"), icon: CheckSquare },
+    { title: "Chat", url: "/chat", group: t("commandSearch.groups.apps"), icon: MessageCircle },
+    { title: "Calendar", url: "/calendar", group: t("commandSearch.groups.apps"), icon: Calendar },
 
     // Auth Pages
-    { title: "Sign In 1", url: "/auth/sign-in", group: "Auth Pages", icon: Shield },
-    { title: "Sign In 2", url: "/auth/sign-in-2", group: "Auth Pages", icon: Shield },
-    { title: "Sign Up 1", url: "/auth/sign-up", group: "Auth Pages", icon: Shield },
-    { title: "Sign Up 2", url: "/auth/sign-up-2", group: "Auth Pages", icon: Shield },
-    { title: "Forgot Password 1", url: "/auth/forgot-password", group: "Auth Pages", icon: Shield },
-    { title: "Forgot Password 2", url: "/auth/forgot-password-2", group: "Auth Pages", icon: Shield },
+    { title: "Sign In 1", url: "/auth/sign-in", group: t("commandSearch.groups.authPages"), icon: Shield },
+    { title: "Sign In 2", url: "/auth/sign-in-2", group: t("commandSearch.groups.authPages"), icon: Shield },
+    { title: "Sign Up 1", url: "/auth/sign-up", group: t("commandSearch.groups.authPages"), icon: Shield },
+    { title: "Sign Up 2", url: "/auth/sign-up-2", group: t("commandSearch.groups.authPages"), icon: Shield },
+    { title: "Forgot Password 1", url: "/auth/forgot-password", group: t("commandSearch.groups.authPages"), icon: Shield },
+    { title: "Forgot Password 2", url: "/auth/forgot-password-2", group: t("commandSearch.groups.authPages"), icon: Shield },
 
     // Errors
-    { title: "Unauthorized", url: "/errors/unauthorized", group: "Errors", icon: AlertTriangle },
-    { title: "Forbidden", url: "/errors/forbidden", group: "Errors", icon: AlertTriangle },
-    { title: "Not Found", url: "/errors/not-found", group: "Errors", icon: AlertTriangle },
-    { title: "Internal Server Error", url: "/errors/internal-server-error", group: "Errors", icon: AlertTriangle },
-    { title: "Under Maintenance", url: "/errors/under-maintenance", group: "Errors", icon: AlertTriangle },
+    { title: "Unauthorized", url: "/errors/unauthorized", group: t("commandSearch.groups.errors"), icon: AlertTriangle },
+    { title: "Forbidden", url: "/errors/forbidden", group: t("commandSearch.groups.errors"), icon: AlertTriangle },
+    { title: "Not Found", url: "/errors/not-found", group: t("commandSearch.groups.errors"), icon: AlertTriangle },
+    { title: "Internal Server Error", url: "/errors/internal-server-error", group: t("commandSearch.groups.errors"), icon: AlertTriangle },
+    { title: "Under Maintenance", url: "/errors/under-maintenance", group: t("commandSearch.groups.errors"), icon: AlertTriangle },
 
     // Settings
-    { title: "User Settings", url: "/settings/user", group: "Settings", icon: User },
-    { title: "Account Settings", url: "/settings/account", group: "Settings", icon: Settings },
-    { title: "Plans & Billing", url: "/settings/billing", group: "Settings", icon: CreditCard },
-    { title: "Appearance", url: "/settings/appearance", group: "Settings", icon: Palette },
-    { title: "Notifications", url: "/settings/notifications", group: "Settings", icon: Bell },
-    { title: "Connections", url: "/settings/connections", group: "Settings", icon: Link2 },
+    { title: "User Settings", url: "/settings/user", group: t("commandSearch.groups.settings"), icon: User },
+    { title: "Account Settings", url: "/settings/account", group: t("commandSearch.groups.settings"), icon: Settings },
+    { title: "Plans & Billing", url: "/settings/billing", group: t("commandSearch.groups.settings"), icon: CreditCard },
+    { title: "Appearance", url: "/settings/appearance", group: t("commandSearch.groups.settings"), icon: Palette },
+    { title: "Notifications", url: "/settings/notifications", group: t("commandSearch.groups.settings"), icon: Bell },
+    { title: "Connections", url: "/settings/connections", group: t("commandSearch.groups.settings"), icon: Link2 },
 
     // Pages
-    { title: "FAQs", url: "/faqs", group: "Pages", icon: HelpCircle },
-    { title: "Pricing", url: "/pricing", group: "Pages", icon: CreditCard },
+    { title: "FAQs", url: "/faqs", group: t("commandSearch.groups.pages"), icon: HelpCircle },
+    { title: "Pricing", url: "/pricing", group: t("commandSearch.groups.pages"), icon: CreditCard },
   ]
 
   const groupedItems = searchItems.reduce((acc, item) => {
@@ -190,14 +192,14 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="overflow-hidden p-0 shadow-2xl border border-zinc-200 dark:border-zinc-800 max-w-[640px]">
-        <DialogTitle className="sr-only">Command Search</DialogTitle>
+        <DialogTitle className="sr-only">{t("commandSearch.title")}</DialogTitle>
         <Command
           ref={commandRef}
           className="transition-transform duration-100 ease-out"
         >
-          <CommandInput placeholder="What do you need?" autoFocus />
+          <CommandInput placeholder={t("commandSearch.placeholder")} autoFocus />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{t("commandSearch.noResults")}</CommandEmpty>
             {Object.entries(groupedItems).map(([group, items]) => (
               <CommandGroup key={group} heading={group}>
                 {items.map((item) => {
@@ -223,14 +225,15 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
 }
 
 export function SearchTrigger({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation()
   return (
     <button
       onClick={onClick}
       className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1 relative w-full justify-start text-muted-foreground sm:pr-12 md:w-36 lg:w-56"
     >
       <Search className="mr-2 h-3.5 w-3.5" />
-      <span className="hidden lg:inline-flex">Search...</span>
-      <span className="inline-flex lg:hidden">Search...</span>
+      <span className="hidden lg:inline-flex">{t("commandSearch.searchTrigger")}</span>
+      <span className="inline-flex lg:hidden">{t("commandSearch.searchTrigger")}</span>
       <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-4 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
         <span className="text-xs">⌘</span>K
       </kbd>

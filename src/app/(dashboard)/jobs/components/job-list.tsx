@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { ChevronRight } from "lucide-react"
 import { useJobSyncStore } from "@/store/jobSyncStore"
+import { useTranslation } from "react-i18next"
 
 type JobListItem = {
   id: number
@@ -23,17 +24,8 @@ function statusVariant(s: string) {
   return "outline" as const
 }
 
-function statusLabel(s: string) {
-  switch (s) {
-    case "IN_PROGRESS":            return "In Progress"
-    case "WAITING_APPROVAL":       return "Awaiting Your Approval"
-    case "WAITING_PHASE_APPROVAL": return "Phase Awaiting Approval"
-    case "COMPLETED":              return "Completed"
-    default:                       return s
-  }
-}
-
 export function JobList({ initialJobs }: { initialJobs: JobListItem[] }) {
+  const { t } = useTranslation()
   const [jobs, setJobs] = useState(initialJobs)
 
   const syncedJobDetails = useJobSyncStore((s) => s.syncedJobDetails)
@@ -54,6 +46,16 @@ export function JobList({ initialJobs }: { initialJobs: JobListItem[] }) {
     )
   }, [syncedJobDetails, syncedJobProgress])
 
+  function statusLabel(s: string) {
+    switch (s) {
+      case "IN_PROGRESS":            return t("jobs.status.IN_PROGRESS")
+      case "WAITING_APPROVAL":       return t("jobs.status.WAITING_APPROVAL")
+      case "WAITING_PHASE_APPROVAL": return t("jobs.status.WAITING_PHASE_APPROVAL")
+      case "COMPLETED":              return t("jobs.status.COMPLETED")
+      default:                       return s
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
       {jobs.map((job) => (
@@ -67,7 +69,7 @@ export function JobList({ initialJobs }: { initialJobs: JobListItem[] }) {
                     {statusLabel(job.status)}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">Expert: {job.expertName}</p>
+                <p className="text-xs text-muted-foreground mb-2">{t("jobs.expert", { name: job.expertName })}</p>
                 <div className="flex items-center gap-2">
                   <Progress value={job.progress} className="h-1.5 flex-1" />
                   <span className="text-xs text-muted-foreground shrink-0">{job.progress}%</span>

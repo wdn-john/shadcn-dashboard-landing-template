@@ -4,16 +4,18 @@ import { useEffect, useState, useCallback } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PaymentsSummaryCard, type PaymentSummary } from "./components/payments-summary-card"
 import { PaymentsList, type PaymentItem } from "./components/payments-list"
+import { useTranslation } from "react-i18next"
 
 type Category = "ALL" | "CURRENT_MONTH" | "CURRENT_WEEK"
 
-const TAB_LABELS: { value: Category; label: string }[] = [
-  { value: "ALL", label: "All Time" },
-  { value: "CURRENT_MONTH", label: "This Month" },
-  { value: "CURRENT_WEEK", label: "This Week" },
-]
-
 export default function PaymentsPage() {
+  const { t } = useTranslation()
+
+  const TAB_LABELS: { value: Category; label: string }[] = [
+    { value: "ALL", label: t("payments.allTime") },
+    { value: "CURRENT_MONTH", label: t("payments.thisMonth") },
+    { value: "CURRENT_WEEK", label: t("payments.thisWeek") },
+  ]
   const [summary, setSummary] = useState<PaymentSummary | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(true)
 
@@ -86,8 +88,8 @@ export default function PaymentsPage() {
   return (
     <div className="px-4 md:px-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Payments</h1>
-        <p className="text-muted-foreground text-sm mt-1">View your payment history and transactions.</p>
+        <h1 className="text-2xl font-bold">{t("payments.title")}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t("payments.subtitle")}</p>
       </div>
 
       <PaymentsSummaryCard summary={summary} loading={summaryLoading} />

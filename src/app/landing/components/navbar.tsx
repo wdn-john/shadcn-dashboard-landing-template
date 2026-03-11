@@ -36,35 +36,8 @@ import { Logo } from "@/components/logo"
 import { MegaMenu } from "@/components/landing/mega-menu"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useTheme } from "@/hooks/use-theme"
-
-const navigationItems = [
-  { name: "Home", href: "#hero" },
-  { name: "Features", href: "#features" },
-  { name: "Solutions", href: "#features", hasMegaMenu: true },
-  { name: "Team", href: "#team" },
-  { name: "Pricing", href: "#pricing" },
-  { name: "FAQ", href: "#faq" },
-  { name: "Contact", href: "#contact" },
-]
-
-// Solutions menu items for mobile
-const solutionsItems = [
-  { title: "Browse Products" },
-  { name: "Free Blocks", href: "#free-blocks" },
-  { name: "Premium Templates", href: "#premium-templates" },
-  { name: "Admin Dashboards", href: "#admin-dashboards" },
-  { name: "Landing Pages", href: "#landing-pages" },
-  { title: "Categories" },
-  { name: "E-commerce", href: "#ecommerce" },
-  { name: "SaaS Dashboards", href: "#saas-dashboards" },
-  { name: "Analytics", href: "#analytics" },
-  { name: "Authentication", href: "#authentication" },
-  { title: "Resources" },
-  { name: "Documentation", href: "#docs" },
-  { name: "Component Showcase", href: "#showcase" },
-  { name: "GitHub Repository", href: "#github" },
-  { name: "Design System", href: "#design-system" },
-]
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useTranslation } from "react-i18next"
 
 // Smooth scroll function
 const smoothScrollTo = (targetId: string) => {
@@ -83,6 +56,35 @@ export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [solutionsOpen, setSolutionsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
+  const { t } = useTranslation()
+
+  const navigationItems = [
+    { key: "Home", label: t("nav.home"), href: "/" },
+    { key: "Features", label: t("nav.features"), href: "#features" },
+    { key: "Solutions", label: t("nav.solutions"), href: "#features", hasMegaMenu: true },
+    { key: "Team", label: t("nav.team"), href: "#team" },
+    { key: "Pricing", label: t("nav.pricing"), href: "#pricing" },
+    { key: "FAQ", label: t("nav.faq"), href: "#faq" },
+    { key: "Contact", label: t("nav.contact"), href: "#contact" },
+  ]
+
+  const solutionsItems = [
+    { title: t("landing.solutions.browseProducts") },
+    { key: "Free Blocks", name: t("landing.solutions.freeBlocks"), href: "#free-blocks" },
+    { key: "Premium Templates", name: t("landing.solutions.premiumTemplates"), href: "#premium-templates" },
+    { key: "Admin Dashboards", name: t("landing.solutions.adminDashboards"), href: "#admin-dashboards" },
+    { key: "Landing Pages", name: t("landing.solutions.landingPages"), href: "#landing-pages" },
+    { title: t("landing.solutions.categories") },
+    { key: "E-commerce", name: t("landing.solutions.ecommerce"), href: "#ecommerce" },
+    { key: "SaaS Dashboards", name: t("landing.solutions.saasDashboards"), href: "#saas-dashboards" },
+    { key: "Analytics", name: t("landing.solutions.analytics"), href: "#analytics" },
+    { key: "Authentication", name: t("landing.solutions.authentication"), href: "#authentication" },
+    { title: t("landing.solutions.resources") },
+    { key: "Documentation", name: t("landing.solutions.documentation"), href: "#docs" },
+    { key: "Component Showcase", name: t("landing.solutions.componentShowcase"), href: "#showcase" },
+    { key: "GitHub Repository", name: t("landing.solutions.githubRepository"), href: "#github" },
+    { key: "Design System", name: t("landing.solutions.designSystem"), href: "#design-system" },
+  ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -90,9 +92,8 @@ export function LandingNavbar() {
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <Link
-            href="https://shadcnstore.com"
+            href="/"
             className="flex items-center space-x-2 cursor-pointer"
-            target="_blank"
             rel="noopener noreferrer"
           >
             <Logo />
@@ -103,11 +104,11 @@ export function LandingNavbar() {
         <NavigationMenu className="hidden xl:flex">
           <NavigationMenuList>
             {navigationItems.map((item) => (
-              <NavigationMenuItem key={item.name}>
+              <NavigationMenuItem key={item.key}>
                 {item.hasMegaMenu ? (
                   <>
                     <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:text-primary focus:text-primary cursor-pointer">
-                      {item.name}
+                      {item.label}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <MegaMenu />
@@ -125,7 +126,7 @@ export function LandingNavbar() {
                       }
                     }}
                   >
-                    {item.name}
+                    {item.label}
                   </NavigationMenuLink>
                 )}
               </NavigationMenuItem>
@@ -135,6 +136,7 @@ export function LandingNavbar() {
 
         {/* Desktop CTA */}
         <div className="hidden xl:flex items-center space-x-2">
+          <LanguageSwitcher />
           <ModeToggle variant="ghost" />
           <Button
             variant="ghost"
@@ -152,16 +154,16 @@ export function LandingNavbar() {
             </a>
           </Button>
           <Button variant="outline" asChild className="cursor-pointer">
-            <Link href="/dashboard" target="_blank" rel="noopener noreferrer">
+            <Link href="/dashboard" rel="noopener noreferrer">
               <LayoutDashboard className="h-4 w-4 mr-2" />
-              Dashboard
+              {t("landing.nav.dashboard")}
             </Link>
           </Button>
           <Button variant="ghost" asChild className="cursor-pointer">
-            <Link href="/auth/sign-in">Sign In</Link>
+            <Link href="/auth/sign-in">{t("landing.nav.signIn")}</Link>
           </Button>
           <Button asChild className="cursor-pointer">
-            <Link href="/auth/sign-up">Get Started</Link>
+            <Link href="/auth/sign-up">{t("landing.nav.getStarted")}</Link>
           </Button>
         </div>
 
@@ -185,7 +187,7 @@ export function LandingNavbar() {
                     <Logo size={16} />
                   </div>
                   <SheetTitle className="text-lg font-semibold">
-                    ShadcnStore
+                    {t("landing.nav.mobileTitle")}
                   </SheetTitle>
                   <div className="ml-auto flex items-center gap-2">
                     <Button
@@ -230,14 +232,14 @@ export function LandingNavbar() {
               <div className="flex-1 overflow-y-auto">
                 <nav className="p-6 space-y-1">
                   {navigationItems.map((item) => (
-                    <div key={item.name}>
+                    <div key={item.key}>
                       {item.hasMegaMenu ? (
                         <Collapsible
                           open={solutionsOpen}
                           onOpenChange={setSolutionsOpen}
                         >
                           <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-base font-medium rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer">
-                            {item.name}
+                            {item.label}
                             <ChevronDown
                               className={`h-4 w-4 transition-transform ${
                                 solutionsOpen ? "rotate-180" : ""
@@ -255,7 +257,7 @@ export function LandingNavbar() {
                                 </div>
                               ) : (
                                 <a
-                                  key={solution.name}
+                                  key={solution.key}
                                   href={solution.href}
                                   className="flex items-center px-4 py-2 text-sm rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
                                   onClick={(e) => {
@@ -263,7 +265,7 @@ export function LandingNavbar() {
                                     if (solution.href?.startsWith("#")) {
                                       e.preventDefault()
                                       setTimeout(
-                                        () => smoothScrollTo(solution.href),
+                                        () => smoothScrollTo(solution.href!),
                                         100
                                       )
                                     }
@@ -287,7 +289,7 @@ export function LandingNavbar() {
                             }
                           }}
                         >
-                          {item.name}
+                          {item.label}
                         </a>
                       )}
                     </div>
@@ -297,6 +299,10 @@ export function LandingNavbar() {
 
               {/* Footer Actions */}
               <div className="border-t p-6 space-y-4">
+                {/* Language Switcher */}
+                <div className="flex justify-start">
+                  <LanguageSwitcher />
+                </div>
                 {/* Primary Actions */}
                 <div className="space-y-3">
                   <Button
@@ -307,7 +313,7 @@ export function LandingNavbar() {
                   >
                     <Link href="/dashboard">
                       <LayoutDashboard className="size-4" />
-                      Dashboard
+                      {t("landing.nav.dashboard")}
                     </Link>
                   </Button>
 
@@ -318,10 +324,10 @@ export function LandingNavbar() {
                       asChild
                       className="cursor-pointer"
                     >
-                      <Link href="/auth/sign-in">Sign In</Link>
+                      <Link href="/auth/sign-in">{t("landing.nav.signIn")}</Link>
                     </Button>
                     <Button asChild size="lg" className="cursor-pointer">
-                      <Link href="/auth/sign-up">Get Started</Link>
+                      <Link href="/auth/sign-up">{t("landing.nav.getStarted")}</Link>
                     </Button>
                   </div>
                 </div>

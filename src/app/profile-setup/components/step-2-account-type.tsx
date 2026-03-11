@@ -4,24 +4,26 @@ import { Button } from "@/components/ui/button"
 import { useProfileSetupStore, AccountType } from "@/store/profileSetupStore"
 import { cn } from "@/lib/utils"
 import { Briefcase, Building2 } from "lucide-react"
-
-const options: { value: AccountType; label: string; description: string; icon: React.ReactNode }[] = [
-  {
-    value: "client",
-    label: "Client",
-    description: "I'm a business or organization looking to hire verified IT experts for my projects.",
-    icon: <Building2 className="size-8" />,
-  },
-  {
-    value: "expert",
-    label: "Expert",
-    description: "I'm a verified IT professional ready to take on client missions and grow my career.",
-    icon: <Briefcase className="size-8" />,
-  },
-]
+import { useTranslation } from "react-i18next"
 
 export function Step2AccountType() {
+  const { t } = useTranslation()
   const { accountType, setAccountType, nextStep, prevStep } = useProfileSetupStore()
+
+  const options: { value: AccountType; label: string; description: string; icon: React.ReactNode }[] = [
+    {
+      value: "client",
+      label: t("profileSetup.step2.client"),
+      description: t("profileSetup.step2.clientDescription"),
+      icon: <Building2 className="size-8" />,
+    },
+    {
+      value: "expert",
+      label: t("profileSetup.step2.expert"),
+      description: t("profileSetup.step2.expertDescription"),
+      icon: <Briefcase className="size-8" />,
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -50,8 +52,8 @@ export function Step2AccountType() {
       </div>
 
       <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={prevStep}>Back</Button>
-        <Button onClick={nextStep} disabled={!accountType}>Continue</Button>
+        <Button variant="outline" onClick={prevStep}>{t("profileSetup.step2.back")}</Button>
+        <Button onClick={nextStep} disabled={!accountType}>{t("profileSetup.step2.continue")}</Button>
       </div>
     </div>
   )

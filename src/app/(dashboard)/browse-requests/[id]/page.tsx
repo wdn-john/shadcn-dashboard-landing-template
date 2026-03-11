@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowLeft, MapPin, Calendar, DollarSign, Users, Clock, Star, Building2 } from "lucide-react"
 import { ApplyForm } from "./components/apply-form"
 import { StartChatButton } from "@/components/start-chat-button"
+import { T } from "@/components/t"
 
 type ServiceRequest = {
   id: number
@@ -85,7 +86,7 @@ export default async function BrowseRequestDetailPage({
       <div>
         <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2">
           <Link href="/browse-requests" className="flex items-center gap-1 text-muted-foreground">
-            <ArrowLeft className="size-3" /> Browse Requests
+            <ArrowLeft className="size-3" /> <T k="browseRequests.detail.backLink" />
           </Link>
         </Button>
       </div>
@@ -100,7 +101,7 @@ export default async function BrowseRequestDetailPage({
                   {request.category}
                 </span>
                 <Badge variant={priorityVariant(request.priority)} className="text-xs">
-                  {request.priority} priority
+                  <T k="browseRequests.detail.priority" values={{ level: request.priority }} />
                 </Badge>
                 <Badge variant="default" className="text-xs">{request.status}</Badge>
               </div>
@@ -120,7 +121,7 @@ export default async function BrowseRequestDetailPage({
         <CardContent>
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Budget</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide"><T k="browseRequests.detail.budgetLabel" /></span>
               <span className="font-medium flex items-center gap-1">
                 <DollarSign className="size-3 text-muted-foreground" />
                 {request.budget != null
@@ -129,21 +130,21 @@ export default async function BrowseRequestDetailPage({
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Location</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide"><T k="browseRequests.detail.locationLabel" /></span>
               <span className="font-medium flex items-center gap-1">
                 <MapPin className="size-3 text-muted-foreground" />
                 {request.workLocation}
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Applicants</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide"><T k="browseRequests.detail.applicantsLabel" /></span>
               <span className="font-medium flex items-center gap-1">
                 <Users className="size-3 text-muted-foreground" />
                 {applicantCount}
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Posted</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wide"><T k="browseRequests.detail.postedLabel" /></span>
               <span className="font-medium flex items-center gap-1">
                 <Calendar className="size-3 text-muted-foreground" />
                 {request.createdAt
@@ -155,7 +156,7 @@ export default async function BrowseRequestDetailPage({
             </div>
             {request.desiredCompletionDate && (
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">Desired By</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide"><T k="browseRequests.detail.desiredByLabel" /></span>
                 <span className="font-medium flex items-center gap-1">
                   <Clock className="size-3 text-muted-foreground" />
                   {new Date(request.desiredCompletionDate).toLocaleDateString("en-CA", {
@@ -166,7 +167,7 @@ export default async function BrowseRequestDetailPage({
             )}
             {request.address?.city && (
               <div className="flex flex-col gap-1 col-span-2">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">City</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wide"><T k="browseRequests.detail.cityLabel" /></span>
                 <span className="font-medium">
                   {[request.address.city, request.address.region]
                     .filter(Boolean)
@@ -181,7 +182,7 @@ export default async function BrowseRequestDetailPage({
       {/* Full description */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Full Description</CardTitle>
+          <CardTitle className="text-base"><T k="browseRequests.detail.fullDescription" /></CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
@@ -194,8 +195,8 @@ export default async function BrowseRequestDetailPage({
       {request.owner && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Requested By</CardTitle>
-            <CardDescription>Information about the client who posted this request.</CardDescription>
+            <CardTitle className="text-base"><T k="browseRequests.detail.requestedBy" /></CardTitle>
+            <CardDescription><T k="browseRequests.detail.requestedByDesc" /></CardDescription>
           </CardHeader>
           <Separator />
           <CardContent className="pt-4">
@@ -223,18 +224,14 @@ export default async function BrowseRequestDetailPage({
                     <span className="font-medium">{request.owner.averageRating!.toFixed(1)}</span>
                     {(request.owner.numberOfReviews ?? 0) > 0 && (
                       <span className="text-muted-foreground">
-                        ({request.owner.numberOfReviews} review{request.owner.numberOfReviews !== 1 ? "s" : ""})
+                        ({request.owner.numberOfReviews} {request.owner.numberOfReviews !== 1 ? <T k="browseRequests.detail.reviews" /> : <T k="browseRequests.detail.review" />})
                       </span>
                     )}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Calendar className="size-3" />
-                  Posted {request.createdAt
-                    ? new Date(request.createdAt).toLocaleDateString("en-CA", {
-                        month: "long", day: "numeric", year: "numeric",
-                      })
-                    : "—"}
+                  <T k="browseRequests.detail.postedDate" values={{ date: request.createdAt ? new Date(request.createdAt).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" }) : "—" }} />
                 </p>
                 <div className="mt-3">
                   <StartChatButton
@@ -253,8 +250,8 @@ export default async function BrowseRequestDetailPage({
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="flex items-center justify-between py-4">
             <div>
-              <p className="font-semibold text-sm">Ready to help?</p>
-              <p className="text-xs text-muted-foreground">Submit your proposal and expertise.</p>
+              <p className="font-semibold text-sm"><T k="browseRequests.detail.readyToHelp" /></p>
+              <p className="text-xs text-muted-foreground"><T k="browseRequests.detail.readyToHelpSub" /></p>
             </div>
             <ApplyForm
               serviceRequestId={request.id}

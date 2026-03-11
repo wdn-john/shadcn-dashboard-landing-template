@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowRight, MapPin, Calendar, Search } from "lucide-react"
 import { RequestFilters } from "./components/request-filters"
+import { T } from "@/components/t"
 
 type ServiceRequest = {
   id: number
@@ -85,9 +86,11 @@ export default async function BrowseRequestsPage({
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Browse Requests</h1>
+        <h1 className="text-2xl font-bold tracking-tight"><T k="browseRequests.title" /></h1>
         <p className="text-muted-foreground mt-1">
-          {total > 0 ? `${total} open request${total !== 1 ? "s" : ""}` : "No requests available"}
+          {total > 0
+            ? <T k={total === 1 ? "browseRequests.openRequest" : "browseRequests.openRequests"} values={{ n: total }} />
+            : <T k="browseRequests.noRequests" />}
         </p>
       </div>
 
@@ -98,9 +101,9 @@ export default async function BrowseRequestsPage({
       {requests.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
           <Search className="size-12 text-muted-foreground/40" />
-          <p className="font-semibold">No requests found</p>
+          <p className="font-semibold"><T k="browseRequests.noRequests" /></p>
           <p className="text-sm text-muted-foreground">
-            Try adjusting your filters, or check back later for new requests.
+            <T k="browseRequests.noResultsHint" />
           </p>
         </div>
       ) : (
@@ -142,7 +145,9 @@ export default async function BrowseRequestsPage({
                         <span>{req.budgetOption}</span>
                       )}
                       {applicantCount > 0 && (
-                        <span>{applicantCount} applicant{applicantCount !== 1 ? "s" : ""}</span>
+                        <span>
+                          <T k={applicantCount === 1 ? "browseRequests.applicant" : "browseRequests.applicants_count"} values={{ n: applicantCount }} />
+                        </span>
                       )}
                     </div>
                   </CardContent>
@@ -173,7 +178,7 @@ export default async function BrowseRequestsPage({
                     </div>
                     <Button size="sm" asChild>
                       <Link href={`/browse-requests/${req.id}`} className="flex items-center gap-1">
-                        View <ArrowRight className="size-3" />
+                        <T k="common.view" /> <ArrowRight className="size-3" />
                       </Link>
                     </Button>
                   </CardFooter>
@@ -188,17 +193,17 @@ export default async function BrowseRequestsPage({
               {currentPage > 1 && (
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`?${new URLSearchParams({ ...sp, page: String(currentPage - 1) })}`}>
-                    Previous
+                    <T k="common.previous" />
                   </Link>
                 </Button>
               )}
               <span className="text-sm text-muted-foreground">
-                Page {currentPage} of {totalPages}
+                <T k="common.pageOf" values={{ current: currentPage, total: totalPages }} />
               </span>
               {currentPage < totalPages && (
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`?${new URLSearchParams({ ...sp, page: String(currentPage + 1) })}`}>
-                    Next
+                    <T k="common.next" />
                   </Link>
                 </Button>
               )}

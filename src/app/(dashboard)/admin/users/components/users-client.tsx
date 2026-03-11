@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,21 +34,22 @@ const statusVariant: Record<AccountStatus, "default" | "secondary" | "outline" |
   ACTIVE:                   "outline",
 }
 
-const statusLabel: Record<AccountStatus, string> = {
-  UNVERIFIED:               "Unverified",
-  PENDING_ID_VERIFICATION:  "Pending ID",
-  VERIFIED:                 "Verified",
-  ACTIVE:                   "Active",
-}
-
 type Props = {
   initialProfiles: ProfileItem[]
 }
 
 export function UsersClient({ initialProfiles }: Props) {
+  const { t } = useTranslation()
   const [profiles, setProfiles] = useState(initialProfiles)
   const [search, setSearch] = useState("")
   const [updating, setUpdating] = useState<string | null>(null)
+
+  const statusLabel: Record<AccountStatus, string> = {
+    UNVERIFIED:               t("account.status.UNVERIFIED"),
+    PENDING_ID_VERIFICATION:  t("account.status.PENDING"),
+    VERIFIED:                 t("account.status.VERIFIED"),
+    ACTIVE:                   t("account.status.ACTIVE"),
+  }
 
   async function handleStatusChange(id: string, accountStatus: AccountStatus) {
     setUpdating(id)
@@ -61,9 +63,9 @@ export function UsersClient({ initialProfiles }: Props) {
       setProfiles(prev =>
         prev.map(p => p.id === id ? { ...p, accountStatus } : p)
       )
-      toast.success("Account status updated")
+      toast.success(t("admin.users.statusUpdated"))
     } catch {
-      toast.error("Failed to update status")
+      toast.error(t("admin.users.statusFailed"))
     } finally {
       setUpdating(null)
     }
@@ -83,42 +85,45 @@ export function UsersClient({ initialProfiles }: Props) {
   const clients = filtered.filter(p => p.userType === "client")
   const others  = filtered.filter(p => !p.userType)
 
+  const groups = [
+    { label: t("admin.users.experts"), items: experts },
+    { label: t("admin.users.clients"), items: clients },
+    ...(others.length > 0 ? [{ label: t("admin.users.other"), items: others }] : []),
+  ]
+
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-        <p className="text-muted-foreground mt-1">{profiles.length} registered profiles</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("admin.users.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("admin.users.registeredProfiles", { n: profiles.length })}</p>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
           className="pl-9"
-          placeholder="Search by name, email or membership..."
+          placeholder={t("admin.users.searchPlaceholder")}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
 
-      {[
-        { label: "Experts", items: experts },
-        { label: "Clients", items: clients },
-        ...(others.length > 0 ? [{ label: "Other", items: others }] : []),
-      ].map(({ label, items }) => (
+      {groups.map(({ label, items }) => (
         <Card key={label}>
           <CardHeader>
             <CardTitle className="text-base">{label}</CardTitle>
-            <CardDescription>{items.length} user{items.length !== 1 ? "s" : ""}</CardDescription>
+            <CardDescription>{t("admin.users.userCount", { n: items.length })}</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {items.length === 0 ? (
-              <p className="text-sm text-muted-foreground px-6 py-8 text-center">No {label.toLowerCase()} found</p>
+              <p className="text-sm text-muted-foreground px-6 py-8 text-center">{t("common.noResults")}</p>
             ) : (
               <div className="divide-y">
                 {items.map(profile => (
                   <UserRow
                     key={profile.id}
                     profile={profile}
+                    statusLabel={statusLabel}
                     updating={updating === profile.id}
                     onStatusChange={(status) => handleStatusChange(profile.id, status)}
                   />
@@ -134,10 +139,12 @@ export function UsersClient({ initialProfiles }: Props) {
 
 function UserRow({
   profile,
+  statusLabel,
   updating,
   onStatusChange,
 }: {
   profile: ProfileItem
+  statusLabel: Record<AccountStatus, string>
   updating: boolean
   onStatusChange: (status: AccountStatus) => void
 }) {
@@ -169,7 +176,7 @@ function UserRow({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {ACCOUNT_STATUSES.map(s => (
+            {(["UNVERIFIED", "PENDING_ID_VERIFICATION", "VERIFIED", "ACTIVE"] as AccountStatus[]).map(s => (
               <SelectItem key={s} value={s} className="text-xs">
                 {statusLabel[s]}
               </SelectItem>

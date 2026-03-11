@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useProfileSetupStore, ExperienceLevel } from "@/store/profileSetupStore"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 const PROFESSIONS = [
   { value: "networking", label: "Networking & Infrastructure" },
@@ -37,13 +38,10 @@ const expertSchema = z.object({
   hourlyRate: z.string().optional(),
 })
 
-const clientSchema = z.object({
-  frequentlyUsedSoftwares: z.array(z.string()).optional(),
-})
-
 type ExpertForm = z.infer<typeof expertSchema>
 
 export function Step3Expertise() {
+  const { t } = useTranslation()
   const { accountType, expertise, setExpertise, nextStep, prevStep } = useProfileSetupStore()
   const isExpert = accountType === "expert"
 
@@ -103,7 +101,7 @@ export function Step3Expertise() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Profession *</Label>
+              <Label>{t("profileSetup.step3.profession")}</Label>
               <Select
                 defaultValue={expertise.profession}
                 onValueChange={(v) => {
@@ -113,7 +111,7 @@ export function Step3Expertise() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select profession" />
+                  <SelectValue placeholder={t("profileSetup.step3.selectProfession")} />
                 </SelectTrigger>
                 <SelectContent>
                   {PROFESSIONS.map((p) => (
@@ -125,14 +123,14 @@ export function Step3Expertise() {
             </div>
 
             <div className="space-y-2">
-              <Label>Category *</Label>
+              <Label>{t("profileSetup.step3.category")}</Label>
               <Select
                 defaultValue={expertise.category}
                 onValueChange={(v) => setValue("category", v)}
                 disabled={!selectedProfession}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("profileSetup.step3.selectCategory")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(CATEGORIES[selectedProfession] ?? []).map((c) => (
@@ -145,10 +143,10 @@ export function Step3Expertise() {
           </div>
 
           <div className="space-y-2">
-            <Label>Skills * <span className="text-muted-foreground text-xs">(minimum 3)</span></Label>
+            <Label>{t("profileSetup.step3.skills")} <span className="text-muted-foreground text-xs">{t("profileSetup.step3.skillsMin")}</span></Label>
             <div className="flex gap-2">
               <Input
-                placeholder="e.g. Cisco, AWS, React..."
+                placeholder={t("profileSetup.step3.skillsPlaceholder")}
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -159,7 +157,7 @@ export function Step3Expertise() {
                 }}
               />
               <Button type="button" variant="outline" onClick={() => addTag(skillInput, setSkillInput, skills, setSkills)}>
-                Add
+                {t("profileSetup.step3.add")}
               </Button>
             </div>
             {skills.length > 0 && (
@@ -175,15 +173,15 @@ export function Step3Expertise() {
               </div>
             )}
             {skills.length < 3 && (
-              <p className="text-xs text-muted-foreground">{3 - skills.length} more required</p>
+              <p className="text-xs text-muted-foreground">{t("profileSetup.step3.moreRequired", { n: 3 - skills.length })}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Certifications <span className="text-muted-foreground">(optional)</span></Label>
+            <Label>{t("profileSetup.step3.certifications")} <span className="text-muted-foreground">{t("profileSetup.step3.optional")}</span></Label>
             <div className="flex gap-2">
               <Input
-                placeholder="e.g. AWS Certified, CISSP..."
+                placeholder={t("profileSetup.step3.certsPlaceholder")}
                 value={certInput}
                 onChange={(e) => setCertInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -194,7 +192,7 @@ export function Step3Expertise() {
                 }}
               />
               <Button type="button" variant="outline" onClick={() => addTag(certInput, setCertInput, certifications, setCertifications)}>
-                Add
+                {t("profileSetup.step3.add")}
               </Button>
             </div>
             {certifications.length > 0 && (
@@ -213,7 +211,7 @@ export function Step3Expertise() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Experience level *</Label>
+              <Label>{t("profileSetup.step3.experienceLevel")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {EXPERIENCE_LEVELS.map((lvl) => (
                   <button
@@ -234,7 +232,7 @@ export function Step3Expertise() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="yearsExperience">Years of experience *</Label>
+              <Label htmlFor="yearsExperience">{t("profileSetup.step3.yearsExperience")}</Label>
               <Input
                 id="yearsExperience"
                 type="number"
@@ -247,23 +245,41 @@ export function Step3Expertise() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="hourlyRate">Hourly rate (CAD) <span className="text-muted-foreground">(optional)</span></Label>
-            <Input id="hourlyRate" type="number" min="0" placeholder="e.g. 95" {...register("hourlyRate")} />
+            <Label htmlFor="hourlyRate">{t("profileSetup.step3.hourlyRate")} <span className="text-muted-foreground">{t("profileSetup.step3.optional")}</span></Label>
+            <Input id="hourlyRate" type="number" min="0" placeholder={t("profileSetup.step3.hourlyRatePlaceholder")} {...register("hourlyRate")} />
           </div>
 
-          <TagSection label="Tools & Software" input={softwareInput} setInput={setSoftwareInput} list={softwares} setList={setSoftwares} placeholder="e.g. Wireshark, Docker, Figma..." />
+          <TagSection
+            label={t("profileSetup.step3.toolsSoftware")}
+            optionalLabel={t("profileSetup.step3.optional")}
+            input={softwareInput}
+            setInput={setSoftwareInput}
+            list={softwares}
+            setList={setSoftwares}
+            placeholder={t("profileSetup.step3.toolsPlaceholder")}
+            addLabel={t("profileSetup.step3.add")}
+          />
 
           <div className="flex justify-between pt-2">
-            <Button type="button" variant="outline" onClick={prevStep}>Back</Button>
-            <Button type="submit" disabled={isExpert && skills.length < 3}>Continue</Button>
+            <Button type="button" variant="outline" onClick={prevStep}>{t("profileSetup.step3.back")}</Button>
+            <Button type="submit" disabled={isExpert && skills.length < 3}>{t("profileSetup.step3.continue")}</Button>
           </div>
         </form>
       ) : (
         <div className="space-y-5">
-          <TagSection label="Tools & Software you use" input={softwareInput} setInput={setSoftwareInput} list={softwares} setList={setSoftwares} placeholder="e.g. Slack, Jira, Salesforce..." />
+          <TagSection
+            label={t("profileSetup.step3.toolsSoftwareClient")}
+            optionalLabel={t("profileSetup.step3.optional")}
+            input={softwareInput}
+            setInput={setSoftwareInput}
+            list={softwares}
+            setList={setSoftwares}
+            placeholder={t("profileSetup.step3.toolsClientPlaceholder")}
+            addLabel={t("profileSetup.step3.add")}
+          />
           <div className="flex justify-between pt-2">
-            <Button variant="outline" onClick={prevStep}>Back</Button>
-            <Button onClick={onClientContinue}>Continue</Button>
+            <Button variant="outline" onClick={prevStep}>{t("profileSetup.step3.back")}</Button>
+            <Button onClick={onClientContinue}>{t("profileSetup.step3.continue")}</Button>
           </div>
         </div>
       )}
@@ -273,22 +289,26 @@ export function Step3Expertise() {
 
 function TagSection({
   label,
+  optionalLabel,
   input,
   setInput,
   list,
   setList,
   placeholder,
+  addLabel,
 }: {
   label: string
+  optionalLabel: string
   input: string
   setInput: (v: string) => void
   list: string[]
   setList: (v: string[]) => void
   placeholder: string
+  addLabel: string
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label} <span className="text-muted-foreground">(optional)</span></Label>
+      <Label>{label} <span className="text-muted-foreground">{optionalLabel}</span></Label>
       <div className="flex gap-2">
         <Input
           placeholder={placeholder}
@@ -312,7 +332,7 @@ function TagSection({
             setInput("")
           }}
         >
-          Add
+          {addLabel}
         </Button>
       </div>
       {list.length > 0 && (

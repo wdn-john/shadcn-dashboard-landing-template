@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export function TaxDetailsClient({ initialTpsNumber, initialTvqNumber, initialIsTaxRegistered }: Props) {
+  const { t } = useTranslation()
   const [tpsNumber, setTpsNumber] = useState(initialTpsNumber)
   const [tvqNumber, setTvqNumber] = useState(initialTvqNumber)
   const [isEditing, setIsEditing] = useState(!initialIsTaxRegistered)
@@ -25,7 +27,7 @@ export function TaxDetailsClient({ initialTpsNumber, initialTvqNumber, initialIs
 
   async function handleSave() {
     if (!tpsNumber.trim() || !tvqNumber.trim()) {
-      toast.error("Both TPS and TVQ numbers are required")
+      toast.error(t("tax.bothRequired"))
       return
     }
     setSaving(true)
@@ -36,10 +38,10 @@ export function TaxDetailsClient({ initialTpsNumber, initialTvqNumber, initialIs
         body: JSON.stringify({ tpsNumber, tvqNumber: tvqNumber, isTaxRegistered: true }),
       })
       if (!res.ok) throw new Error()
-      toast.success("Tax details saved")
+      toast.success(t("tax.saved"))
       setIsEditing(false)
     } catch {
-      toast.error("Failed to save tax details")
+      toast.error(t("tax.failed"))
     } finally {
       setSaving(false)
     }
@@ -58,29 +60,28 @@ export function TaxDetailsClient({ initialTpsNumber, initialTvqNumber, initialIs
           <Link href="/account"><ArrowLeft className="size-4" /></Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tax Details</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">Required for tax-registered businesses.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("tax.title")}</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">{t("tax.subtitle")}</p>
         </div>
       </div>
 
       <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4">
         <Info className="size-4 text-muted-foreground mt-0.5 shrink-0" />
         <p className="text-sm text-muted-foreground">
-          If you are a tax-registered business in Quebec, provide your TPS (GST) and TVQ (QST) numbers.
-          These will appear on invoices generated for completed missions.
+          {t("tax.taxInfo")}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Tax Registration Numbers</CardTitle>
+          <CardTitle className="text-base">{t("tax.taxRegNumbers")}</CardTitle>
           {hasExisting && !isEditing && (
-            <CardDescription>Your tax numbers are registered.</CardDescription>
+            <CardDescription>{t("tax.taxRegistered")}</CardDescription>
           )}
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="grid gap-1.5">
-            <Label htmlFor="tps">TPS / GST Number</Label>
+            <Label htmlFor="tps">{t("tax.tpsLabel")}</Label>
             <Input
               id="tps"
               placeholder="e.g. 123456789 RT 0001"
@@ -91,7 +92,7 @@ export function TaxDetailsClient({ initialTpsNumber, initialTvqNumber, initialIs
             />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="tvq">TVQ / QST Number</Label>
+            <Label htmlFor="tvq">{t("tax.tvqLabel")}</Label>
             <Input
               id="tvq"
               placeholder="e.g. 1234567890 TQ 0001"
@@ -106,15 +107,15 @@ export function TaxDetailsClient({ initialTpsNumber, initialTvqNumber, initialIs
             {isEditing ? (
               <>
                 {hasExisting && (
-                  <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+                  <Button variant="outline" onClick={handleCancel}>{t("common.cancel")}</Button>
                 )}
                 <Button disabled={saving || !tpsNumber.trim() || !tvqNumber.trim()} onClick={handleSave}>
                   {saving && <Loader2 className="size-4 mr-2 animate-spin" />}
-                  Save
+                  {t("tax.save")}
                 </Button>
               </>
             ) : (
-              <Button variant="outline" onClick={() => setIsEditing(true)}>Modify</Button>
+              <Button variant="outline" onClick={() => setIsEditing(true)}>{t("tax.modify")}</Button>
             )}
           </div>
         </CardContent>

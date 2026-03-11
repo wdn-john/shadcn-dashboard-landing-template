@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Star, Users, Briefcase } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 type ApplicantEntry = {
   id: number
@@ -31,7 +32,7 @@ type ApplicantEntry = {
 
 type FilterKey = "All" | "Pending" | "Accepted" | "Rejected"
 
-const FILTERS: FilterKey[] = ["All", "Pending", "Accepted", "Rejected"]
+const FILTER_KEYS: FilterKey[] = ["All", "Pending", "Accepted", "Rejected"]
 
 function statusBadgeVariant(s: string): "default" | "secondary" | "outline" | "destructive" {
   switch (s) {
@@ -53,6 +54,7 @@ export function ApplicantsView({
   applicationId: number
   initialApplicants: ApplicantEntry[]
 }) {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<FilterKey>("All")
 
   const filtered =
@@ -67,6 +69,14 @@ export function ApplicantsView({
     Rejected: initialApplicants.filter((a) => a.status === "Rejected").length,
   }
 
+  const filterLabel = (f: FilterKey) => {
+    if (f === "All") return t("applications.tabs.all")
+    if (f === "Pending") return t("applications.tabs.pending")
+    if (f === "Accepted") return t("applications.tabs.accepted")
+    if (f === "Rejected") return t("applications.tabs.rejected")
+    return f
+  }
+
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6 max-w-3xl">
       {/* Header */}
@@ -77,11 +87,11 @@ export function ApplicantsView({
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">Applicants</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("applications.view.title")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {initialApplicants.length === 0
-              ? "No one has applied yet."
-              : `${initialApplicants.length} expert${initialApplicants.length !== 1 ? "s" : ""} applied`}
+              ? t("applications.view.noneYet")
+              : t(initialApplicants.length === 1 ? "applications.view.expertApplied" : "applications.view.expertsApplied", { n: initialApplicants.length })}
           </p>
         </div>
       </div>
@@ -89,7 +99,7 @@ export function ApplicantsView({
       {/* Filter tabs */}
       {initialApplicants.length > 0 && (
         <div className="flex gap-1.5 flex-wrap">
-          {FILTERS.map((f) => (
+          {FILTER_KEYS.map((f) => (
             <Button
               key={f}
               variant={filter === f ? "default" : "outline"}
@@ -97,7 +107,7 @@ export function ApplicantsView({
               onClick={() => setFilter(f)}
               className="gap-1.5"
             >
-              {f}
+              {filterLabel(f)}
               {counts[f] > 0 && (
                 <span className={`text-xs rounded-full px-1.5 py-0 ${
                   filter === f
@@ -117,12 +127,14 @@ export function ApplicantsView({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Users className="size-4" />
-            {filter === "All" ? "All Applicants" : `${filter} Applicants`}
+            {filter === "All"
+              ? t("applications.view.allApplicants")
+              : t("applications.view.filteredApplicants", { filter: filterLabel(filter) })}
           </CardTitle>
           <CardDescription>
             {filtered.length === 0
-              ? `No ${filter.toLowerCase()} applicants`
-              : `${filtered.length} applicant${filtered.length !== 1 ? "s" : ""}`}
+              ? t("applications.view.noFiltered", { filter: filterLabel(filter).toLowerCase() })
+              : t(filtered.length === 1 ? "applications.applicant" : "applications.applicants_count", { n: filtered.length })}
           </CardDescription>
         </CardHeader>
         <Separator />
@@ -131,8 +143,8 @@ export function ApplicantsView({
             <Briefcase className="size-7 text-muted-foreground" />
             <p className="font-medium text-sm text-muted-foreground">
               {initialApplicants.length === 0
-                ? "No experts have applied yet. Check back soon."
-                : `No ${filter.toLowerCase()} applicants.`}
+                ? t("applications.view.noExpertsHint")
+                : t("applications.view.noFiltered", { filter: filterLabel(filter).toLowerCase() })}
             </p>
           </CardContent>
         ) : (
@@ -159,7 +171,7 @@ export function ApplicantsView({
                         {entry.status}
                       </Badge>
                       {entry.chosen && (
-                        <Badge variant="default" className="text-xs">Selected</Badge>
+                        <Badge variant="default" className="text-xs">{t("requests.detail.selected")}</Badge>
                       )}
                     </div>
 
@@ -175,21 +187,23 @@ export function ApplicantsView({
                       )}
                       {entry.estimatedDelivery && (
                         <span>
-                          Delivery:{" "}
-                          {new Date(entry.estimatedDelivery).toLocaleDateString("en-CA", {
-                            month: "short", day: "numeric", year: "numeric",
+                          {t("requests.detail.delivery", {
+                            date: new Date(entry.estimatedDelivery).toLocaleDateString("en-CA", {
+                              month: "short", day: "numeric", year: "numeric",
+                            }),
                           })}
                         </span>
                       )}
                       {entry.allowedRevisions > 0 && (
                         <span>
-                          {entry.allowedRevisions} revision{entry.allowedRevisions !== 1 ? "s" : ""}
+                          {t(entry.allowedRevisions === 1 ? "requests.detail.revision" : "requests.detail.revisions", { n: entry.allowedRevisions })}
                         </span>
                       )}
                       <span>
-                        Applied{" "}
-                        {new Date(entry.createdAt).toLocaleDateString("en-CA", {
-                          month: "short", day: "numeric",
+                        {t("requests.detail.applied", {
+                          date: new Date(entry.createdAt).toLocaleDateString("en-CA", {
+                            month: "short", day: "numeric",
+                          }),
                         })}
                       </span>
                     </div>
@@ -198,7 +212,7 @@ export function ApplicantsView({
                   <div className="shrink-0">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/applications/${applicationId}/applicants/${entry.id}`}>
-                        View Profile
+                        {t("requests.detail.viewProfile")}
                       </Link>
                     </Button>
                   </div>

@@ -25,20 +25,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowLeft, Calendar, RefreshCw, DollarSign, Clock, Trash2 } from "lucide-react"
 import { formatDistanceToNow, format, parseISO } from "date-fns"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 import type { EntryDetails } from "../page"
 
 type Props = {
   details: EntryDetails
   entryId: number
-}
-
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
-  PENDING:    { label: "Pending",   variant: "secondary" },
-  REVIEWING:  { label: "Reviewing", variant: "default" },
-  ACCEPTED:   { label: "Accepted",  variant: "outline" },
-  REJECTED:   { label: "Rejected",  variant: "destructive" },
-  WITHDRAWN:  { label: "Withdrawn", variant: "secondary" },
-  CHOSEN:     { label: "Chosen",    variant: "outline" },
 }
 
 function fmtDate(d: string) {
@@ -50,22 +42,34 @@ function fmtAgo(d: string) {
 }
 
 export function ApplicationDetail({ details, entryId }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const [withdrawing, setWithdrawing] = useState(false)
 
-  const statusCfg = statusMap[details.status?.toUpperCase()] ?? { label: details.status, variant: "secondary" as const }
-  const canWithdraw = details.status?.toUpperCase() === "PENDING" || details.status?.toUpperCase() === "REVIEWING"
+  const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+    PENDING:   "secondary",
+    REVIEWING: "default",
+    ACCEPTED:  "outline",
+    REJECTED:  "destructive",
+    WITHDRAWN: "secondary",
+    CHOSEN:    "outline",
+  }
+  const statusKey = details.status?.toUpperCase()
+  const statusVariant = statusVariantMap[statusKey] ?? "secondary"
+  const statusLabel = t(`applications.status.${statusKey}`, { defaultValue: details.status })
+
+  const canWithdraw = statusKey === "PENDING" || statusKey === "REVIEWING"
 
   async function handleWithdraw() {
     setWithdrawing(true)
     try {
       const res = await fetch(`/api/applications/entries/${entryId}`, { method: "DELETE" })
       if (!res.ok) throw new Error()
-      toast.success("Application withdrawn")
+      toast.success(t("applications.detail.withdrawn"))
       router.push("/applications")
     } catch {
-      toast.error("Failed to withdraw application")
+      toast.error(t("applications.detail.withdrawFailed"))
     } finally {
       setWithdrawing(false)
       setWithdrawOpen(false)
@@ -82,7 +86,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
           <h1 className="text-2xl font-bold tracking-tight truncate">{details.title}</h1>
           <p className="text-muted-foreground text-sm mt-0.5">{details.category}</p>
         </div>
-        <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
+        <Badge variant={statusVariant}>{statusLabel}</Badge>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -90,13 +94,13 @@ export function ApplicationDetail({ details, entryId }: Props) {
         <div className="lg:col-span-2 flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Your Proposal</CardTitle>
+              <CardTitle className="text-base">{t("applications.detail.yourProposal")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="flex flex-col gap-1">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <DollarSign className="size-3" /> Proposed Price
+                    <DollarSign className="size-3" /> {t("applications.detail.proposedPrice")}
                   </p>
                   <p className="font-semibold text-sm">
                     {details.proposedPrice != null ? `$${details.proposedPrice.toLocaleString()}` : "—"}
@@ -104,7 +108,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar className="size-3" /> Delivery
+                    <Calendar className="size-3" /> {t("applications.detail.delivery")}
                   </p>
                   <p className="font-semibold text-sm">
                     {details.estimatedDelivery ? fmtDate(details.estimatedDelivery) : "—"}
@@ -112,16 +116,20 @@ export function ApplicationDetail({ details, entryId }: Props) {
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <RefreshCw className="size-3" /> Revisions
+                    <RefreshCw className="size-3" /> {t("applications.detail.revisions")}
                   </p>
                   <p className="font-semibold text-sm">{details.revisions ?? 0}</p>
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Clock className="size-3" /> Availability
+                    <Clock className="size-3" /> {t("applications.detail.availability")}
                   </p>
                   <p className="font-semibold text-sm capitalize">
-                    {details.availability === "now" ? "Immediately" : details.availability ? fmtDate(details.availability) : "—"}
+                    {details.availability === "now"
+                      ? t("applications.detail.immediately")
+                      : details.availability
+                      ? fmtDate(details.availability)
+                      : "—"}
                   </p>
                 </div>
               </div>
@@ -130,7 +138,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
                 <>
                   <Separator />
                   <div>
-                    <p className="text-xs text-muted-foreground mb-2">Cover Letter</p>
+                    <p className="text-xs text-muted-foreground mb-2">{t("applications.detail.coverLetter")}</p>
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{details.message}</p>
                   </div>
                 </>
@@ -142,7 +150,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
           {details.timeline?.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Activity</CardTitle>
+                <CardTitle className="text-base">{t("applications.detail.activity")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ol className="relative border-l border-border ml-2 flex flex-col gap-6">
@@ -168,7 +176,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Request</CardTitle>
+              <CardTitle className="text-base">{t("applications.detail.requestCard")}</CardTitle>
               <CardDescription>{details.category}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
@@ -186,7 +194,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
               </div>
               {details.budget != null && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Budget</span>
+                  <span className="text-muted-foreground">{t("applications.detail.budget")}</span>
                   <span className="font-medium">${details.budget.toLocaleString()}</span>
                 </div>
               )}
@@ -200,7 +208,7 @@ export function ApplicationDetail({ details, entryId }: Props) {
               onClick={() => setWithdrawOpen(true)}
             >
               <Trash2 className="size-4 mr-2" />
-              Withdraw Application
+              {t("applications.withdrawApplication")}
             </Button>
           )}
         </div>
@@ -209,15 +217,15 @@ export function ApplicationDetail({ details, entryId }: Props) {
       <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Withdraw Application</DialogTitle>
+            <DialogTitle>{t("applications.detail.withdrawTitle")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to withdraw your application for <strong>{details.title}</strong>? This cannot be undone.
+              {t("applications.detail.withdrawDesc", { title: details.title })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setWithdrawOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setWithdrawOpen(false)}>{t("common.cancel")}</Button>
             <Button variant="destructive" disabled={withdrawing} onClick={handleWithdraw}>
-              Withdraw
+              {t("applications.withdraw")}
             </Button>
           </DialogFooter>
         </DialogContent>

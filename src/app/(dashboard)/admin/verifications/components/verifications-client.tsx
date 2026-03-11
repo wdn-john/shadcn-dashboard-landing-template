@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CheckCircle2, XCircle, Clock, Eye } from "lucide-react"
+import { CheckCircle2, XCircle } from "lucide-react"
 import { toast } from "sonner"
 
 type VerificationItem = {
@@ -38,14 +39,8 @@ type Props = {
   totalElements: number
 }
 
-const statusBadge: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  PENDING:   { label: "Pending",   variant: "secondary" },
-  REVIEWING: { label: "Reviewing", variant: "default" },
-  APPROVED:  { label: "Approved",  variant: "outline" },
-  REJECTED:  { label: "Rejected",  variant: "destructive" },
-}
-
 export function VerificationsClient({ initialItems, totalElements }: Props) {
+  const { t } = useTranslation()
   const [items, setItems] = useState(initialItems)
   const [rejectTarget, setRejectTarget] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState("")
@@ -57,9 +52,9 @@ export function VerificationsClient({ initialItems, totalElements }: Props) {
       const res = await fetch(`/api/admin/verifications/${id}/approve`, { method: "POST" })
       if (!res.ok) throw new Error()
       setItems(prev => prev.map(v => v.id === id ? { ...v, status: "APPROVED" } : v))
-      toast.success("Verification approved")
+      toast.success(t("admin.verifications.approved"))
     } catch {
-      toast.error("Failed to approve")
+      toast.error(t("admin.verifications.approveFailed"))
     } finally {
       setLoading(null)
     }
@@ -76,9 +71,9 @@ export function VerificationsClient({ initialItems, totalElements }: Props) {
       })
       if (!res.ok) throw new Error()
       setItems(prev => prev.map(v => v.id === rejectTarget ? { ...v, status: "REJECTED" } : v))
-      toast.success("Verification rejected")
+      toast.success(t("admin.verifications.rejected"))
     } catch {
-      toast.error("Failed to reject")
+      toast.error(t("admin.verifications.rejectFailed"))
     } finally {
       setLoading(null)
       setRejectTarget(null)
@@ -92,18 +87,18 @@ export function VerificationsClient({ initialItems, totalElements }: Props) {
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Identity Verifications</h1>
-        <p className="text-muted-foreground mt-1">{totalElements} total submissions</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("admin.verifications.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("admin.verifications.totalSubmissions", { n: totalElements })}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Pending Review</CardTitle>
-          <CardDescription>{pending.length} verification{pending.length !== 1 ? "s" : ""} awaiting action</CardDescription>
+          <CardTitle className="text-base">{t("admin.verifications.pendingReview")}</CardTitle>
+          <CardDescription>{t("admin.verifications.pendingCount", { n: pending.length })}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {pending.length === 0 ? (
-            <p className="text-sm text-muted-foreground px-6 py-8 text-center">No pending verifications</p>
+            <p className="text-sm text-muted-foreground px-6 py-8 text-center">{t("admin.verifications.noPending")}</p>
           ) : (
             <div className="divide-y">
               {pending.map(item => (
@@ -123,8 +118,8 @@ export function VerificationsClient({ initialItems, totalElements }: Props) {
       {reviewed.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Reviewed</CardTitle>
-            <CardDescription>{reviewed.length} completed</CardDescription>
+            <CardTitle className="text-base">{t("admin.verifications.reviewed")}</CardTitle>
+            <CardDescription>{t("admin.verifications.reviewedCount", { n: reviewed.length })}</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
@@ -144,25 +139,25 @@ export function VerificationsClient({ initialItems, totalElements }: Props) {
       <Dialog open={!!rejectTarget} onOpenChange={open => !open && setRejectTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Verification</DialogTitle>
+            <DialogTitle>{t("admin.verifications.rejectTitle")}</DialogTitle>
             <DialogDescription>
-              Provide a reason for rejection. This will be visible to the user.
+              {t("admin.verifications.rejectDescription")}
             </DialogDescription>
           </DialogHeader>
           <Textarea
-            placeholder="Reason for rejection..."
+            placeholder={t("admin.verifications.rejectReason")}
             value={rejectReason}
             onChange={e => setRejectReason(e.target.value)}
             rows={3}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectTarget(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setRejectTarget(null)}>{t("common.cancel")}</Button>
             <Button
               variant="destructive"
               disabled={!rejectReason.trim() || loading === rejectTarget}
               onClick={handleReject}
             >
-              Reject
+              {t("admin.verifications.reject")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -184,6 +179,13 @@ function VerificationRow({
   onApprove?: () => void
   onReject?: () => void
 }) {
+  const { t } = useTranslation()
+  const statusBadge: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    PENDING:   { label: t("admin.verifications.statusPending"),   variant: "secondary" },
+    REVIEWING: { label: t("admin.verifications.statusReviewing"), variant: "default" },
+    APPROVED:  { label: t("admin.verifications.statusApproved"),  variant: "outline" },
+    REJECTED:  { label: t("admin.verifications.statusRejected"),  variant: "destructive" },
+  }
   const badge = statusBadge[item.status] ?? { label: item.status, variant: "outline" as const }
 
   return (
@@ -212,7 +214,7 @@ function VerificationRow({
               onClick={onApprove}
             >
               <CheckCircle2 className="size-3.5 mr-1" />
-              Approve
+              {t("admin.verifications.approve")}
             </Button>
             <Button
               size="sm"
@@ -222,7 +224,7 @@ function VerificationRow({
               onClick={onReject}
             >
               <XCircle className="size-3.5 mr-1" />
-              Reject
+              {t("admin.verifications.reject")}
             </Button>
           </>
         )}

@@ -14,47 +14,26 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { LogOut } from "lucide-react"
 import useAuth from "@/hooks/use-auth"
 import { Logo } from "@/components/logo"
-
-const STEPS = [
-  { number: 1, label: "Personal" },
-  { number: 2, label: "Account type" },
-  { number: 3, label: "Expertise" },
-  { number: 4, label: "Address" },
-  { number: 5, label: "Payment" },
-  { number: 6, label: "Photo" },
-  { number: 7, label: "Review" },
-]
-
-const STEP_TITLES: Record<number, { title: string; subtitle: string }> = {
-  1: {
-    title: "Personal information",
-    subtitle: "Tell us a bit about yourself to get started.",
-  },
-  2: { title: "Account type", subtitle: "How will you be using Workedin?" },
-  3: {
-    title: "Expertise & skills",
-    subtitle: "Help us match you with the right opportunities.",
-  },
-  4: {
-    title: "Your address",
-    subtitle: "We use this to match you with local opportunities.",
-  },
-  5: { title: "Payment setup", subtitle: "Secure payments for your missions." },
-  6: {
-    title: "Profile photo",
-    subtitle: "A photo helps build trust with your connections.",
-  },
-  7: {
-    title: "Review & confirm",
-    subtitle: "Everything look right? Complete your profile.",
-  },
-}
+import { useTranslation } from "react-i18next"
 
 export default function ProfileSetupPage() {
+  const { t } = useTranslation()
   const { currentStep } = useProfileSetupStore()
   const progress = (currentStep / 7) * 100
-  const { title, subtitle } = STEP_TITLES[currentStep]
   const { logout } = useAuth()
+
+  const STEPS = [
+    { number: 1, label: t("profileSetup.steps.personal") },
+    { number: 2, label: t("profileSetup.steps.accountType") },
+    { number: 3, label: t("profileSetup.steps.expertise") },
+    { number: 4, label: t("profileSetup.steps.address") },
+    { number: 5, label: t("profileSetup.steps.payment") },
+    { number: 6, label: t("profileSetup.steps.photo") },
+    { number: 7, label: t("profileSetup.steps.review") },
+  ]
+
+  const title = t(`profileSetup.stepTitles.${currentStep}.title`)
+  const subtitle = t(`profileSetup.stepTitles.${currentStep}.subtitle`)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -66,14 +45,14 @@ export default function ProfileSetupPage() {
         <div className="flex items-center gap-4">
           <ModeToggle />
           <p className="text-sm text-muted-foreground">
-            Step {currentStep} of 7
+            {t("profileSetup.stepOf", { current: currentStep, total: 7 })}
           </p>
           <button
             onClick={logout}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <LogOut className="size-4" />
-            <span>Log out</span>
+            <span>{t("profileSetup.logOut")}</span>
           </button>
         </div>
       </header>

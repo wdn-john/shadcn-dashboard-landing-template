@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ArrowLeft, Tag, X, Info, Loader2 } from "lucide-react"
 import { StripePaymentForm } from "./stripe-payment-form"
+import { useTranslation } from "react-i18next"
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -22,6 +23,7 @@ const stripePromise = loadStripe(
 type Props = { requestId: number }
 
 export function CheckoutView({ requestId }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const { details, appliedPromoCodes, setAppliedPromoCodes, reset } =
     useCheckoutStore()
@@ -39,9 +41,9 @@ export function CheckoutView({ requestId }: Props) {
     return (
       <div className="px-4 lg:px-6 max-w-xl">
         <p className="text-muted-foreground text-sm">
-          No checkout session found.{" "}
+          {t("checkout.noSession")}{" "}
           <Link href={`/requests/${requestId}`} className="underline">
-            Go back to the request.
+            {t("checkout.goBackRequest")}
           </Link>
         </p>
       </div>
@@ -73,7 +75,7 @@ export function CheckoutView({ requestId }: Props) {
     const code = promoInput.trim().toUpperCase()
     if (!code) return
     if (appliedPromoCodes.includes(code)) {
-      setPromoError("Promo code already applied.")
+      setPromoError(t("checkout.promoAlreadyApplied"))
       return
     }
 
@@ -84,7 +86,7 @@ export function CheckoutView({ requestId }: Props) {
     setPromoLoading(false)
 
     if (!res.ok || !data.ok) {
-      setPromoError(data.message ?? "Invalid promo code.")
+      setPromoError(data.message ?? t("checkout.invalidPromo"))
       return
     }
     setAppliedPromoCodes([...appliedPromoCodes, code])
@@ -111,7 +113,7 @@ export function CheckoutView({ requestId }: Props) {
 
     if (!res.ok || !data.ok) {
       setIntentError(
-        data.message ?? "Failed to initiate payment. Please try again."
+        data.message ?? t("checkout.paymentFailed")
       )
       return
     }
@@ -134,19 +136,19 @@ export function CheckoutView({ requestId }: Props) {
             href={`/requests/${requestId}`}
             className="flex items-center gap-1 text-muted-foreground"
           >
-            <ArrowLeft className="size-3" /> Back to Request
+            <ArrowLeft className="size-3" /> {t("checkout.backToRequest")}
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Checkout</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("checkout.pageTitle")}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Review your order before pre-authorizing payment.
+          {t("checkout.pageSubtitle")}
         </p>
       </div>
 
       {/* Order summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Order Summary</CardTitle>
+          <CardTitle className="text-base">{t("checkout.orderSummary")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -163,7 +165,7 @@ export function CheckoutView({ requestId }: Props) {
           </div>
           <Separator />
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Mission price</span>
+            <span className="text-muted-foreground">{t("checkout.missionPrice")}</span>
             <span className="font-medium">
               $
               {Number(finalPrice).toLocaleString("en-CA", {
@@ -180,13 +182,13 @@ export function CheckoutView({ requestId }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="size-4" /> Promo Code
+              <Tag className="size-4" /> {t("checkout.promoCode")}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div className="flex gap-2">
               <Input
-                placeholder="Enter promo code"
+                placeholder={t("checkout.promoPlaceholder")}
                 value={promoInput}
                 onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === "Enter" && applyPromoCode()}
@@ -199,7 +201,7 @@ export function CheckoutView({ requestId }: Props) {
                 {promoLoading ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  "Apply"
+                  t("checkout.applyPromo")
                 )}
               </Button>
             </div>
@@ -236,11 +238,11 @@ export function CheckoutView({ requestId }: Props) {
       {/* Order breakdown */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Order Breakdown</CardTitle>
+          <CardTitle className="text-base">{t("checkout.orderBreakdown")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Subtotal</span>
+            <span className="text-muted-foreground">{t("checkout.subTotal")}</span>
             <span>
               $
               {Number(subTotal).toLocaleString("en-CA", {
@@ -250,7 +252,7 @@ export function CheckoutView({ requestId }: Props) {
           </div>
           {platformFee > 0 && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Platform fee</span>
+              <span className="text-muted-foreground">{t("checkout.platformFee")}</span>
               <span>
                 $
                 {Number(platformFee).toLocaleString("en-CA", {
@@ -261,7 +263,7 @@ export function CheckoutView({ requestId }: Props) {
           )}
           {tps > 0 && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">TPS (GST)</span>
+              <span className="text-muted-foreground">{t("checkout.tps")}</span>
               <span>
                 $
                 {Number(tps).toLocaleString("en-CA", {
@@ -272,7 +274,7 @@ export function CheckoutView({ requestId }: Props) {
           )}
           {tvq > 0 && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">TVQ (QST)</span>
+              <span className="text-muted-foreground">{t("checkout.tvq")}</span>
               <span>
                 $
                 {Number(tvq).toLocaleString("en-CA", {
@@ -283,7 +285,7 @@ export function CheckoutView({ requestId }: Props) {
           )}
           <Separator />
           <div className="flex justify-between font-semibold text-base">
-            <span>Total</span>
+            <span>{t("checkout.total")}</span>
             <span>
               $
               {Number(total).toLocaleString("en-CA", {
@@ -299,11 +301,11 @@ export function CheckoutView({ requestId }: Props) {
       <div className="rounded-xl border bg-muted/50 px-4 py-4 flex gap-3 text-sm text-muted-foreground">
         <Info className="size-4 mt-0.5 shrink-0 text-primary" />
         <p>
-          By pre-authorizing, you&apos;re <strong>not being charged yet</strong>
-          . The expert must complete the work first. You&apos;ll be charged only
-          after you approve the completed work.{" "}
+          {t("checkout.preAuthNotice").replace("{{strong}}", "|||").split("|||")[0]}
+          <strong>{t("checkout.notChargedYet")}</strong>
+          {t("checkout.preAuthNotice").replace("{{strong}}", "|||").split("|||")[1]}{" "}
           <a href="#" className="underline">
-            Terms &amp; Conditions
+            {t("checkout.termsConditions")}
           </a>
         </p>
       </div>
@@ -324,18 +326,18 @@ export function CheckoutView({ requestId }: Props) {
         >
           {intentLoading ? (
             <>
-              <Loader2 className="size-4 animate-spin" /> Preparing payment...
+              <Loader2 className="size-4 animate-spin" /> {t("checkout.preparing")}
             </>
           ) : (
-            `Pre-Authorize $${Number(total).toLocaleString("en-CA", {
-              minimumFractionDigits: 2,
-            })} CAD`
+            t("checkout.preAuthorize", {
+              amount: Number(total).toLocaleString("en-CA", { minimumFractionDigits: 2 }),
+            })
           )}
         </Button>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Payment Details</CardTitle>
+            <CardTitle className="text-base">{t("checkout.paymentDetails")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Elements
@@ -354,8 +356,7 @@ export function CheckoutView({ requestId }: Props) {
       )}
 
       <p className="text-center text-xs text-muted-foreground">
-        Secured by <strong>Stripe</strong>. Your card information is never
-        stored on our servers.
+        {t("checkout.securedByStripe")}
       </p>
     </div>
   )

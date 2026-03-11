@@ -9,8 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Slider } from "@/components/ui/slider"
 import { useProfileSetupStore } from "@/store/profileSetupStore"
 import { Camera, X, ZoomIn } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 export function Step6Photo() {
+  const { t } = useTranslation()
   const { personal, avatar, setAvatar, nextStep, prevStep } = useProfileSetupStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -91,12 +93,12 @@ export function Step6Photo() {
           onClick={() => fileInputRef.current?.click()}
         >
           <Camera className="size-4" />
-          {preview ? "Change photo" : "Upload photo"}
+          {preview ? t("profileSetup.step6.changePhoto") : t("profileSetup.step6.uploadPhoto")}
         </Button>
 
         <p className="text-sm text-muted-foreground text-center">
-          Optional — JPG, PNG or WebP, max 5MB. <br />
-          You can always update this later from your profile settings.
+          {t("profileSetup.step6.photoHint")} <br />
+          {t("profileSetup.step6.photoHint2")}
         </p>
       </div>
 
@@ -104,7 +106,7 @@ export function Step6Photo() {
       <Dialog open={!!cropSrc} onOpenChange={(open) => { if (!open) setCropSrc(null) }}>
         <DialogContent className="max-w-md p-0 overflow-hidden">
           <DialogHeader className="px-6 pt-6 pb-2">
-            <DialogTitle>Crop your photo</DialogTitle>
+            <DialogTitle>{t("profileSetup.step6.cropTitle")}</DialogTitle>
           </DialogHeader>
 
           {/* Cropper canvas */}
@@ -137,21 +139,21 @@ export function Step6Photo() {
                 className="flex-1"
               />
             </div>
-            <p className="text-xs text-muted-foreground text-center">Drag to reposition · Scroll or slide to zoom</p>
+            <p className="text-xs text-muted-foreground text-center">{t("profileSetup.step6.cropHint")}</p>
           </div>
 
           <DialogFooter className="px-6 pb-6 gap-2">
-            <Button variant="outline" onClick={() => setCropSrc(null)}>Cancel</Button>
-            <Button onClick={handleApplyCrop}>Apply</Button>
+            <Button variant="outline" onClick={() => setCropSrc(null)}>{t("profileSetup.step6.cancel")}</Button>
+            <Button onClick={handleApplyCrop}>{t("profileSetup.step6.apply")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={prevStep}>Back</Button>
+        <Button variant="outline" onClick={prevStep}>{t("profileSetup.step6.back")}</Button>
         <div className="flex gap-3">
-          {!preview && <Button variant="ghost" onClick={nextStep}>Skip</Button>}
-          <Button onClick={nextStep}>{preview ? "Continue" : "Continue without photo"}</Button>
+          {!preview && <Button variant="ghost" onClick={nextStep}>{t("profileSetup.step6.skip")}</Button>}
+          <Button onClick={nextStep}>{preview ? t("profileSetup.step6.continue") : t("profileSetup.step6.continueWithout")}</Button>
         </div>
       </div>
     </div>

@@ -26,6 +26,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/use-auth"
+import { useTranslation } from "react-i18next"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export function NavUser({
   user,
@@ -37,7 +39,8 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { logout} = useAuth();
+  const { logout} = useAuth()
+  const { t } = useTranslation()
 
   return (
     <SidebarMenu>
@@ -84,29 +87,33 @@ export function NavUser({
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/settings/account">
                   <CircleUser />
-                  Account
+                  {t("navUser.account")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/settings/billing">
                   <CreditCard />
-                  Billing
+                  {t("navUser.billing")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/settings/notifications">
                   <BellDot />
-                  Notifications
+                  {t("navUser.notifications")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <div className="px-1 py-1">
+              <LanguageSwitcher />
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-red-600 focus:text-red-600"
               onSelect={logout}
             >
               <LogOut />
-              Log out
+              {t("navUser.logOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -6,4 +6,6 @@ export type Session = {
   profile?: Profile;
   isAuthenticated?: boolean;
   accessToken?: string | null;
+  /** True when the cookie exists but the backend rejected it (401/403). */
+  staleToken?: boolean;
 };

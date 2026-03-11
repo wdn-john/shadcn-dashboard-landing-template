@@ -28,6 +28,7 @@ import { Separator } from "@/components/ui/separator"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 // ── Issue suggestions (mirrors mobile backupItHelpDeskCommonIssues) ────────────
 
@@ -51,70 +52,6 @@ const ISSUE_SUGGESTIONS = [
   "Change management", "Other",
 ]
 
-// ── Schema ────────────────────────────────────────────────────────────────────
-
-const schema = z
-  .object({
-    issue: z.string().min(5, "Please describe the issue (min 5 characters)"),
-    category: z.enum(
-      ["SOFTWARE", "HARDWARE", "NETWORK", "SECURITY", "PROJECT", "OTHER"],
-      {
-        message: "Please select a category",
-      }
-    ),
-    description: z
-      .string()
-      .min(20, "Please provide more detail (min 20 characters)"),
-    priority: z.enum(["LOW", "MEDIUM", "HIGH"], {
-      message: "Select a priority",
-    }),
-    workLocation: z.enum(["ON_SITE", "REMOTE", "NOT_SURE"], {
-      message: "Select a work location",
-    }),
-    budgetOption: z.enum(["NEGOTIABLE", "FIXED"], {
-      message: "Select a budget type",
-    }),
-    budget: z.string().optional(),
-    desiredCompletionDate: z
-      .string()
-      .min(1, "Please select a desired completion date"),
-    // Address fields (required when ON_SITE or NOT_SURE)
-    street: z.string().optional(),
-    city: z.string().optional(),
-    province: z.string().optional(),
-    postalCode: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.budgetOption === "FIXED" && !data.budget) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["budget"],
-        message: "Budget amount is required for a fixed price",
-      })
-    }
-    if (data.workLocation !== "REMOTE") {
-      if (!data.city)
-        ctx.addIssue({
-          code: "custom",
-          path: ["city"],
-          message: "City is required for on-site work",
-        })
-    }
-  })
-
-type FormValues = z.infer<typeof schema>
-
-// ── Category/Enum labels ──────────────────────────────────────────────────────
-
-const CATEGORIES = [
-  { value: "SOFTWARE", label: "Software" },
-  { value: "HARDWARE", label: "Hardware" },
-  { value: "NETWORK", label: "Network" },
-  { value: "SECURITY", label: "Security" },
-  { value: "PROJECT", label: "Project" },
-  { value: "OTHER", label: "Other" },
-]
-
 const PROVINCES = [
   "Alberta",
   "British Columbia",
@@ -134,6 +71,7 @@ const PROVINCES = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function PostRequestForm() {
+  const { t } = useTranslation()
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -160,6 +98,80 @@ export function PostRequestForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // ── Schema (inside component to use t()) ─────────────────────────────────────
+
+  const schema = z
+    .object({
+      issue: z.string().min(5, t("requests.new.issueTitleError")),
+      category: z.enum(
+        ["SOFTWARE", "HARDWARE", "NETWORK", "SECURITY", "PROJECT", "OTHER"],
+        { message: t("requests.new.category") }
+      ),
+      description: z.string().min(20, t("requests.new.descriptionError")),
+      priority: z.enum(["LOW", "MEDIUM", "HIGH"], {
+        message: t("requests.new.priority"),
+      }),
+      workLocation: z.enum(["ON_SITE", "REMOTE", "NOT_SURE"], {
+        message: t("requests.new.workLocation"),
+      }),
+      budgetOption: z.enum(["NEGOTIABLE", "FIXED"], {
+        message: t("requests.new.budget"),
+      }),
+      budget: z.string().optional(),
+      desiredCompletionDate: z.string().min(1, t("requests.new.completionDate")),
+      street: z.string().optional(),
+      city: z.string().optional(),
+      province: z.string().optional(),
+      postalCode: z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.budgetOption === "FIXED" && !data.budget) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["budget"],
+          message: t("requests.new.budgetAmount"),
+        })
+      }
+      if (data.workLocation !== "REMOTE") {
+        if (!data.city)
+          ctx.addIssue({
+            code: "custom",
+            path: ["city"],
+            message: t("requests.new.cityPlaceholder"),
+          })
+      }
+    })
+
+  type FormValues = z.infer<typeof schema>
+
+  // ── Category/Enum labels ────────────────────────────────────────────────────
+
+  const CATEGORIES = [
+    { value: "SOFTWARE", label: t("requests.new.categories.SOFTWARE") },
+    { value: "HARDWARE", label: t("requests.new.categories.HARDWARE") },
+    { value: "NETWORK", label: t("requests.new.categories.NETWORK") },
+    { value: "SECURITY", label: t("requests.new.categories.SECURITY") },
+    { value: "PROJECT", label: t("requests.new.categories.PROJECT") },
+    { value: "OTHER", label: t("requests.new.categories.OTHER") },
+  ]
+
+  const PRIORITIES = [
+    { value: "LOW", label: t("requests.new.priorities.LOW"), desc: t("requests.new.priorities.lowHint") },
+    { value: "MEDIUM", label: t("requests.new.priorities.MEDIUM"), desc: t("requests.new.priorities.mediumHint") },
+    { value: "HIGH", label: t("requests.new.priorities.HIGH"), desc: t("requests.new.priorities.highHint") },
+  ]
+
+  const WORK_LOCATIONS = [
+    { value: "REMOTE", label: t("requests.new.workLocations.REMOTE"), desc: t("requests.new.workLocations.remoteHint") },
+    { value: "ON_SITE", label: t("requests.new.workLocations.ON_SITE"), desc: t("requests.new.workLocations.onsiteHint") },
+    { value: "NOT_SURE", label: t("requests.new.workLocations.NOT_SURE"), desc: t("requests.new.workLocations.notsureHint") },
+  ]
+
+  const BUDGET_OPTIONS = [
+    { value: "NEGOTIABLE", label: t("requests.new.budgetOptions.NEGOTIABLE"), desc: t("requests.new.budgetOptions.negotiableHint") },
+    { value: "FIXED", label: t("requests.new.budgetOptions.FIXED"), desc: t("requests.new.budgetOptions.fixedHint") },
+  ]
+
   const {
     register,
     handleSubmit,
@@ -183,7 +195,6 @@ export function PostRequestForm() {
     setSubmitting(true)
     setError(null)
 
-    // Build the address JSON string
     const addressObj = showAddressFields
       ? {
           street: values.street ?? "",
@@ -196,7 +207,6 @@ export function PostRequestForm() {
         }
       : { lat: 0, lng: 0, country: "Canada" }
 
-    // Build FormData (backend expects multipart/form-data)
     const formData = new FormData()
     formData.append("issue", values.issue)
     formData.append("category", values.category)
@@ -222,11 +232,10 @@ export function PostRequestForm() {
     setSubmitting(false)
 
     if (!res.ok || !data.ok) {
-      setError(data.message ?? "Failed to post request. Please try again.")
+      setError(data.message ?? t("requests.new.failed"))
       return
     }
 
-    // Redirect to the new request's detail page or the requests list
     const id = data.data?.id
     router.replace(id ? `/requests/${id}` : "/requests")
   }
@@ -240,14 +249,14 @@ export function PostRequestForm() {
             href="/requests"
             className="flex items-center gap-1 text-muted-foreground"
           >
-            <ArrowLeft className="size-3" /> Back to requests
+            <ArrowLeft className="size-3" /> {t("requests.backToRequests")}
           </Link>
         </Button>
         <h1 className="text-2xl font-bold tracking-tight">
-          Post a Service Request
+          {t("requests.new.title")}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Describe your IT issue and verified experts will apply to help you.
+          {t("requests.new.subtitle")}
         </p>
       </div>
 
@@ -255,20 +264,20 @@ export function PostRequestForm() {
         {/* ── Section 1: The Problem ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Describe the Issue</CardTitle>
+            <CardTitle className="text-base">{t("requests.new.issueSection")}</CardTitle>
             <CardDescription>
-              Be specific — experts will use this to write their proposals.
+              {t("requests.new.issueSectionHint")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="grid gap-2" ref={issueContainerRef}>
               <Label htmlFor="issue">
-                Issue Title <span className="text-destructive">*</span>
+                {t("requests.new.issueTitle")}
               </Label>
               <div className="relative">
                 <Input
                   id="issue"
-                  placeholder="e.g. VPN not connecting after Windows update"
+                  placeholder={t("requests.new.issueTitlePlaceholder")}
                   autoComplete="off"
                   {...register("issue")}
                   onChange={(e) => {
@@ -309,14 +318,14 @@ export function PostRequestForm() {
 
             <div className="grid gap-2">
               <Label htmlFor="category">
-                Category <span className="text-destructive">*</span>
+                {t("requests.new.category")}
               </Label>
               <Select
                 onValueChange={(v) => setValue("category", v as any)}
                 defaultValue=""
               >
                 <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
+                  <SelectValue placeholder={t("requests.new.categoryPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((c) => (
@@ -335,11 +344,11 @@ export function PostRequestForm() {
 
             <div className="grid gap-2">
               <Label htmlFor="description">
-                Detailed Description <span className="text-destructive">*</span>
+                {t("requests.new.description")}
               </Label>
               <Textarea
                 id="description"
-                placeholder="Describe the problem in detail: when it started, what you've already tried, affected systems, error messages, etc."
+                placeholder={t("requests.new.descriptionPlaceholder")}
                 rows={5}
                 {...register("description")}
               />
@@ -355,31 +364,23 @@ export function PostRequestForm() {
         {/* ── Section 2: Request Details ── */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Request Details</CardTitle>
+            <CardTitle className="text-base">{t("requests.new.detailsSection")}</CardTitle>
             <CardDescription>
-              Help experts understand the scope and urgency.
+              {t("requests.new.detailsSectionHint")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
             {/* Priority */}
             <div className="grid gap-3">
               <Label>
-                Priority <span className="text-destructive">*</span>
+                {t("requests.new.priority")} <span className="text-destructive">*</span>
               </Label>
               <RadioGroup
                 defaultValue="MEDIUM"
                 onValueChange={(v) => setValue("priority", v as any)}
                 className="flex gap-4"
               >
-                {[
-                  { value: "LOW", label: "Low", desc: "Not urgent" },
-                  {
-                    value: "MEDIUM",
-                    label: "Medium",
-                    desc: "Within a few days",
-                  },
-                  { value: "HIGH", label: "High", desc: "Urgent — ASAP" },
-                ].map((p) => (
+                {PRIORITIES.map((p) => (
                   <Label
                     key={p.value}
                     htmlFor={`priority-${p.value}`}
@@ -409,30 +410,14 @@ export function PostRequestForm() {
             {/* Work Location */}
             <div className="grid gap-3">
               <Label>
-                Work Location <span className="text-destructive">*</span>
+                {t("requests.new.workLocation")} <span className="text-destructive">*</span>
               </Label>
               <RadioGroup
                 defaultValue="NOT_SURE"
                 onValueChange={(v) => setValue("workLocation", v as any)}
                 className="flex gap-4"
               >
-                {[
-                  {
-                    value: "REMOTE",
-                    label: "Remote",
-                    desc: "Expert works remotely",
-                  },
-                  {
-                    value: "ON_SITE",
-                    label: "On-Site",
-                    desc: "Expert comes to you",
-                  },
-                  {
-                    value: "NOT_SURE",
-                    label: "Not Sure",
-                    desc: "Open to either",
-                  },
-                ].map((w) => (
+                {WORK_LOCATIONS.map((w) => (
                   <Label
                     key={w.value}
                     htmlFor={`wl-${w.value}`}
@@ -462,25 +447,14 @@ export function PostRequestForm() {
             {/* Budget */}
             <div className="grid gap-3">
               <Label>
-                Budget <span className="text-destructive">*</span>
+                {t("requests.new.budget")} <span className="text-destructive">*</span>
               </Label>
               <RadioGroup
                 defaultValue="NEGOTIABLE"
                 onValueChange={(v) => setValue("budgetOption", v as any)}
                 className="flex gap-4"
               >
-                {[
-                  {
-                    value: "NEGOTIABLE",
-                    label: "Negotiable",
-                    desc: "Experts can propose a price",
-                  },
-                  {
-                    value: "FIXED",
-                    label: "Fixed",
-                    desc: "You set the budget",
-                  },
-                ].map((b) => (
+                {BUDGET_OPTIONS.map((b) => (
                   <Label
                     key={b.value}
                     htmlFor={`bo-${b.value}`}
@@ -502,8 +476,7 @@ export function PostRequestForm() {
               {budgetOption === "FIXED" && (
                 <div className="grid gap-2 mt-1">
                   <Label htmlFor="budget">
-                    Budget Amount (CAD){" "}
-                    <span className="text-destructive">*</span>
+                    {t("requests.new.budgetAmount")}
                   </Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -533,8 +506,7 @@ export function PostRequestForm() {
             {/* Desired Completion Date */}
             <div className="grid gap-2">
               <Label htmlFor="desiredCompletionDate">
-                Desired Completion Date{" "}
-                <span className="text-destructive">*</span>
+                {t("requests.new.completionDate")}
               </Label>
               <Input
                 id="desiredCompletionDate"
@@ -555,19 +527,19 @@ export function PostRequestForm() {
         {showAddressFields && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Location</CardTitle>
+              <CardTitle className="text-base">{t("requests.new.locationSection")}</CardTitle>
               <CardDescription>
                 {workLocation === "ON_SITE"
-                  ? "Required — the expert will come to this location."
-                  : "Provide your location in case on-site work is needed."}
+                  ? t("requests.new.locationHintOnsite")
+                  : t("requests.new.locationHintOther")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="street">Street Address</Label>
+                <Label htmlFor="street">{t("requests.new.streetAddress")}</Label>
                 <Input
                   id="street"
-                  placeholder="123 Main Street"
+                  placeholder={t("requests.new.streetAddressPlaceholder")}
                   {...register("street")}
                 />
               </div>
@@ -578,7 +550,7 @@ export function PostRequestForm() {
                   </Label>
                   <Input
                     id="city"
-                    placeholder="Montreal"
+                    placeholder={t("requests.new.cityPlaceholder")}
                     {...register("city")}
                   />
                   {errors.city && (
@@ -591,7 +563,7 @@ export function PostRequestForm() {
                   <Label htmlFor="postalCode">Postal Code</Label>
                   <Input
                     id="postalCode"
-                    placeholder="H2X 1Y4"
+                    placeholder={t("requests.new.postalCodePlaceholder")}
                     {...register("postalCode")}
                   />
                 </div>
@@ -600,7 +572,7 @@ export function PostRequestForm() {
                 <Label htmlFor="province">Province</Label>
                 <Select onValueChange={(v) => setValue("province", v)}>
                   <SelectTrigger id="province">
-                    <SelectValue placeholder="Select province" />
+                    <SelectValue placeholder={t("requests.new.provincePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {PROVINCES.map((p) => (
@@ -625,10 +597,10 @@ export function PostRequestForm() {
         {/* Actions */}
         <div className="flex items-center justify-between pb-6">
           <Button variant="outline" type="button" asChild>
-            <Link href="/requests">Cancel</Link>
+            <Link href="/requests">{t("requests.new.cancel")}</Link>
           </Button>
           <Button type="submit" disabled={submitting} className="min-w-36">
-            {submitting ? "Posting..." : "Post Request"}
+            {submitting ? t("requests.new.submitting") : t("requests.new.submit")}
           </Button>
         </div>
       </form>

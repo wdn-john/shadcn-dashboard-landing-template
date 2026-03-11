@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ClipboardList, Users, Briefcase, Plus, ArrowRight } from "lucide-react"
+import { T } from "@/components/t"
 
 type RequestSummary = {
   id: number
@@ -46,16 +47,18 @@ export function ClientDashboard({ firstName, requests }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            {firstName ? `Welcome back, ${firstName}` : "Dashboard"}
+            {firstName
+              ? <T k="dashboard.welcome" values={{ name: firstName }} />
+              : <T k="dashboard.title" />}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage your IT service requests and track mission progress.
+            <T k="dashboard.client.subtitle" />
           </p>
         </div>
         <Button asChild>
           <Link href="/requests/new">
             <Plus className="size-4" />
-            Post a Request
+            <T k="dashboard.client.postRequest" />
           </Link>
         </Button>
       </div>
@@ -64,40 +67,40 @@ export function ClientDashboard({ firstName, requests }: Props) {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>My Requests</CardDescription>
+            <CardDescription><T k="dashboard.client.myRequests" /></CardDescription>
             <ClipboardList className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">{total}</p>
           </CardContent>
           <CardFooter className="text-sm text-muted-foreground">
-            {open} open · {inProgress} in progress · {completed} completed
+            <T k="dashboard.client.openStatus" values={{ open, inProgress, completed }} />
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>Pending Applications</CardDescription>
+            <CardDescription><T k="dashboard.client.pendingApplications" /></CardDescription>
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">—</p>
           </CardContent>
           <CardFooter className="text-sm text-muted-foreground">
-            Experts waiting for your review
+            <T k="dashboard.client.expertsReview" />
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>Active Missions</CardDescription>
+            <CardDescription><T k="dashboard.client.activeMissions" /></CardDescription>
             <Briefcase className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">{inProgress}</p>
           </CardContent>
           <CardFooter className="text-sm text-muted-foreground">
-            Work currently in progress
+            <T k="dashboard.client.workInProgress" />
           </CardFooter>
         </Card>
       </div>
@@ -106,12 +109,12 @@ export function ClientDashboard({ firstName, requests }: Props) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>My Service Requests</CardTitle>
-            <CardDescription>Your posted IT requests and their current status</CardDescription>
+            <CardTitle><T k="dashboard.client.myServiceRequests" /></CardTitle>
+            <CardDescription><T k="dashboard.client.requestsDesc" /></CardDescription>
           </div>
           <Button variant="ghost" size="sm" asChild>
             <Link href="/requests" className="flex items-center gap-1">
-              View all <ArrowRight className="size-3" />
+              <T k="dashboard.client.viewAll" /> <ArrowRight className="size-3" />
             </Link>
           </Button>
         </CardHeader>
@@ -119,14 +122,14 @@ export function ClientDashboard({ firstName, requests }: Props) {
           {requests.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
               <ClipboardList className="size-10 text-muted-foreground/50" />
-              <p className="text-muted-foreground font-medium">No requests yet</p>
+              <p className="text-muted-foreground font-medium"><T k="dashboard.client.noRequests" /></p>
               <p className="text-sm text-muted-foreground">
-                Post your first IT service request to get started.
+                <T k="dashboard.client.noRequestsHint" />
               </p>
               <Button asChild size="sm">
                 <Link href="/requests/new">
                   <Plus className="size-4" />
-                  Post a Request
+                  <T k="dashboard.client.postRequest" />
                 </Link>
               </Button>
             </div>
@@ -137,7 +140,7 @@ export function ClientDashboard({ firstName, requests }: Props) {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">{req.title || req.description}</p>
                     <p className="text-sm text-muted-foreground">
-                      {req.price != null ? `$${Number(req.price).toFixed(2)}` : "No budget set"}
+                      {req.price != null ? `$${Number(req.price).toFixed(2)}` : <T k="dashboard.client.noBudget" />}
                       {" · "}
                       {req.posted
                         ? new Date(req.posted).toLocaleDateString("en-CA", {
@@ -151,7 +154,7 @@ export function ClientDashboard({ firstName, requests }: Props) {
                   <div className="flex items-center gap-3 shrink-0">
                     <Badge variant={statusVariant(req.status)}>{req.status}</Badge>
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/requests/${req.id}`}>View</Link>
+                      <Link href={`/requests/${req.id}`}><T k="common.view" /></Link>
                     </Button>
                   </div>
                 </div>

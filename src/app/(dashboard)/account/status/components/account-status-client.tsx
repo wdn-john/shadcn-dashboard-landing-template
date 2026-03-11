@@ -32,6 +32,7 @@ import {
   Info,
   AlertCircle,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -58,17 +59,15 @@ async function fileToBase64(file: File): Promise<string> {
   })
 }
 
-const WIZARD_STEPS = ["Document", "Upload", "Selfie", "Review"]
-
-function WizardProgress({ current }: { current: number }) {
+function WizardProgress({ current, steps }: { current: number; steps: string[] }) {
   return (
     <div className="flex items-center mb-1">
-      {WIZARD_STEPS.map((label, i) => {
+      {steps.map((label, i) => {
         const num = i + 1
         const done = num < current
         const active = num === current
         return (
-          <div key={label} className={cn("flex items-center", i < WIZARD_STEPS.length - 1 && "flex-1")}>
+          <div key={label} className={cn("flex items-center", i < steps.length - 1 && "flex-1")}>
             <div className="flex items-center gap-2 shrink-0">
               <div
                 className={cn(
@@ -91,7 +90,7 @@ function WizardProgress({ current }: { current: number }) {
                 {label}
               </span>
             </div>
-            {i < WIZARD_STEPS.length - 1 && (
+            {i < steps.length - 1 && (
               <div className={cn("flex-1 h-px mx-3", done ? "bg-primary" : "bg-border")} />
             )}
           </div>
@@ -108,6 +107,8 @@ function ImageUploadCard({
   image,
   onSelect,
   required = true,
+  optionalText,
+  replaceText,
 }: {
   label: string
   hint: string
@@ -115,6 +116,8 @@ function ImageUploadCard({
   image: ImageData | null
   onSelect: (img: ImageData) => void
   required?: boolean
+  optionalText: string
+  replaceText: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -131,7 +134,7 @@ function ImageUploadCard({
       <p className="text-sm font-medium">
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
-        {!required && <span className="text-muted-foreground font-normal ml-1">— optional</span>}
+        {!required && <span className="text-muted-foreground font-normal ml-1">{optionalText}</span>}
       </p>
       <input
         ref={inputRef}
@@ -150,7 +153,7 @@ function ImageUploadCard({
             className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-md bg-black/60 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-black/80"
           >
             <RotateCcw className="size-3" />
-            Replace
+            {replaceText}
           </button>
         </div>
       ) : (
@@ -175,6 +178,14 @@ export function AccountStatusClient({
   accountStatus: string | null
 }) {
   const router = useRouter()
+  const { t } = useTranslation()
+
+  const WIZARD_STEPS = [
+    t("account.status.wizard.stepDocument"),
+    t("account.status.wizard.stepUpload"),
+    t("account.status.wizard.stepSelfie"),
+    t("account.status.wizard.stepReview"),
+  ]
 
   const [view, setView] = useState<StatusView>("loading")
   const [step, setStep] = useState(1)
@@ -220,12 +231,12 @@ export function AccountStatusClient({
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({}))
-        setError((d as { message?: string }).message ?? "Failed to start verification.")
+        setError((d as { message?: string }).message ?? t("account.status.wizard.step3.startFailed"))
         return
       }
       setStep(4)
     } catch {
-      setError("Something went wrong. Please try again.")
+      setError(t("account.status.wizard.somethingWentWrong"))
     } finally {
       setStarting(false)
     }
@@ -234,7 +245,7 @@ export function AccountStatusClient({
   async function handleSubmit() {
     if (!frontImage || !selfieImage || !documentType) return
     if (documentType === "DRIVERS_LICENSE" && !backImage) {
-      setError("Please upload the back of your driver's license.")
+      setError(t("account.status.wizard.step4.backRequired"))
       return
     }
     setSubmitting(true)
@@ -252,12 +263,12 @@ export function AccountStatusClient({
       })
       if (!res.ok) {
         const d = await res.json().catch(() => ({}))
-        setError((d as { message?: string }).message ?? "Submission failed. Please try again.")
+        setError((d as { message?: string }).message ?? t("account.status.wizard.step6.submissionFailed"))
         return
       }
       setView("reviewing")
     } catch {
-      setError("Something went wrong. Please try again.")
+      setError(t("account.status.wizard.somethingWentWrong"))
     } finally {
       setSubmitting(false)
     }
@@ -300,9 +311,9 @@ export function AccountStatusClient({
         <ArrowLeft className="size-4" />
       </Button>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Account Status</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("account.status.title")}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          {isWizard ? "Identity Verification" : "Identity verification and account standing."}
+          {isWizard ? t("account.status.identityVerification") : t("account.status.subtitle")}
         </p>
       </div>
     </div>
@@ -321,8 +332,8 @@ export function AccountStatusClient({
                 <CheckCircle className="size-4 text-emerald-600" />
               </div>
               <div>
-                <CardTitle className="text-base">Identity Verified</CardTitle>
-                <CardDescription>Your identity has been successfully verified.</CardDescription>
+                <CardTitle className="text-base">{t("account.status.approved.title")}</CardTitle>
+                <CardDescription>{t("account.status.approved.desc")}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -330,13 +341,13 @@ export function AccountStatusClient({
             <div className="flex items-start gap-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-4 py-3">
               <ShieldCheck className="size-4 text-emerald-600 mt-0.5 shrink-0" />
               <p className="text-sm text-emerald-700 dark:text-emerald-300">
-                Your verified status allows you to apply to service requests and receive payments through the platform.
+                {t("account.status.approved.notice")}
               </p>
             </div>
             <Separator />
             <div className="flex justify-end">
               <Button variant="outline" asChild>
-                <Link href="/account">Back to Account</Link>
+                <Link href="/account">{t("common.backToAccount")}</Link>
               </Button>
             </div>
           </CardContent>
@@ -358,8 +369,8 @@ export function AccountStatusClient({
                 <Clock className="size-4 text-amber-600" />
               </div>
               <div>
-                <CardTitle className="text-base">Verification Under Review</CardTitle>
-                <CardDescription>Your documents are being reviewed by our team.</CardDescription>
+                <CardTitle className="text-base">{t("account.status.reviewing.title")}</CardTitle>
+                <CardDescription>{t("account.status.reviewing.desc")}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -370,27 +381,27 @@ export function AccountStatusClient({
                   icon: CheckCircle,
                   color: "text-emerald-600",
                   bg: "bg-emerald-100 dark:bg-emerald-950/40",
-                  title: "Documents Submitted",
-                  desc: "Your documents have been received.",
-                  badge: "Done",
+                  title: t("account.status.reviewing.step1Title"),
+                  desc: t("account.status.reviewing.step1Desc"),
+                  badge: t("account.status.reviewing.step1Badge"),
                   variant: "outline" as const,
                 },
                 {
                   icon: Clock,
                   color: "text-amber-600",
                   bg: "bg-amber-100 dark:bg-amber-950/40",
-                  title: "Under Review",
-                  desc: "Our team is verifying your identity.",
-                  badge: "1–2 business days",
+                  title: t("account.status.reviewing.step2Title"),
+                  desc: t("account.status.reviewing.step2Desc"),
+                  badge: t("account.status.reviewing.step2Badge"),
                   variant: "default" as const,
                 },
                 {
                   icon: CheckCircle,
                   color: "text-muted-foreground",
                   bg: "bg-muted",
-                  title: "Decision Notified",
-                  desc: "You'll receive an email with the outcome.",
-                  badge: "After review",
+                  title: t("account.status.reviewing.step3Title"),
+                  desc: t("account.status.reviewing.step3Desc"),
+                  badge: t("account.status.reviewing.step3Badge"),
                   variant: "secondary" as const,
                 },
               ].map((item, i) => (
@@ -414,7 +425,7 @@ export function AccountStatusClient({
             <Separator />
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => router.push("/dashboard")}>
-                Back to Dashboard
+                {t("nav.dashboard")}
               </Button>
             </div>
           </CardContent>
@@ -436,9 +447,9 @@ export function AccountStatusClient({
                 <XCircle className="size-4 text-red-600" />
               </div>
               <div>
-                <CardTitle className="text-base">Verification Rejected</CardTitle>
+                <CardTitle className="text-base">{t("account.status.rejected.title")}</CardTitle>
                 <CardDescription>
-                  Unfortunately your verification was not approved. Review the reason below and try again.
+                  {t("account.status.rejected.desc")}
                 </CardDescription>
               </div>
             </div>
@@ -448,20 +459,20 @@ export function AccountStatusClient({
               <div className="flex items-start gap-3 rounded-lg bg-destructive/5 border border-destructive/20 px-4 py-3">
                 <AlertCircle className="size-4 text-destructive mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-destructive mb-0.5">Reason</p>
+                  <p className="text-sm font-medium text-destructive mb-0.5">{t("common.reason")}</p>
                   <p className="text-sm text-foreground">{rejectionReason}</p>
                 </div>
               </div>
             )}
             <div>
-              <p className="text-sm font-medium mb-3">Tips for resubmission</p>
+              <p className="text-sm font-medium mb-3">{t("account.status.rejected.tips")}</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {[
-                  "Use a valid, unexpired document",
-                  "Ensure good lighting — no shadows or glare",
-                  "All text on the document must be clearly legible",
-                  "Include the entire document in the frame",
-                  "Your selfie must clearly show your face",
+                  t("account.status.rejected.tip1"),
+                  t("account.status.rejected.tip2"),
+                  t("account.status.rejected.tip3"),
+                  t("account.status.rejected.tip4"),
+                  t("account.status.rejected.tip5"),
                 ].map((tip) => (
                   <li key={tip} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <CheckCircle className="size-3.5 text-emerald-600 mt-0.5 shrink-0" />
@@ -473,11 +484,11 @@ export function AccountStatusClient({
             <Separator />
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => router.push("/dashboard")}>
-                Do it later
+                {t("common.doItLater")}
               </Button>
               <Button className="gap-2" onClick={handleRetry}>
                 <RotateCcw className="size-4" />
-                Try Again
+                {t("common.tryAgain")}
               </Button>
             </div>
           </CardContent>
@@ -501,18 +512,18 @@ export function AccountStatusClient({
                 <ShieldCheck className="size-4 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-base">Verify Your Identity</CardTitle>
-                <CardDescription>Complete identity verification to unlock full platform access.</CardDescription>
+                <CardTitle className="text-base">{t("account.status.wizard.step1.title")}</CardTitle>
+                <CardDescription>{t("account.status.wizard.step1.desc")}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { icon: CheckCircle, label: "Apply to requests", color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-950/40" },
-                { icon: CreditCard, label: "Receive payments", color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-950/40" },
-                { icon: ShieldCheck, label: "Build client trust", color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-950/40" },
-                { icon: Lock, label: "Secure your account", color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-950/40" },
+                { icon: CheckCircle, label: t("account.status.wizard.step1.benefit1"), color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-950/40" },
+                { icon: CreditCard, label: t("account.status.wizard.step1.benefit2"), color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-950/40" },
+                { icon: ShieldCheck, label: t("account.status.wizard.step1.benefit3"), color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-950/40" },
+                { icon: Lock, label: t("account.status.wizard.step1.benefit4"), color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-950/40" },
               ].map((b) => (
                 <div key={b.label} className="flex items-center gap-3 rounded-lg border px-4 py-3">
                   <div className={cn("flex size-8 items-center justify-center rounded-md shrink-0", b.bg)}>
@@ -525,16 +536,16 @@ export function AccountStatusClient({
             <div className="flex items-start gap-3 rounded-lg bg-muted/60 px-4 py-3">
               <Info className="size-4 text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-sm text-muted-foreground">
-                The process takes about 5 minutes. Your information is encrypted and stored securely.
+                {t("account.status.wizard.step1.infoText")}
               </p>
             </div>
             <Separator />
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" asChild>
-                <Link href="/account">Cancel</Link>
+                <Link href="/account">{t("common.cancel")}</Link>
               </Button>
               <Button className="gap-2" onClick={() => setStep(2)}>
-                Get Started
+                {t("account.status.wizard.step1.getStarted")}
                 <ArrowRight className="size-4" />
               </Button>
             </div>
@@ -546,8 +557,8 @@ export function AccountStatusClient({
       {step === 2 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Why We Verify Identities</CardTitle>
-            <CardDescription>Identity verification keeps our community safe and trustworthy.</CardDescription>
+            <CardTitle className="text-base">{t("account.status.wizard.step2.title")}</CardTitle>
+            <CardDescription>{t("account.status.wizard.step2.desc")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
@@ -556,29 +567,29 @@ export function AccountStatusClient({
                   icon: ShieldCheck,
                   color: "text-blue-600",
                   bg: "bg-blue-100 dark:bg-blue-950/40",
-                  title: "Platform Security",
-                  desc: "We verify all experts to prevent bad actors and protect both clients and experts.",
+                  title: t("account.status.wizard.step2.reason1Title"),
+                  desc: t("account.status.wizard.step2.reason1Desc"),
                 },
                 {
                   icon: Lock,
                   color: "text-emerald-600",
                   bg: "bg-emerald-100 dark:bg-emerald-950/40",
-                  title: "Fraud Prevention",
-                  desc: "Verified identities drastically reduce fraud and chargebacks.",
+                  title: t("account.status.wizard.step2.reason2Title"),
+                  desc: t("account.status.wizard.step2.reason2Desc"),
                 },
                 {
                   icon: FileCheck,
                   color: "text-amber-600",
                   bg: "bg-amber-100 dark:bg-amber-950/40",
-                  title: "Legal Compliance",
-                  desc: "We are required by law to verify the identities of people receiving payments.",
+                  title: t("account.status.wizard.step2.reason3Title"),
+                  desc: t("account.status.wizard.step2.reason3Desc"),
                 },
                 {
                   icon: Users,
                   color: "text-purple-600",
                   bg: "bg-purple-100 dark:bg-purple-950/40",
-                  title: "Client Trust",
-                  desc: "Clients are more likely to hire verified experts, boosting your opportunities.",
+                  title: t("account.status.wizard.step2.reason4Title"),
+                  desc: t("account.status.wizard.step2.reason4Desc"),
                 },
               ].map((r) => (
                 <div key={r.title} className="flex items-start gap-4 rounded-lg border px-4 py-3">
@@ -595,16 +606,16 @@ export function AccountStatusClient({
             <div className="flex items-start gap-3 rounded-lg bg-muted/60 px-4 py-3">
               <Lock className="size-4 text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                Your documents are processed securely and never shared with third parties outside of legal requirements.
+                {t("account.status.wizard.step2.privacyNote")}
               </p>
             </div>
             <Separator />
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(1)}>
-                Back
+                {t("common.back")}
               </Button>
               <Button className="gap-2" onClick={() => setStep(3)}>
-                Continue
+                {t("common.continue")}
                 <ArrowRight className="size-4" />
               </Button>
             </div>
@@ -616,10 +627,10 @@ export function AccountStatusClient({
       {step === 3 && (
         <Card>
           <CardHeader>
-            <WizardProgress current={1} />
-            <CardTitle className="text-base">Choose Your Document</CardTitle>
+            <WizardProgress current={1} steps={WIZARD_STEPS} />
+            <CardTitle className="text-base">{t("account.status.wizard.step3.title")}</CardTitle>
             <CardDescription>
-              Select the government-issued document you&apos;d like to use for verification.
+              {t("account.status.wizard.step3.desc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -629,16 +640,22 @@ export function AccountStatusClient({
                   {
                     type: "DRIVERS_LICENSE" as const,
                     icon: CreditCard,
-                    title: "Driver's License",
-                    desc: "Front and back required.",
-                    reqs: ["Valid & not expired", "Clearly legible text"],
+                    title: t("account.status.wizard.step3.driversLicenseTitle"),
+                    desc: t("account.status.wizard.step3.driversLicenseDesc"),
+                    reqs: [
+                      t("account.status.wizard.step3.req1"),
+                      t("account.status.wizard.step3.req2"),
+                    ],
                   },
                   {
                     type: "PASSPORT" as const,
                     icon: FileCheck,
-                    title: "Passport",
-                    desc: "Photo page only.",
-                    reqs: ["Valid & not expired", "Photo page in full view"],
+                    title: t("account.status.wizard.step3.passportTitle"),
+                    desc: t("account.status.wizard.step3.passportDesc"),
+                    reqs: [
+                      t("account.status.wizard.step3.req1"),
+                      t("account.status.wizard.step3.passportReq2"),
+                    ],
                   },
                 ] as const
               ).map((doc) => {
@@ -695,7 +712,7 @@ export function AccountStatusClient({
             <Separator />
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(2)}>
-                Back
+                {t("common.back")}
               </Button>
               <Button
                 className="gap-2"
@@ -705,11 +722,11 @@ export function AccountStatusClient({
                 {starting ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Starting…
+                    {t("account.status.wizard.step3.starting")}
                   </>
                 ) : (
                   <>
-                    Continue
+                    {t("common.continue")}
                     <ArrowRight className="size-4" />
                   </>
                 )}
@@ -723,12 +740,12 @@ export function AccountStatusClient({
       {step === 4 && (
         <Card>
           <CardHeader>
-            <WizardProgress current={2} />
-            <CardTitle className="text-base">Upload Your Document</CardTitle>
+            <WizardProgress current={2} steps={WIZARD_STEPS} />
+            <CardTitle className="text-base">{t("account.status.wizard.step4.title")}</CardTitle>
             <CardDescription>
               {documentType === "DRIVERS_LICENSE"
-                ? "Upload a clear photo of the front and back of your driver's license."
-                : "Upload a clear photo of the photo page of your passport."}
+                ? t("account.status.wizard.step4.licenseDesc")
+                : t("account.status.wizard.step4.passportDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -739,37 +756,41 @@ export function AccountStatusClient({
               )}
             >
               <ImageUploadCard
-                label="Front"
-                hint="Click to upload front of document"
+                label={t("account.status.wizard.step4.front")}
+                hint={t("account.status.wizard.step4.frontHint")}
                 image={frontImage}
                 onSelect={setFrontImage}
+                optionalText={t("common.optional")}
+                replaceText={t("common.replace")}
               />
               {documentType === "DRIVERS_LICENSE" && (
                 <ImageUploadCard
-                  label="Back"
-                  hint="Click to upload back of document"
+                  label={t("account.status.wizard.step4.back")}
+                  hint={t("account.status.wizard.step4.backHint")}
                   image={backImage}
                   onSelect={setBackImage}
+                  optionalText={t("common.optional")}
+                  replaceText={t("common.replace")}
                 />
               )}
             </div>
             <div className="flex items-start gap-3 rounded-lg bg-muted/60 px-4 py-3">
               <Info className="size-4 text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                Ensure the document is fully visible, well-lit, and all text is legible. Avoid shadows or glare.
+                {t("account.status.wizard.step4.infoNote")}
               </p>
             </div>
             <Separator />
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(3)}>
-                Back
+                {t("common.back")}
               </Button>
               <Button
                 className="gap-2"
                 disabled={!frontImage || (documentType === "DRIVERS_LICENSE" && !backImage)}
                 onClick={() => setStep(5)}
               >
-                Continue
+                {t("common.continue")}
                 <ArrowRight className="size-4" />
               </Button>
             </div>
@@ -781,35 +802,37 @@ export function AccountStatusClient({
       {step === 5 && (
         <Card>
           <CardHeader>
-            <WizardProgress current={3} />
-            <CardTitle className="text-base">Take a Selfie</CardTitle>
+            <WizardProgress current={3} steps={WIZARD_STEPS} />
+            <CardTitle className="text-base">{t("account.status.wizard.step5.title")}</CardTitle>
             <CardDescription>
-              Upload a clear photo of your face to match against your document.
+              {t("account.status.wizard.step5.desc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="max-w-xs">
               <ImageUploadCard
-                label="Selfie"
-                hint="Click to upload your selfie"
+                label={t("account.status.wizard.step5.selfieLabel")}
+                hint={t("account.status.wizard.step5.selfieHint")}
                 capture="user"
                 image={selfieImage}
                 onSelect={setSelfieImage}
+                optionalText={t("common.optional")}
+                replaceText={t("common.replace")}
               />
             </div>
             <div className="flex items-start gap-3 rounded-lg bg-muted/60 px-4 py-3">
               <Camera className="size-4 text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                Look directly at the camera. Ensure your face is fully visible. Remove sunglasses or hats.
+                {t("account.status.wizard.step5.cameraNote")}
               </p>
             </div>
             <Separator />
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(4)}>
-                Back
+                {t("common.back")}
               </Button>
               <Button className="gap-2" disabled={!selfieImage} onClick={() => setStep(6)}>
-                Continue
+                {t("common.continue")}
                 <ArrowRight className="size-4" />
               </Button>
             </div>
@@ -821,10 +844,10 @@ export function AccountStatusClient({
       {step === 6 && (
         <Card>
           <CardHeader>
-            <WizardProgress current={4} />
-            <CardTitle className="text-base">Review & Submit</CardTitle>
+            <WizardProgress current={4} steps={WIZARD_STEPS} />
+            <CardTitle className="text-base">{t("account.status.wizard.step6.title")}</CardTitle>
             <CardDescription>
-              Review your information before submitting for verification.
+              {t("account.status.wizard.step6.desc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -835,9 +858,11 @@ export function AccountStatusClient({
                   <CreditCard className="size-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Document Type</p>
+                  <p className="text-xs text-muted-foreground">{t("account.status.wizard.step6.documentTypeLabel")}</p>
                   <p className="text-sm font-medium">
-                    {documentType === "DRIVERS_LICENSE" ? "Driver's License" : "Passport"}
+                    {documentType === "DRIVERS_LICENSE"
+                      ? t("account.status.wizard.step3.driversLicenseTitle")
+                      : t("account.status.wizard.step3.passportTitle")}
                   </p>
                 </div>
               </div>
@@ -847,41 +872,41 @@ export function AccountStatusClient({
                 className="text-primary h-auto py-1 text-xs"
                 onClick={() => setStep(3)}
               >
-                Change
+                {t("account.status.wizard.step6.change")}
               </Button>
             </div>
             <Separator />
 
             {/* Uploaded photos */}
             <div>
-              <p className="text-sm font-medium mb-3">Uploaded Photos</p>
+              <p className="text-sm font-medium mb-3">{t("account.status.wizard.step6.uploadedPhotos")}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {frontImage && (
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-xs text-muted-foreground font-medium">Front</p>
+                    <p className="text-xs text-muted-foreground font-medium">{t("account.status.wizard.step4.front")}</p>
                     <img
                       src={frontImage.preview}
-                      alt="Front"
+                      alt={t("account.status.wizard.step4.front")}
                       className="w-full aspect-video rounded-lg object-cover border"
                     />
                   </div>
                 )}
                 {backImage && (
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-xs text-muted-foreground font-medium">Back</p>
+                    <p className="text-xs text-muted-foreground font-medium">{t("account.status.wizard.step4.back")}</p>
                     <img
                       src={backImage.preview}
-                      alt="Back"
+                      alt={t("account.status.wizard.step4.back")}
                       className="w-full aspect-video rounded-lg object-cover border"
                     />
                   </div>
                 )}
                 {selfieImage && (
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-xs text-muted-foreground font-medium">Selfie</p>
+                    <p className="text-xs text-muted-foreground font-medium">{t("account.status.wizard.step5.selfieLabel")}</p>
                     <img
                       src={selfieImage.preview}
-                      alt="Selfie"
+                      alt={t("account.status.wizard.step5.selfieLabel")}
                       className="w-full aspect-video rounded-lg object-cover border"
                     />
                   </div>
@@ -894,8 +919,7 @@ export function AccountStatusClient({
             <div className="flex items-start gap-3 rounded-lg bg-muted/60 px-4 py-3">
               <Info className="size-4 text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                By submitting, you confirm that all documents belong to you and the information is accurate.
-                Submitting fraudulent documents may result in account suspension.
+                {t("account.status.wizard.step6.disclaimer")}
               </p>
             </div>
 
@@ -908,18 +932,18 @@ export function AccountStatusClient({
 
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(5)}>
-                Back
+                {t("common.back")}
               </Button>
               <Button className="gap-2" disabled={submitting} onClick={handleSubmit}>
                 {submitting ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Submitting…
+                    {t("account.status.wizard.step6.submitting")}
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="size-4" />
-                    Submit for Review
+                    {t("account.status.wizard.step6.submitForReview")}
                   </>
                 )}
               </Button>

@@ -27,28 +27,12 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { useChat, type Conversation } from "../use-chat"
+import { useTranslation } from "react-i18next"
 
 interface ConversationListProps {
   conversations: Conversation[]
   selectedConversation: string | null
   onSelectConversation: (conversationId: string) => void
-}
-
-// Enhanced time formatting function
-function formatMessageTime(timestamp: string): string {
-  const date = new Date(timestamp)
-
-  if (isToday(date)) {
-    return format(date, 'h:mm a') // 3:30 PM
-  } else if (isYesterday(date)) {
-    return 'Yesterday'
-  } else if (isThisWeek(date)) {
-    return format(date, 'EEEE') // Day name
-  } else if (isThisYear(date)) {
-    return format(date, 'MMM d') // Jan 15
-  } else {
-    return format(date, 'dd/MM/yy') // 15/01/24
-  }
 }
 
 export function ConversationList({
@@ -57,6 +41,23 @@ export function ConversationList({
   onSelectConversation
 }: ConversationListProps) {
   const { searchQuery, setSearchQuery } = useChat()
+  const { t } = useTranslation()
+
+  function formatMessageTime(timestamp: string): string {
+    const date = new Date(timestamp)
+
+    if (isToday(date)) {
+      return format(date, 'h:mm a')
+    } else if (isYesterday(date)) {
+      return t("chat.yesterday")
+    } else if (isThisWeek(date)) {
+      return format(date, 'EEEE')
+    } else if (isThisYear(date)) {
+      return format(date, 'MMM d')
+    } else {
+      return format(date, 'dd/MM/yy')
+    }
+  }
 
   const filteredConversations = conversations.filter((conversation) =>
     conversation.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -83,7 +84,7 @@ export function ConversationList({
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header - Hidden on mobile (handled by parent) */}
       <div className="hidden lg:flex items-center justify-between h-16 px-4 border-b flex-shrink-0">
-        <h2 className="text-lg font-semibold">Messages</h2>
+        <h2 className="text-lg font-semibold">{t("chat.messages")}</h2>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -97,16 +98,16 @@ export function ConversationList({
           <DropdownMenuContent align="end">
             <DropdownMenuItem className="cursor-pointer">
               <UserPlus className="h-4 w-4 mr-2" />
-              New Chat
+              {t("chat.newChat")}
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">
               <Filter className="h-4 w-4 mr-2" />
-              Filter Messages
+              {t("chat.filterMessages")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer">
               <Settings className="h-4 w-4 mr-2" />
-              Chat Settings
+              {t("chat.chatSettings")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -118,7 +119,7 @@ export function ConversationList({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search conversations..."
+            placeholder={t("chat.searchConversations")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 cursor-text"

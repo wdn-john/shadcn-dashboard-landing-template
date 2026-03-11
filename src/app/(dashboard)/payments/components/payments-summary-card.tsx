@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DollarSign, Briefcase, Clock } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 export type PaymentSummary = {
   totalSpent: number
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function PaymentsSummaryCard({ summary, loading }: Props) {
+  const { t } = useTranslation()
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -35,22 +37,22 @@ export function PaymentsSummaryCard({ summary, loading }: Props) {
 
   const stats = [
     {
-      label: "Total Spent",
+      label: t("payments.totalSpent"),
       value: `$${summary.totalSpent.toFixed(2)}`,
       icon: DollarSign,
-      sub: "All time",
+      sub: t("payments.allTimeSub"),
     },
     {
-      label: "Jobs Hired",
+      label: t("payments.jobsHired"),
       value: summary.totalJobs.toString(),
       icon: Briefcase,
-      sub: "Completed missions",
+      sub: t("payments.completedMissions"),
     },
     {
-      label: "Pending",
+      label: t("payments.pending"),
       value: `$${summary.pendingAmount.toFixed(2)}`,
       icon: Clock,
-      sub: "Pre-authorized",
+      sub: t("payments.preAuthorized"),
     },
   ]
 

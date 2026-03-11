@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Plus, ClipboardList, ArrowRight, Clock, CheckCircle, Circle, Loader } from "lucide-react"
+import { T } from "@/components/t"
 
 type ServiceRequest = {
   id: number
@@ -69,15 +70,15 @@ export default async function RequestsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Requests</h1>
+          <h1 className="text-2xl font-bold tracking-tight"><T k="requests.title" /></h1>
           <p className="text-muted-foreground mt-1">
-            {total > 0 ? `${total} service request${total !== 1 ? "s" : ""}` : "No requests yet"}
+            {total > 0 ? <T k="requests.subtitle" values={{ count: total }} /> : <T k="requests.noRequests" />}
           </p>
         </div>
         <Button asChild>
           <Link href="/requests/new">
             <Plus className="size-4" />
-            Post a Request
+            <T k="requests.postRequest" />
           </Link>
         </Button>
       </div>
@@ -88,15 +89,15 @@ export default async function RequestsPage() {
           <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-4">
             <ClipboardList className="size-12 text-muted-foreground/40" />
             <div>
-              <p className="font-semibold text-lg">No requests yet</p>
+              <p className="font-semibold text-lg"><T k="requests.noRequests" /></p>
               <p className="text-muted-foreground text-sm mt-1 max-w-sm">
-                Post your first IT service request and get matched with a verified expert.
+                <T k="requests.noRequestsHint" />
               </p>
             </div>
             <Button asChild>
               <Link href="/requests/new">
                 <Plus className="size-4" />
-                Post a Request
+                <T k="requests.postRequest" />
               </Link>
             </Button>
           </CardContent>
@@ -141,7 +142,9 @@ export default async function RequestsPage() {
                       <span>${Number(req.budget).toLocaleString()}</span>
                     )}
                     {applicantCount > 0 && (
-                      <span>{applicantCount} applicant{applicantCount !== 1 ? "s" : ""}</span>
+                      <span>
+                        <T k={applicantCount === 1 ? "requests.applicant" : "requests.applicants_count"} values={{ n: applicantCount }} />
+                      </span>
                     )}
                     <span className="ml-auto">
                       {req.createdAt
@@ -156,7 +159,7 @@ export default async function RequestsPage() {
                   <div className="flex justify-end mt-3">
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/requests/${req.id}`} className="flex items-center gap-1">
-                        View details <ArrowRight className="size-3" />
+                        <T k="common.view" /> <ArrowRight className="size-3" />
                       </Link>
                     </Button>
                   </div>

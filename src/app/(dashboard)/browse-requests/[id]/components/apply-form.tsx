@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Send, CheckCircle, CalendarIcon, ShieldCheck, Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   serviceRequestId: number
@@ -31,6 +32,7 @@ function isBackdated(dateStr: string) {
 }
 
 export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState("")
@@ -72,25 +74,25 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
     setError(null)
 
     if (!estimatedCompletionDate) {
-      setError("Please select an estimated completion date.")
+      setError(t("applyForm.completionRequired"))
       return
     }
     if (isBackdated(estimatedCompletionDate)) {
-      setError("Estimated completion date cannot be in the past.")
+      setError(t("applyForm.completionPast"))
       return
     }
     if (availability === "date") {
       if (!availabilityDate) {
-        setError("Please select your availability date.")
+        setError(t("applyForm.availabilityRequired"))
         return
       }
       if (isBackdated(availabilityDate)) {
-        setError("Availability date cannot be in the past.")
+        setError(t("applyForm.availabilityPast"))
         return
       }
     }
     if (price && (isNaN(Number(price)) || Number(price) <= 0)) {
-      setError("Price must be a positive number.")
+      setError(t("applyForm.pricePositive"))
       return
     }
 
@@ -117,7 +119,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
     if (res.status === 403) {
       setOpen(false)
       setForbiddenMessage(
-        (data as { message?: string }).message ?? "You must verify your identity before applying."
+        (data as { message?: string }).message ?? t("applyForm.verificationDefault")
       )
       setForbiddenOpen(true)
       return
@@ -131,7 +133,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
     }
 
     if (!res.ok || !(data as { ok?: boolean }).ok) {
-      setError((data as { message?: string }).message ?? "Failed to submit application. Please try again.")
+      setError((data as { message?: string }).message ?? t("applyForm.submitFailed"))
       return
     }
 
@@ -160,7 +162,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
     return (
       <Button variant="outline" disabled className="flex items-center gap-2">
         <CheckCircle className="size-4 text-green-600" />
-        Already Applied
+        {t("applyForm.alreadyApplied")}
       </Button>
     )
   }
@@ -172,33 +174,33 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
         <DialogTrigger asChild>
           <Button className="flex items-center gap-2">
             <Send className="size-4" />
-            Apply to this Request
+            {t("applyForm.applyButton")}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Submit Your Application</DialogTitle>
+            <DialogTitle>{t("applyForm.dialogTitle")}</DialogTitle>
             <DialogDescription>
-              Write a proposal explaining how you can help the client.
+              {t("applyForm.dialogDesc")}
             </DialogDescription>
           </DialogHeader>
 
           {success ? (
             <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
               <CheckCircle className="size-12 text-green-600" />
-              <p className="font-semibold">Application submitted!</p>
+              <p className="font-semibold">{t("applyForm.successTitle")}</p>
               <p className="text-sm text-muted-foreground">
-                The client will review your proposal and get back to you.
+                {t("applyForm.successDesc")}
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Message */}
               <div className="grid gap-2">
-                <Label htmlFor="message">Proposal Message</Label>
+                <Label htmlFor="message">{t("applyForm.proposalMessage")}</Label>
                 <Textarea
                   id="message"
-                  placeholder="Describe your approach, relevant experience, and why you're the right person for this request..."
+                  placeholder={t("applyForm.proposalPlaceholder")}
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -208,8 +210,8 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
               {/* Price */}
               <div className="grid gap-2">
                 <Label htmlFor="price">
-                  {isFixed ? "Your Bid (CAD)" : "Price Proposal (CAD)"}{" "}
-                  <span className="text-muted-foreground font-normal">— optional</span>
+                  {isFixed ? t("applyForm.bidFixed") : t("applyForm.bidVariable")}{" "}
+                  <span className="text-muted-foreground font-normal">{t("applyForm.optional")}</span>
                 </Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
@@ -229,7 +231,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
               {/* Estimated completion date (required) */}
               <div className="grid gap-2">
                 <Label htmlFor="estimatedCompletionDate">
-                  Estimated Completion Date <span className="text-destructive">*</span>
+                  {t("applyForm.completionDate")} <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -245,7 +247,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
 
               {/* Availability */}
               <div className="grid gap-2">
-                <Label>Availability</Label>
+                <Label>{t("applyForm.availability")}</Label>
                 <div className="flex flex-col gap-2">
                   <button
                     type="button"
@@ -267,7 +269,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
                         <span className="size-2 rounded-full bg-primary" />
                       )}
                     </span>
-                    Available now
+                    {t("applyForm.availableNow")}
                   </button>
 
                   <button
@@ -290,7 +292,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
                         <span className="size-2 rounded-full bg-primary" />
                       )}
                     </span>
-                    Choose a date
+                    {t("applyForm.chooseDate")}
                   </button>
                 </div>
 
@@ -315,10 +317,10 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
 
               <DialogFooter className="mt-2">
                 <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                  Cancel
+                  {t("applyForm.cancel")}
                 </Button>
                 <Button type="submit" disabled={submitting}>
-                  {submitting ? "Submitting..." : "Submit Application"}
+                  {submitting ? t("applyForm.submitting") : t("applyForm.submit")}
                 </Button>
               </DialogFooter>
             </form>
@@ -334,15 +336,15 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
               <div className="flex size-10 items-center justify-center rounded-full bg-amber-100 shrink-0">
                 <ShieldCheck className="size-5 text-amber-600" />
               </div>
-              <DialogTitle>Verification Required</DialogTitle>
+              <DialogTitle>{t("applyForm.verificationRequired")}</DialogTitle>
             </div>
             <DialogDescription>
-              {forbiddenMessage ?? "You must complete identity verification before applying to requests."}
+              {forbiddenMessage ?? t("applyForm.verificationDefault")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setForbiddenOpen(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={() => {
@@ -350,7 +352,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
                 router.push("/account/status")
               }}
             >
-              Start Verification
+              {t("applyForm.startVerification")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -364,7 +366,7 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
             <div className="flex size-10 items-center justify-center rounded-full bg-emerald-100 shrink-0">
               <Lock className="size-5 text-emerald-600" />
             </div>
-            <DialogTitle className="text-base">Stripe Account Required</DialogTitle>
+            <DialogTitle className="text-base">{t("applyForm.stripeRequired")}</DialogTitle>
           </div>
 
           {/* Body */}
@@ -375,13 +377,13 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
               </div>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              WorkedIn uses Stripe, a trusted global payments provider, to handle all transactions securely.
+              {t("applyForm.stripeBody1")}
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              To apply for requests and receive payments, you must connect your Stripe account.
+              {t("applyForm.stripeBody2")}
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Without completing this setup, you won't be able to get paid for your work.
+              {t("applyForm.stripeBody3")}
             </p>
 
             {/* Stripe branding */}
@@ -390,8 +392,8 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
                 <span className="text-white font-bold text-sm">S</span>
               </div>
               <div>
-                <p className="text-sm font-semibold">Powered by Stripe</p>
-                <p className="text-xs text-muted-foreground">Trusted by millions worldwide</p>
+                <p className="text-sm font-semibold">{t("applyForm.poweredByStripe")}</p>
+                <p className="text-xs text-muted-foreground">{t("applyForm.stripeTrusted")}</p>
               </div>
             </div>
 
@@ -401,17 +403,17 @@ export function ApplyForm({ serviceRequestId, budgetOption, alreadyApplied }: Pr
               rel="noopener noreferrer"
               className="block text-center text-xs text-primary underline underline-offset-2"
             >
-              Learn more about why Stripe is required
+              {t("applyForm.stripeLearnMore")}
             </a>
           </div>
 
           {/* Actions */}
           <div className="px-6 pb-5 flex flex-col gap-2">
             <Button className="w-full" onClick={handleStripeSetup} disabled={stripeLoading}>
-              {stripeLoading ? "Opening..." : "Proceed to Stripe Setup"}
+              {stripeLoading ? t("applyForm.stripeOpening") : t("applyForm.stripeSetup")}
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => setStripeOpen(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
           </div>
 

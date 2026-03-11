@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { FileText, TrendingUp, Download, ExternalLink, Loader2, ChevronLeft } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -80,72 +81,65 @@ function LineItem({ label, value, bold }: { label: string; value?: string; bold?
 // ── Receipt Dialog ───────────────────────────────────────────────────────────
 
 function ReceiptContent({ receipt }: { receipt: ClientReceipt }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-4 text-sm">
-      {/* Header meta */}
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Receipt No. {receipt.receiptNumber}</span>
+        <span>{t("documents.receiptNo", { number: receipt.receiptNumber })}</span>
         <span>{receipt.formattedReceiptDate}</span>
       </div>
 
-      {/* Parties */}
       <div className="grid grid-cols-2 gap-4 rounded-lg bg-muted/50 p-3 text-xs">
         <div>
-          <p className="font-semibold mb-1">Expert</p>
+          <p className="font-semibold mb-1">{t("common.expert")}</p>
           <p>{receipt.expertName}</p>
           <p className="text-muted-foreground">{receipt.expertEmail}</p>
           {receipt.expertPhoneNumber && <p className="text-muted-foreground">{receipt.expertPhoneNumber}</p>}
         </div>
         <div>
-          <p className="font-semibold mb-1">Client</p>
+          <p className="font-semibold mb-1">{t("common.client")}</p>
           <p>{receipt.clientName}</p>
           <p className="text-muted-foreground">{receipt.clientEmail}</p>
           {receipt.clientPhoneNumber && <p className="text-muted-foreground">{receipt.clientPhoneNumber}</p>}
         </div>
       </div>
 
-      {/* Service */}
       <div>
-        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Service Purchased</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t("documents.servicePurchased")}</p>
         <p className="font-medium">{receipt.requestName}</p>
       </div>
 
       <Separator />
 
-      {/* Line items */}
       <div className="flex flex-col gap-2">
-        <LineItem label="Service Price" value={receipt.formattedServicePrice} />
-        <LineItem label="Platform Fee" value={receipt.formattedPlatformFee} />
-        <LineItem label="GST / TPS (5%)" value={receipt.formattedCheckoutTps} />
-        <LineItem label="QST / TVQ (9.975%)" value={receipt.formattedCheckoutTvq} />
+        <LineItem label={t("documents.servicePrice")} value={receipt.formattedServicePrice} />
+        <LineItem label={t("checkout.platformFee")} value={receipt.formattedPlatformFee} />
+        <LineItem label={t("documents.gstTps")} value={receipt.formattedCheckoutTps} />
+        <LineItem label={t("documents.qstTvq")} value={receipt.formattedCheckoutTvq} />
         <Separator />
-        <LineItem label="Total Paid by Client" value={receipt.formattedCheckoutTotal} bold />
-        <LineItem label="Remaining Payment" value={receipt.formattedRemainingAmount} />
+        <LineItem label={t("documents.totalPaidByClient")} value={receipt.formattedCheckoutTotal} bold />
+        <LineItem label={t("documents.remainingPayment")} value={receipt.formattedRemainingAmount} />
       </div>
 
-      {/* Payment info */}
       <div className="rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground space-y-1">
-        <p>Paid with {receipt.paymentMethod} ending in {receipt.paymentMethodLastFourDigits} on {receipt.formattedReceiptDate}.</p>
-        <p>Payment Reference: {receipt.paymentIntentId}</p>
+        <p>{t("documents.paidWith", { method: receipt.paymentMethod, last4: receipt.paymentMethodLastFourDigits, date: receipt.formattedReceiptDate })}</p>
+        <p>{t("documents.paymentRef", { id: receipt.paymentIntentId })}</p>
       </div>
 
-      {/* Tax numbers */}
       {(receipt.expertTpsNumber || receipt.expertTvqNumber) && (
         <p className="text-xs text-muted-foreground">
           GST/TPS No. {receipt.expertTpsNumber || "N/A"} &nbsp;·&nbsp; QST/TVQ No. {receipt.expertTvqNumber || "N/A"}
         </p>
       )}
 
-      {/* Legal */}
       <p className="text-xs text-muted-foreground leading-relaxed border-t pt-3">
-        This receipt was issued by the Expert named above. Workedin Inc. acted solely as a facilitator of this transaction and is not the provider of the service.
+        {t("documents.receiptDisclaimer")}
       </p>
 
-      {/* PDF */}
       {receipt.pdfDownloadUrl && (
         <Button variant="outline" size="sm" className="gap-2" asChild>
           <a href={receipt.pdfDownloadUrl} target="_blank" rel="noopener noreferrer">
-            <Download className="size-3.5" /> Download PDF
+            <Download className="size-3.5" /> {t("documents.downloadPdf")}
           </a>
         </Button>
       )}
@@ -156,86 +150,82 @@ function ReceiptContent({ receipt }: { receipt: ClientReceipt }) {
 // ── Earnings Dialog ──────────────────────────────────────────────────────────
 
 function EarningsContent({ report }: { report: EarningsReport }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-4 text-sm">
-      {/* Header meta */}
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Statement No. {report.earningsReportNumber}</span>
+        <span>{t("documents.statementNo", { number: report.earningsReportNumber })}</span>
         <span>{report.formattedCreatedAt}</span>
       </div>
 
-      {/* Parties */}
       <div className="grid grid-cols-2 gap-4 rounded-lg bg-muted/50 p-3 text-xs">
         <div>
-          <p className="font-semibold mb-1">Expert</p>
+          <p className="font-semibold mb-1">{t("common.expert")}</p>
           <p>{report.expertName}</p>
           {report.expertBusinessName && <p>{report.expertBusinessName}</p>}
           <p className="text-muted-foreground">{report.expertEmail}</p>
         </div>
         <div>
-          <p className="font-semibold mb-1">Service</p>
+          <p className="font-semibold mb-1">{t("documents.service")}</p>
           <p>{report.serviceName}</p>
-          <p className="text-muted-foreground">Client: {report.clientName}</p>
+          <p className="text-muted-foreground">{t("documents.clientLabel", { name: report.clientName })}</p>
         </div>
       </div>
 
       <Separator />
 
-      {/* Expert breakdown */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Expert — Breakdown</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{t("documents.expertBreakdown")}</p>
         <div className="flex flex-col gap-1.5">
-          <LineItem label="Total Amount Paid by Client" value={report.formattedAmount} />
-          <LineItem label="Expert GST (TPS)" value={report.formattedExpertTps} />
-          <LineItem label="Expert QST (TVQ)" value={report.formattedExpertTvq} />
-          <LineItem label="Expert Brute Amount" value={report.formattedExpertBruteAmount} />
+          <LineItem label={t("documents.totalPaidByClient")} value={report.formattedAmount} />
+          <LineItem label={t("documents.expertGst")} value={report.formattedExpertTps} />
+          <LineItem label={t("documents.expertQst")} value={report.formattedExpertTvq} />
+          <LineItem label={t("documents.expertBruteAmount")} value={report.formattedExpertBruteAmount} />
         </div>
       </div>
 
       <Separator />
 
-      {/* Platform breakdown */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Platform — Breakdown</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{t("documents.platformBreakdown")}</p>
         <div className="flex flex-col gap-1.5">
-          <LineItem label="Platform Fee" value={report.formattedPlatformFee} />
-          <LineItem label="Platform GST (TPS)" value={report.formattedPlatformTps} />
-          <LineItem label="Platform QST (TVQ)" value={report.formattedPlatformTvq} />
-          <LineItem label="Platform Total" value={report.formattedPlatformTotal} />
+          <LineItem label={t("checkout.platformFee")} value={report.formattedPlatformFee} />
+          <LineItem label={t("documents.platformGst")} value={report.formattedPlatformTps} />
+          <LineItem label={t("documents.platformQst")} value={report.formattedPlatformTvq} />
+          <LineItem label={t("documents.platformTotal")} value={report.formattedPlatformTotal} />
         </div>
       </div>
 
       <Separator />
 
-      {/* Workedin commission */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Workedin — Commission</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{t("documents.workedinCommission")}</p>
         <div className="flex flex-col gap-1.5">
-          <LineItem label="Commission" value={report.formattedWorkedinCommission} />
-          <LineItem label="Commission GST (TPS)" value={report.formattedWorkedinCommissionTps} />
-          <LineItem label="Commission QST (TVQ)" value={report.formattedWorkedinCommissionTvq} />
-          <LineItem label="Commission Total" value={report.formattedWorkedinCommissionTotal} />
+          <LineItem label={t("documents.commission")} value={report.formattedWorkedinCommission} />
+          <LineItem label={t("documents.commissionGst")} value={report.formattedWorkedinCommissionTps} />
+          <LineItem label={t("documents.commissionQst")} value={report.formattedWorkedinCommissionTvq} />
+          <LineItem label={t("documents.commissionTotal")} value={report.formattedWorkedinCommissionTotal} />
         </div>
       </div>
 
       <Separator />
 
-      <LineItem label="Net Amount Transferred to Expert" value={report.formattedExpertPayoutAmount} bold />
+      <LineItem label={t("documents.netTransferred")} value={report.formattedExpertPayoutAmount} bold />
 
       {report.transferPublicId && (
         <div className="rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-          Payout ID: {report.transferPublicId}
+          {t("documents.payoutId", { id: report.transferPublicId })}
         </div>
       )}
 
       <p className="text-xs text-muted-foreground leading-relaxed border-t pt-3">
-        This statement confirms a payout facilitated by Workedin Inc. for the service listed above.
+        {t("documents.earningsDisclaimer")}
       </p>
 
       {report.pdfDownloadUrl && (
         <Button variant="outline" size="sm" className="gap-2" asChild>
           <a href={report.pdfDownloadUrl} target="_blank" rel="noopener noreferrer">
-            <Download className="size-3.5" /> Download PDF
+            <Download className="size-3.5" /> {t("documents.downloadPdf")}
           </a>
         </Button>
       )}
@@ -252,9 +242,10 @@ function ReceiptPicker({
   receipts: ClientReceipt[]
   onSelect: (r: ClientReceipt) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm text-muted-foreground">Select which receipt to view:</p>
+      <p className="text-sm text-muted-foreground">{t("documents.selectReceipt")}</p>
       {receipts.map((r) => (
         <button
           key={r.id}
@@ -280,9 +271,10 @@ function EarningsPicker({
   reports: EarningsReport[]
   onSelect: (r: EarningsReport) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm text-muted-foreground">Select which statement to view:</p>
+      <p className="text-sm text-muted-foreground">{t("documents.selectStatement")}</p>
       {reports.map((r) => (
         <button
           key={r.id}
@@ -310,6 +302,8 @@ type Props = {
 }
 
 export function MissionDocuments({ missionId, showEarnings = false }: Props) {
+  const { t } = useTranslation()
+
   // Receipt state
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [receiptLoading, setReceiptLoading] = useState(false)
@@ -375,7 +369,7 @@ export function MissionDocuments({ missionId, showEarnings = false }: Props) {
           ) : (
             <FileText className="size-3.5" />
           )}
-          View Receipt
+          {t("documents.viewReceipt")}
         </Button>
 
         {showEarnings && (
@@ -391,7 +385,7 @@ export function MissionDocuments({ missionId, showEarnings = false }: Props) {
             ) : (
               <TrendingUp className="size-3.5" />
             )}
-            View Earnings Statement
+            {t("documents.viewEarningsStatement")}
           </Button>
         )}
       </div>
@@ -410,7 +404,7 @@ export function MissionDocuments({ missionId, showEarnings = false }: Props) {
                   <ChevronLeft className="size-4" />
                 </button>
               )}
-              {selectedReceipt ? "Service Receipt" : "Select Receipt"}
+              {selectedReceipt ? t("documents.serviceReceipt") : t("documents.selectReceiptTitle")}
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[70vh] pr-1">
@@ -437,7 +431,7 @@ export function MissionDocuments({ missionId, showEarnings = false }: Props) {
                   <ChevronLeft className="size-4" />
                 </button>
               )}
-              {selectedEarnings ? "Earnings Statement" : "Select Statement"}
+              {selectedEarnings ? t("documents.earningsStatement") : t("documents.selectStatementTitle")}
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[70vh] pr-1">
